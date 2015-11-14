@@ -14,10 +14,7 @@ func (h *Heap) Insert(value int) {
 	child = len(a) - 1
 
 	for child > 0 {
-		parent = child / 2
-		if child&1 == 0 {
-			parent--
-		}
+		parent = (child - 1) / 2
 
 		if a[child] < a[parent] {
 			a[child], a[parent] = a[parent], a[child]
@@ -56,7 +53,7 @@ func (h *Heap) Extract() (int, error) {
 			child = left
 		}
 
-		if a[parent] > a[child] {
+		if a[child] < a[parent] {
 			a[parent], a[child] = a[child], a[parent]
 			parent = child
 		} else {
