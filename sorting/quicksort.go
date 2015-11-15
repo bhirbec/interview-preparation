@@ -13,20 +13,20 @@ func main() {
 }
 
 func Quicksort(array []int) {
-	quicksort(array, 0, len(array)-1)
-}
-
-func quicksort(array []int, start, stop int) {
-	if stop > start {
-		p := partition(array, start, stop)
-		quicksort(array, start, p-1)
-		quicksort(array, p+1, stop)
+	n := len(array)
+	if n > 1 {
+		p := partition(array, n)
+		Quicksort(array[:p])
+		Quicksort(array[p:])
 	}
 }
 
-func partition(array []int, start, stop int) int {
-	p := uniform(start, stop)
+func partition(array []int, n int) int {
+	p := rand.Intn(n)
 	pivot := array[p]
+
+	start := 0
+	stop := n - 1
 
 	for start < stop {
 		for array[start] < pivot {
@@ -53,13 +53,10 @@ func partition(array []int, start, stop int) int {
 			stop--
 		}
 	}
+
 	return p
 }
 
 func init() {
 	rand.Seed(time.Now().Unix())
-}
-
-func uniform(min, max int) int {
-	return rand.Intn(max+1-min) + min
 }
