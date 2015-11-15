@@ -7,7 +7,7 @@ import (
 )
 
 func main() {
-	array := []int{2, 4, 6, 5, 7, 3, 4, 6, 7, 8, 5, 4}
+	array := []int{2, 4, 6, 2, 2, -2, 2, 3, 6, -4, 5, 6, 8, 5, 7, 8}
 	Quicksort(array)
 	fmt.Println(array)
 }
@@ -17,44 +17,29 @@ func Quicksort(array []int) {
 	if n > 1 {
 		p := partition(array, n)
 		Quicksort(array[:p])
-		Quicksort(array[p:])
+		Quicksort(array[p+1:])
 	}
 }
 
 func partition(array []int, n int) int {
 	p := rand.Intn(n)
 	pivot := array[p]
+	array[p], array[0] = array[0], array[p]
+	left := 0
 
-	start := 0
-	stop := n - 1
-
-	for start < stop {
-		for array[start] < pivot {
-			start++
-		}
-
-		for array[stop] > pivot {
-			stop--
-		}
-
-		array[start], array[stop] = array[stop], array[start]
-
-		if start == p {
-			p = stop
-		} else if stop == p {
-			p = start
-		}
-
-		if p != start {
-			start++
-		}
-
-		if p != stop {
-			stop--
+	for i := 1; i < n; i++ {
+		if array[i] < pivot {
+			left++
+			array[left], array[i] = array[i], array[left]
 		}
 	}
 
-	return p
+	if left == 0 {
+		return 0
+	}
+
+	array[left], array[0] = array[0], array[left]
+	return left
 }
 
 func init() {
