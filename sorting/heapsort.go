@@ -41,16 +41,13 @@ func (h *Heap) Extract() (int, error) {
 	last--
 
 	for {
-		left := 2*(parent+1) - 1
-		if left > last {
+		child = 2*parent + 1 // left child
+		if child > last {
 			break
 		}
 
-		right := left + 1
-		if right <= last && a[right] < a[left] {
+		if right := child + 1; right <= last && a[right] < a[child] {
 			child = right
-		} else {
-			child = left
 		}
 
 		if a[child] < a[parent] {
