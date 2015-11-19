@@ -1,23 +1,16 @@
-package main
+package sort
 
 import (
-	"fmt"
 	"math/rand"
 	"time"
 )
 
-func main() {
-	array := []int{2, 4, 6, 2, 2, -2, 2, 3, 6, -4, 5, 6, 8, 5, 7, 8}
-	Quicksort(array)
-	fmt.Println(array)
-}
-
-func Quicksort(array []int) {
+func QuickSort(array []int) {
 	n := len(array)
 	if n > 1 {
 		p := partition(array, n)
-		Quicksort(array[:p])
-		Quicksort(array[p+1:])
+		QuickSort(array[:p])
+		QuickSort(array[p+1:])
 	}
 }
 

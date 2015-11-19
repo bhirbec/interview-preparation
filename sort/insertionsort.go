@@ -1,16 +1,6 @@
-package main
+package sort
 
-import (
-	"fmt"
-)
-
-func main() {
-	array := []int{112, 4, 3, 6, 9, 3, 4, 6, 45, 34, 6, 4, 23, 443, 13, 4, 543, 43}
-	sort(array)
-	fmt.Println(array)
-}
-
-func sort(array []int) {
+func InsertionSort(array []int) {
 	n := len(array)
 
 	for i := 1; i < n; i++ {

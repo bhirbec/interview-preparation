@@ -1,16 +1,6 @@
-package main
+package sort
 
-import (
-	"fmt"
-)
-
-func main() {
-	array := []int64{1, 4, 5, 3, 4, 6, 7, 34, 5, 2, 3, 545, -43, 3}
-	sort(array)
-	fmt.Println(array)
-}
-
-func sort(array []int64) {
+func SelectionSort(array []int) {
 	var i, j, n, min_pos int
 	n = len(array)
 

@@ -1,8 +1,26 @@
-package main
+package sort
 
 import (
 	"fmt"
 )
+
+func HeapSort(array []int) []int {
+	n := len(array)
+
+	// heapify
+	heap := &Heap{}
+	for i := 0; i < n; i++ {
+		heap.Insert(array[i])
+	}
+
+	// sort
+	output := make([]int, n)
+	for i := 0; i < n; i++ {
+		output[i], _ = heap.Extract()
+	}
+
+	return output
+}
 
 type Heap []int
 
@@ -59,28 +77,4 @@ func (h *Heap) Extract() (int, error) {
 	}
 
 	return root, nil
-}
-
-func heapsort(array []int) []int {
-	n := len(array)
-
-	// heapify
-	heap := &Heap{}
-	for i := 0; i < n; i++ {
-		heap.Insert(array[i])
-	}
-
-	// sort
-	output := make([]int, n)
-	for i := 0; i < n; i++ {
-		output[i], _ = heap.Extract()
-	}
-
-	return output
-}
-
-func main() {
-	array := []int{2, 4, 6, 2, 2, -2, 2, 3, 6, -4, 5, 6, 8, 5, 7, 8}
-	array = heapsort(array)
-	fmt.Println(array)
 }

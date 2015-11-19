@@ -1,16 +1,6 @@
-package main
+package sort
 
-import (
-	"fmt"
-)
-
-func main() {
-	array := []int{3, 7, 1, 5, 623, 3, 4, 65, 9, 42, 445, 23, 5, 1, 8, 6, 3, 1, 89, 324, 74, 23, 6}
-	sorted := mergesort(array)
-	fmt.Println(sorted)
-}
-
-func mergesort(array []int) []int {
+func MergeSort(array []int) []int {
 	n := len(array)
 
 	if n == 1 {
@@ -18,8 +8,8 @@ func mergesort(array []int) []int {
 	}
 
 	h := n / 2
-	A := mergesort(array[:h])
-	B := mergesort(array[h:])
+	A := MergeSort(array[:h])
+	B := MergeSort(array[h:])
 	return merge(A, B)
 }
 
