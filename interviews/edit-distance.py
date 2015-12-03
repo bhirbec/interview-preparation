@@ -30,43 +30,38 @@
 # - time / subproblem = O(1)
 
 def main():
-    b = 'kitten'
-    a = 'sitting'
-    d = distance(list(a), list(b))
-    print '=>', d
+    d = distance('kitten', 'sitting')
+    print d
 
 def distance(a, b):
     cache = {}
 
     def _distance(a, b, i, j, n, m):
+        if i == n and j == m:
+            return 0
+
+        # i has reached n and the cost can only be m - j insertions
+        if i == n:
+            return m - j
+
+        # j has reached m and the cost can only be n - i deletions
+        if j == m:
+            return n - i
+
         hit = cache.get((i, j))
         if hit is not None:
             return hit
 
-        # characters are the same
-        if i < n and j < m and a[i] == b[j]:
+        if a[i] == b[j]:
             cost = _distance(a, b, i+1, j+1, n, m)
-            cache[(i, j)] = cost
-            return cost
-
-        if i < n and j < m:
+        else:
             cost_replace = _distance(a, b, i+1, j+1, n, m)
             cost_insert = _distance(a, b, i, j+1, n, m)
             cost_delete = _distance(a, b, i+1, j, n, m)
-            cache[(i, j)] = min(cost_replace, cost_insert, cost_delete) + 1
-            return cache[(i, j)]
+            cost = min(cost_replace, cost_insert, cost_delete) + 1
 
-        # j has reached m and we can only perform deletions
-        if i < n:
-            cache[(i, j)] = n - i
-            return cache[(i, j)]
-
-        # i has reached n and we can only perform insertions
-        if j < m:
-            cache[(i, j)] = m - j
-            return cache[(i, j)]
-
-        return 0
+        cache[(i, j)] = cost
+        return cache[(i, j)]
 
     return _distance(a, b, 0, 0, len(a), len(b))
 
