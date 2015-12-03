@@ -58,13 +58,13 @@ def distance(a, b):
 
         # j has reached m and we can only perform deletions
         if i < n:
-            cache[(i, j)] = cost_delete = _distance(a, b, i+1, j, n, m) + 1
-            return cost_delete
+            cache[(i, j)] = n - i
+            return cache[(i, j)]
 
         # i has reached n and we can only perform insertions
         if j < m:
-            cost_insert = cost_insert = _distance(a, b, i, j+1, n, m) + 1
-            return cost_insert
+            cache[(i, j)] = m - j
+            return cache[(i, j)]
 
         return 0
 
