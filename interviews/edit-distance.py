@@ -30,7 +30,7 @@
 # - time / subproblem = O(1)
 
 def main():
-    d = distance('kitten', 'sitting')
+    d = distance('intention', 'execution')
     print d
 
 def distance(a, b):
@@ -38,33 +38,33 @@ def distance(a, b):
     cache = [[None for i in range(m)] for j in range(n)]
 
     def _distance(i, j):
-        if i == n and j == m:
+        if i < 0 and j < 0:
             return 0
 
-        # i has reached n and the cost can only be m - j insertions
-        if i == n:
-            return m - j
+        # i has reached n and we need to insert j+1 chars to produce Bj
+        if i < 0:
+            return j+1
 
-        # j has reached m and the cost can only be n - i deletions
-        if j == m:
-            return n - i
+        # j has reached m and we need to delete i+1 chars to produce Ai
+        if j < 0:
+            return i+1
 
         cost = cache[i][j]
         if cost is not None:
             return cost
 
         if a[i] == b[j]:
-            cost = _distance(i+1, j+1)
+            cost = _distance(i-1, j-1)
         else:
-            cost_replace = _distance(i+1, j+1)
-            cost_insert = _distance(i, j+1)
-            cost_delete = _distance(i+1, j)
-            cost = min(cost_replace, cost_insert, cost_delete) + 1
+            cost_replace = _distance(i-1, j-1) + 2
+            cost_insert = _distance(i, j-1) + 1
+            cost_delete = _distance(i-1, j) + 1
+            cost = min(cost_replace, cost_insert, cost_delete)
 
         cache[i][j] = cost
         return cost
 
-    return _distance(0, 0)
+    return _distance(n-1, m-1)
 
 if __name__ == '__main__':
     main()
