@@ -49,9 +49,9 @@ def distance(a, b):
         if j == m:
             return n - i
 
-        hit = cache[i][j]
-        if hit is not None:
-            return hit
+        cost = cache[i][j]
+        if cost is not None:
+            return cost
 
         if a[i] == b[j]:
             cost = _distance(i+1, j+1)
