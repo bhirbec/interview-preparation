@@ -30,8 +30,8 @@
 # - time / subproblem = O(1)
 
 def main():
-    d = distance('intention', 'execution')
-    print d
+    print distance('intention', 'execution')
+    print distance_bottom_up('intention', 'execution')
 
 def distance(a, b):
     n, m = len(a), len(b)
@@ -65,6 +65,30 @@ def distance(a, b):
         return cost
 
     return _distance(n-1, m-1)
+
+def distance_bottom_up(a, b):
+    a, b = [''] + list(a), [''] + list(b)
+    n, m = len(a), len(b)
+    cache = [[0 for j in range(m)] for i in range(n)]
+
+    for i in range(n):
+        cache[i][0] = i
+
+    for j in range(m):
+        cache[0][j] = j
+
+    for i in range(1, n):
+        for j in range(1, m):
+            if a[i] == b[j]:
+                cost = cache[i-1][j-1]
+            else:
+                cost_replace = cache[i-1][j-1] + 2
+                cost_insert = cache[i-1][j] + 1
+                cost_delete = cache[i][j-1] + 1
+                cost = min(cost_delete, cost_insert, cost_delete)
+            cache[i][j] = cost
+
+    return cache[n-1][m-1]
 
 if __name__ == '__main__':
     main()
