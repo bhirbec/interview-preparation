@@ -34,7 +34,8 @@ def main():
     print d
 
 def distance(a, b):
-    cache = {}
+    n, m = len(a), len(b)
+    cache = [[None for i in range(m)] for j in range(n)]
 
     def _distance(a, b, i, j, n, m):
         if i == n and j == m:
@@ -48,7 +49,7 @@ def distance(a, b):
         if j == m:
             return n - i
 
-        hit = cache.get((i, j))
+        hit = cache[i][j]
         if hit is not None:
             return hit
 
@@ -60,8 +61,8 @@ def distance(a, b):
             cost_delete = _distance(a, b, i+1, j, n, m)
             cost = min(cost_replace, cost_insert, cost_delete) + 1
 
-        cache[(i, j)] = cost
-        return cache[(i, j)]
+        cache[i][j] = cost
+        return cost
 
     return _distance(a, b, 0, 0, len(a), len(b))
 
