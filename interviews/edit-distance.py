@@ -37,7 +37,7 @@ def distance(a, b):
     n, m = len(a), len(b)
     cache = [[None for i in range(m)] for j in range(n)]
 
-    def _distance(a, b, i, j, n, m):
+    def _distance(i, j):
         if i == n and j == m:
             return 0
 
@@ -54,17 +54,17 @@ def distance(a, b):
             return hit
 
         if a[i] == b[j]:
-            cost = _distance(a, b, i+1, j+1, n, m)
+            cost = _distance(i+1, j+1)
         else:
-            cost_replace = _distance(a, b, i+1, j+1, n, m)
-            cost_insert = _distance(a, b, i, j+1, n, m)
-            cost_delete = _distance(a, b, i+1, j, n, m)
+            cost_replace = _distance(i+1, j+1)
+            cost_insert = _distance(i, j+1)
+            cost_delete = _distance(i+1, j)
             cost = min(cost_replace, cost_insert, cost_delete) + 1
 
         cache[i][j] = cost
         return cost
 
-    return _distance(a, b, 0, 0, len(a), len(b))
+    return _distance(0, 0)
 
 if __name__ == '__main__':
     main()
