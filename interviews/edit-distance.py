@@ -85,7 +85,7 @@ def distance_bottom_up(a, b):
                 cost_replace = cache[i-1][j-1] + 2
                 cost_insert = cache[i-1][j] + 1
                 cost_delete = cache[i][j-1] + 1
-                cost = min(cost_delete, cost_insert, cost_delete)
+                cost = min(cost_replace, cost_insert, cost_delete)
             cache[i][j] = cost
 
     return cache[n-1][m-1]
