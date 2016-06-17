@@ -1,0 +1,42 @@
+Questions found on glassdoor
+============================
+
+* Implement a queue using two stacks
+You stick the stacks butt to butt, and then turn them inside out, then they are a queue! Man, I love Science!
+
+* Given a social network as a graph, return the closest path to a given node from a given node.
+Standard Breath First Search on a social network.
+
+* How do you split given string into words.
+I wrote function WITHOUT using std library, to go from each char and copy into my two dimensional array.
+
+* Round 1 Given a bitmap, use a quaTree data structure to represent the bitmap. The maps are all squares with black or white pixels and the length of the map is 2^n (you can always divide the map into 4 smaller parts). Then give you a root node of a quaTree, calculate the total black pixel in this map. Follow up: Given two root node, generate the intersection of these two maps.
+
+* A-1 B-2 .... AA -27 Write a function that given a number will return the string associated with it
+seems like a hash might do this in about 4 lines of code
+
+* Perform additions of cells if index of row and column is given in a 2D array.
+
+* Question about getting the node that is closest in value to a tree.
+
+* The first problem is about finding the shortest path in a graph with 2 follow-ups. The second one is about find 3 contiguous 1s in a horizontal or vertical line in a graph which only contains 0s and 1s.
+
+* Given a social network graph (nodes = people, edges = friendships between people) and a starting person, print the level of friendship for every other person with that person. That is, print the minimum number of "hops" (edges) to get from the start person to every other person.
+http://www.glassdoor.com/Interview/Given-a-social-network-graph-nodes-people-edges-friendships-between-people-and-a-starting-person-print-the-level-of-QTN_1214548.htm
+
+* Write an algorithm to create an ordered list from the union of ordered sublists.
+
+* Write an algorithm to generate all unique possible letter racks in scrabble.
+
+* Given an array of integers, find the length of the shortest subsequence that sums up to over a certain threshold.
+http://www.glassdoor.com/Interview/Given-an-array-of-integers-find-the-length-of-the-shortest-subsequence-that-sums-up-to-over-a-certain-threshold-QTN_1142240.htm
+
+* Q1) There is an array of 10 integers. I will give you the start and end index of a range and calculate the sum of all numbers within that index range. Do all validations necessary. Will your code work if the array has 10 million integers?
+
+* Q2) Design a game of tetris. What programming classes will you have? Only look at the programming side and do not worry about the graphics programming.
+
+* Matrix - given a nxn matrix, print the matrix in diagonal from left to right.
+
+* dynamic programming (http://www.glassdoor.com/Interview/Google-Software-Engineer-Interview-Questions-EI_IE9079.0,6_KO7,24.htm#InterviewReview_4168541)
+- rod cut problem
+- coin change problem
