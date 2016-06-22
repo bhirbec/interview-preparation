@@ -14,7 +14,7 @@ https://www.youtube.com/watch?v=OQ5jsbhAv_M
 - define subproblems
 - guess something
 - reuse subproblem with recurence
-- build an algo recurse + memoization or bottom-up + table
+- build an algorithm recurse + memoization or bottom-up + table
 - solve the original problem
 
 # 1. Fibonacci Numbers
@@ -28,7 +28,7 @@ F1 = F2 = 1
 Fn = Fn-1 + Fn-2
 ```
 
-## 1.1 Naive recursive alg
+## 1.1 Naive Recursive Algorithm
 
 ```
 Fib(n):
@@ -92,7 +92,7 @@ Generalization of bottom-up:
 - topological sort of subproblem dependency DAG (directed acyclic graph)
 - save space (for Fibonacci we only need to remember the last 2 values)
 
-DAG
+DAG:
 ```
   /----------------\
 Fn-3 --> Fn-2 --> Fn-1 --> Fn
@@ -121,11 +121,11 @@ dist(s, u) is a subproblem => recursive calls
 ```
 
 # 4. Text Justification
-https://youtu.be/ENyox7kNKeY?list=PLfMspJ0TLR5HRFu2kLh3U4mvStMO8QURm&t=1011
 
-Input is a text (list of words) and we want to split it into "good" lines.
-We define a quantity we call `badness(i,j)` as a the "badness" of using words[i:j]
-as a line.
+https://youtu.be/ENyox7kNKeY?list=PLfMspJ0TLR5HRFu2kLh3U4mvStMO8QURm
+
+Input is a text (list of words) and we want to split it into "good" lines (justified 
+to the right). 
 
 ```
 ~~~~ ~~ ~~~~~~ |
@@ -133,30 +133,34 @@ as a line.
 ~~      ~~~~~~ | We want to avoid bid gaps
 ```
 
+We define a quantity that we call `badness(i,j)` as a the "badness" of 
+using words[i:j] as a line.
+
 ```
 When line doesn't fit:
 badness(i, j) = +infinity 
 
 Otherwise:
-badness(i, j) = (page_width - total_width_of_words[i:j])^3 
+badness(i, j) = (page_width - total_width)^3 
 ```
 
-## 4.1 Define Subproblems
+Overall problem is:
+*Minimize sum of badnesses of the lines*
+
+**Subproblems:**
 
 In the brut force approach we would try all the different splits. For every
 words does it start a new line or not? If there are N words them there are
 2^N different splits.
 
-Guess: where does the second line begin? Try all words after the first one. After
-we find the first line then we're left with another problem of the same type. Where
-does the third line begin?
+**Guess:**
 
-=> subproblems are suffixes words[i:]
-=> number of subproblems: n
+Where does the second line begin? Try all words after the first one. After we find 
+the first line then we're left with another problem of the same type. Where does 
+the third line begin? Subproblems are suffixes words[i:] and the number of subproblems is 
+n.
 
-## 4.2. Recurrence
-
-Recurrence:
+**Recurrence:**
 ```
 DP(i) = Min( DP(j) + badness(i,j) for j in range(i+1, n+1) )
 
