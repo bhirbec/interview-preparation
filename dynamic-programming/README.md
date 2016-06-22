@@ -19,6 +19,8 @@ https://www.youtube.com/watch?v=OQ5jsbhAv_M
 
 # 1. Fibonacci Numbers
 
+https://youtu.be/OQ5jsbhAv_M?t=306
+
 Number of rabbit you have on day N if they reproduce
 
 ```
@@ -61,7 +63,7 @@ Fib(n):
 	return f
 ```
 
-Buy drawing the recursion tree we can see how we cut some work:
+By drawing the recursion tree we can see how we cut some work:
 - Fib(k) only recurses the first time it's called for any k
 - memoized calls cost O(1)
 - number of memoized calls is n
