@@ -28,7 +28,7 @@ F1 = F2 = 1
 Fn = Fn-1 + Fn-2
 ```
 
-## 1.1 Naive Recursive Algorithm
+**Naive Recursive Algorithm**
 
 ```
 Fib(n):
@@ -47,7 +47,7 @@ T(n) >= 2 * T(n-2)
 
 Exponential Time :/
 
-## 1.2 Memoization
+**Memoized Algorithm**
 
 ```
 memo = {}
@@ -74,7 +74,7 @@ Generalization:
 - memoization + reuse + guess
 - Running time = # of subproblem + time per subproblems (don't count memoized recursive calls)
 
-## 1.3 Bottom-up Algo
+**Bottom-up Algo**
 
 ```
 Fib(n):
