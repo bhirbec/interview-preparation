@@ -23,8 +23,7 @@ Valid independent sets are:
 - vertices 1 and 4
 - vertices 2 and 4
 
-Max weigthed independent set is:
-- vertices 2 and 2
+Max weigthed independent set is: vertices 2 and 2
 
 ## Optimal Solution
 
@@ -38,12 +37,12 @@ Case 1: Vn not in S
 - S must be a max-weight IS of G'
 
 Case 2: Vn in S
-- Let G'' = G wihout Vn-1 and Vn
-- previous vertex Vn-1 not S
+- Let G'' = G without Vn-1 and Vn
+- previous vertex Vn-1 not in S
 - S - {Vn} is an IS of G''
 - S - {Vn} must in fact be a max-weight IS of G''
 
-Summary: a max-weight IS must be either:
+A max-weight IS must be either:
 - (i) a max-weight IS of G' or
 - (ii) vn + a max-weight IS of G''
 
@@ -55,9 +54,9 @@ Summary: a max-weight IS must be either:
 - return S1 or S2 U {Vn}, whichever is better
 ```
 
-This algorithm is exponential time. However, there're O(n) distinct subproblems - at  any time the algorithm holds a prefix of the graph. An obvious way to speed up this algorithm is to cache the solutions of subproblems (memoization) and reuse the solutions.
+This algorithm is exponential time. However, there're O(n) distinct subproblems - at any time the algorithm holds a prefix of the graph. An obvious way to speed up this algorithm is to cache the solutions of the subproblems (memoization) and reuse the solutions.
 
-With memoization the algorithm is O(n). Implementation [here](https://github.com/bhirbec/interview-preparation/blob/master/dynamic-programming/wis/wis.py).
+With memoization the algorithm is O(n). Python implementation available [here](https://github.com/bhirbec/interview-preparation/blob/master/dynamic-programming/wis/wis.py).
 
 ## Bottom-up Algorithm
 
