@@ -8,73 +8,72 @@ import heapq
 
 
 def main():
-	a1 = [1, 1,  1,  1,  1, 45]
-	a2 = [1, 4,  7,  9, 12, 23]
-	a3 = [5, 6, 11, 14, 17, 22]
-	a4 = [3, 4,  9, 15, 18, 32]
-	print merge_naive([a1, a2, a3, a4], 6)
-	print merge_with_heap([a1, a2, a3, a4], 6)
+    a1 = [1, 1,  1,  1,  1, 45]
+    a2 = [1, 4,  7,  9, 12, 23]
+    a3 = [5, 6, 11, 14, 17, 22]
+    a4 = [3, 4,  9, 15, 18, 32]
+    print merge_naive([a1, a2, a3, a4], 6)
+    print merge_with_heap([a1, a2, a3, a4], 6)
 
 
 def merge_with_heap(arrays, n):
-	'''
-	Time: O(n * m * log(m))
-	Extra space: log(m)
-	'''
-	m = len(arrays)
-	size = n*m
-	h = []
-	merged = [0]*size
+    '''
+    Time: O(n * m * log(m))
+    Extra space: log(m)
+    '''
+    m = len(arrays)
+    size = n*m
+    h = []
+    merged = [0]*size
 
-	for i in xrange(m):
-		val = arrays[i][0]
-		heapq.heappush(h, (val, i, 0))
+    for i in xrange(m):
+        val = arrays[i][0]
+        heapq.heappush(h, (val, i, 0))
 
-	for k in xrange(size):
-		val, i, j = heapq.heappop(h)
-		merged[k] = val
+    for k in xrange(size):
+        val, i, j = heapq.heappop(h)
+        merged[k] = val
 
-		# array i isn't done
-		if j < n-1:
-			j += 1
-			val = arrays[i][j]
-			heapq.heappush(h, (val, i, j))
+        # array i isn't done
+        if j < n-1:
+            j += 1
+            val = arrays[i][j]
+            heapq.heappush(h, (val, i, j))
 
-	return merged
+    return merged
 
 def merge_naive(arrays, n):
-	'''
-	Time: O(n * m^2)
-	'''
-	m = len(arrays)
-	positions = [0]*m
-	merged = [0]*n*m
+    '''
+    Merge m arrays of size n into one single array of size n*m.
 
-	for k in xrange(n*m):
-		min_value = 0
-		selected_i = 0
+    Time: O(n * m^2)
+    Extra space: O(m)
+    '''
+    m = len(arrays)
+    size = n*m
+    mins = [0]*m
+    merged = [0]*size
 
-		# initialize the min
-		for i in xrange(m):
-			pos = positions[i]
-			if pos < n:
-				selected_i = i
-				min_value = arrays[i][pos]
-				break
+    def _find_min():
+        min_val, i, j = None, None, None
+        for _i, _j in enumerate(mins):
+            if _j < 0:
+                continue
+            val = arrays[_i][_j]
+            if min_val is None or val < min_val:
+               min_val, i, j = val, _i, _j
 
-		# find the min
-		for i in xrange(selected_i+1, m):
-			pos = positions[i]
-			if pos < n:
-				value = arrays[i][pos]
-				if value < min_value:
-					min_value = value
-					selected_i = i
+        return min_val, i, j
 
-		merged[k] = min_value
-		positions[selected_i] += 1
+    for k in xrange(size):
+        merged[k], i, j = _find_min()
+        if j < n-1:
+            mins[i] = j+1
+        else:
+            mins[i] = -1
 
-	return merged
+    return merged
+
 
 if __name__ == '__main__':
-	main()
+    main()
