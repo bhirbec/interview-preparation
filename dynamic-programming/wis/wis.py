@@ -31,25 +31,29 @@ def recursive(graph):
 
 def bottom_up(graph):
     n = len(graph)
-    cache = [0]*n
-    cache[0] = graph[0], [graph[0]]
+    cache = [0]*(n+1)
+    cache[0], cache[1] = 0, graph[0]
 
-    for i in range(1, n):
-        w = graph[i]
+    for i in range(1, n+1):
+        w = graph[i-1]
+        S2 = cache[i-2] + w
+        S1 = cache[i-1]
+        cache[i] = S1 if S1 > S2 else S2
 
-        if i-2 < 0:
-            S2, IS2 = 0, []
+    return _reconstruct_solution(n, cache)
+
+def _reconstruct_solution(n, cache):
+    i = n
+    output = []
+    while i >= 0:
+        if cache[i] > cache[i-1]:
+            output.append(graph[i-1])
+            i -= 2
         else:
-            S2, IS2 = cache[i-2]
+            i -= 1
 
-        S1, IS1 = cache[i-1]
-        S2 += w
-
-        if S1 > S2:
-            cache[i] = S1, IS1
-        else:
-            # TODO: remove list concat. It makes this algorithm O(n**2)
-            cache[i] = S2, IS2 + [w]
+    output.reverse()
+    return output
 
     return cache[n-1][1]
 
