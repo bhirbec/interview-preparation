@@ -68,3 +68,18 @@ A[0] = 0, A[1] = w1
 For i = 2, 3, 4, ..., n:
 	A[i] = max(A[i-1], A[i-2] + wi)
 ```
+
+## Reconstruct the Solution
+
+The idea is to scan our array of max-weight **from right to left**. For each step of the loop, we
+look at the current entry, and check which candidates was used by redoing the comparison.
+
+```
+S = {}
+while i >= 1:
+	if A[i-1] >= A[i-2]:
+		i =- 1
+	else:
+		add Vi to S
+		i -= 2
+```
