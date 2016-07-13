@@ -255,32 +255,3 @@ for i = |X|....0:
 DAG will a 2-dimensial array that has to be computed starting from the bottom rigth.
 
 Runnin Time: Theta(|X|.|Y|)
-
-# 9. Knapsack
-
-https://youtu.be/ocZMDMZwhCY?t=2589
-
-- list of items
-- each has a size Si and a value Vi
-- knapsack of total size S
-
-We want to max sum of value for a subset of items with size <= S
-
-Subproblem:
-suffix i of items
-and remaining capacity X
-number of subproblem = nS
-
-Guess: is item i in the subset?
-2 choices
-
-Recurrence:
-```
-DP(i, X) = max(
-	DP(i+1, X) +
-	DP(i+1, X-Si) + Vi
-)
-```
-
-Running Time:
-O(n.S) not polynomial time. Pseudo-polynomial
