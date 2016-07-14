@@ -3,6 +3,7 @@
 Sources:
 - [Coursera - Algorithm & Design Analysis Part 2](https://www.coursera.org/learn/algorithm-design-analysis-2/lecture/LIgLJ/the-knapsack-problem)
 - [YouTube - MIT OpenCourseWare](https://youtu.be/ocZMDMZwhCY?t=2589)
+- [YouTube - Tushar Roy](https://www.youtube.com/watch?v=8LusJS5-AGo)
 
 ## Definition
 
