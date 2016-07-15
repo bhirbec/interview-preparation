@@ -1,6 +1,6 @@
 # Dynamic Programming
 
-This is a attempt to summarize my understanding of Dynamic Programming...
+This is an attempt to summarize my understanding of Dynamic Programming...
 
 # Definition 
 
