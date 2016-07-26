@@ -8,48 +8,37 @@
 # 'abc' -> 'a' or 'b' or 'c'
 # 'gggaaa' -> 'gaaag' or 'aggga'
 
-# Note if there are multiple correct answers you only need to return 1 palindrome.</p>
+# Note if there are multiple correct answers you only need to return 1 palindrome.
 
 def main(s):
 	'''
-	Time complexity: O(n x log(n))
+	Time complexity: O(n)
 	Space complexity: O(n)
-	- set a map that stores number of occurences per character
-	- we can keep characters having an even number of occurences
-	- characters having odd number of occurences can only go in the middle. So
-	  we take them by decreasing order and remove 1 to keep them
-	TODO: can we do O(n)?
+
+	- set S = a map that will stores number of occurences per char
+	- for each c in s:
+		- S[c] += 1
+		- if S[c] == 2 then we can keep the char
+	- the map can only have 0 or 1. We keep the first char with 1 occurence.
 	'''
+	chars = []
 	char_counts = {}
+
 	for c in s:
-		if c in char_counts:
-			char_counts[c] += 1
-		else:
-			char_counts[c] = 1
+		if c not in char_counts:
+			char_counts[c] = 0
+		char_counts[c] += 1
 
-	kept = []
-	odd_chars = []
+		if char_counts[c] == 2:
+			chars.append(c)
+			char_counts[c] = 0
 
+	middle = ''
 	for c, count in char_counts.iteritems():
-		if (count % 2) == 0:
-			kept.append((count, c))
-		else:
-			odd_chars.append((count, c))
+		if count > 0:
+			middle = c
+			break
 
-	odd_chars.sort(key=lambda item: item[0], reverse=1)
+	return ''.join(chars) + middle + '' .join(reversed(chars))
 
-	nb_odds = len(odd_chars)
-	for i in xrange(nb_odds-1):
-		count, c = odd_chars[i]
-		if count > 1:
-			kept.append((count-1, c))
-
-	output = []
-	for count, c in kept:
-		for i in xrange(count / 2):
-			output.append(c)
-
-	middle = odd_chars[nb_odds-1][1] if nb_odds > 0 else ''
-	print ''.join(output) + middle + '' .join(reversed(output))
-
-main(s="baazzxkkkuiuoioiikaab")
+print main(s="baazzxkkkuiuoioiikaab")
