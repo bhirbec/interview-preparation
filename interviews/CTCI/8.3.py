@@ -7,6 +7,10 @@ def main():
     print magix_index_distinct_array(array)
 
 def magix_index_distinct_array(array):
+    '''
+    Time: O(log(n))
+    space: O(log(n))
+    '''
     n = len(array)
 
     def _f(i, j):

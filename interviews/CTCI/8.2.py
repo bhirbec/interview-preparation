@@ -12,6 +12,9 @@ def main():
     print find_path(matrix)
 
 def find_path(matrix):
+    '''
+    Time: O(n x m)
+    '''
     n = len(matrix)
     if n == 0:
         return []
