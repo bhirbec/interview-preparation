@@ -36,53 +36,52 @@
 
 # Time Complexity: O(n^2)
 
-def longest_incr_subseq(seq):
-	'''
-	Return the LIS for a given sequence.
-	https://www.youtube.com/watch?v=4fQJGoeW5VE](https://www.youtube.com/watch?v=4fQJGoeW5VE
-	'''
+def recursive(array):
+	def _f(i):
+		if i < 0:
+			return 0
 
-	n = len(seq)
-	subseqs = [[] for v in seq]
-	subseqs[0] = [seq[0]]
+		if cache[i] > 0:
+			return cache[i]
 
-	for i in xrange(1, n):
-		for j in xrange(0, i):
-			if seq[j] < seq[i] and len(subseqs[i]) < len(subseqs[j]):
-				subseqs[i] = list(subseqs[j]) # remove copy
+		length = 1
+		for j in xrange(i):
+			s = _f(j)
+			if array[i] >= array[j] and s + 1 > length:
+				length = s + 1
 
-		subseqs[i].append(seq[i])
+		cache[i] = length
+		return length
 
-	longest = subseqs[0]
-	for i in xrange(1, n):
-		if len(subseqs[i]) > len(longest):
-			longest = subseqs[i]
+	n = len(array)
+	cache = [0]*n
+	m = _f(n-1)
+	return reconstruct(m, n, cache, array)
 
-	return longest
+def bottom_up(array):
+	n = len(array)
+	cache = [1] * n
 
+	for i in xrange(n):
+		for j in xrange(i):
+			if array[i] >= array[j] and cache[j] + 1 > cache[i]:
+				cache[i] = cache[j] + 1
 
-def size_of_longest_incr_subseq(seq):
-	'''
-	Return the size of the LIS for a given sequence.
-	https://www.youtube.com/watch?v=CE2b_-XfVDk
-	'''
+	m = max(cache)
+	return reconstruct(m, n, cache, array)
 
-	n = len(seq)
-	lis = [1 for i in seq]
+def reconstruct(m, n, cache, array):
+	i = n - 1
+	output = []
 
-	for i in xrange(1, n):
-		for j in xrange(0, i):
-			if seq[j] < seq[i]:
-				if lis[i] < lis[j] + 1:
-					lis[i] = lis[j] + 1
+	while i > 0:
+		if cache[i] == m:
+			output.append(array[i])
+			m -= 1
+		i -= 1
 
-	return max(lis)
+	return list(reversed(output))
 
-
-arr = [3, 4, -1, 0, 6, 2, 3]
-print longest_incr_subseq(arr)
-print size_of_longest_incr_subseq(arr)
-
-arr = [3, 2, 6, 4, 5, 1]
-print longest_incr_subseq(arr)
-print size_of_longest_incr_subseq(arr)
+array = [1, 2, 0, -8, 0, 6, 7, 3, 3, 89]
+print recursive(array)
+print bottom_up(array)
