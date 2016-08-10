@@ -14,6 +14,30 @@
 
 from itertools import product
 
+def generate_bits(k):
+    for i in range(1, k+1):
+        for bits in _generate_combinations(i, k):
+            print bits
+
+def _generate_combinations(n, size):
+    def _f(bits, i, start, end):
+        if i == n:
+            yield format_str.format(bits)
+            return
+
+        for p in xrange(start, end+1):
+            mask = 1 << p
+            bits |= mask
+            for v in _f(bits, i+1, p+1, end+1):
+                yield v
+            bits &= ~mask
+
+    format_str = '{0:0%db}' % size
+    return _f(0, 0, 0, size-n)
+
+
+generate_bits(k=8)
+
 def generate_bits_1(k):
     '''
     - compute cartesian product
@@ -78,7 +102,7 @@ def generate_bits_2(k):
 
 def generate_bits_3(k):
     '''
-    Time: O(k) Space: O()
+    Time: O(2^k) Space: O(2^k)
     - recursively compute all 2^k combinations from the smallest number to the biggest
     - keep track of the number of bits for each combination
     - store combinations into a vector where the ith position holds all the combinations with i bits set to 1
@@ -106,8 +130,4 @@ def generate_bits_3(k):
     for comb in store:
         for bits in comb:
             yield bits
-
-k = 4
-for s in generate_bits_3(k):
-    print s
 
