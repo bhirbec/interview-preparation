@@ -23,7 +23,7 @@ def main():
 			right = Node(
 				value = 7,
 				left = Node(
-					value = 5
+					value = 6
 				),
 				right = Node(
 					value = 8
@@ -48,33 +48,10 @@ def is_bst(n):
 		if n is None:
 			return True
 
-		# root node
-		if min_val is None and max_val is None:
-			return _f(n.left, min_val, n.value) and _f(n.right, n.value, max_val)
+		if (min_val is not None and n.value <= min_val) or (max_val is not None and n.value >= max_val):
+			return False
 
-		# left only nodes
-		if min_val is None:
-			return (
-				n.value <= max_val
-				and _f(n.left, min_val, n.value)
-				and _f(n.right, n.value, max_val)
-			)
-
-		# right only nodes
-		if max_val is None:
-			return (
-				n.value >= min_val
-				and _f(n.left, min_val, n.value)
-				and _f(n.right, n.value, max_val)
-			)
-
-		return (
-			n.value <= max_val
-			and n.value >= min_val
-			and _f(n.left, min_val, n.value)
-			and _f(n.right, n.value, max_val)
-		)
-
+		return _f(n.left, min_val, n.value) and _f(n.right, n.value, max_val)
 
 	return _f(n, None, None)
 
