@@ -1,75 +1,36 @@
-# Implement a function to check if a binary tree is balanced. For the purpose of this
-# question, a balanced tree is defined to be a tree such that the heigths of the two
-# subtrees of any node nver differ by more one.
+from Queue import Queue
 
+def main():
+    graph = {
+        1: [2, 3],
+        2: [4, 3],
+        3: [],
+        4: [1, 5],
+        5: [2],
+        6: [5]
+    }
 
-def is_balanced(n):
-	return check_depth(n) != -1
+    print exists_path(graph, 1, 5)
 
-def check_depth(n):
-	if n is None:
-		return 0
+def exists_path(graph, origin, dest):
+    q = Queue()
+    q.put(origin)
+    visited = {}
 
-	left = check_depth(n.get('left'))
-	if left == -1:
-		return -1
+    while not q.empty():
+        n = q.get()
+        if n in visited:
+            continue
 
-	right = check_depth(n.get('right'))
-	if right == -1:
-		return -1
+        if n == dest:
+            return True
 
-	diff = abs(left - right)
-	if diff > 1:
-		return -1
+        for ni in graph[n]:
+            q.put(ni)
 
-	return max(left, right) + 1
+        visited[n] = True
 
+    return False
 
-root = {
-	'left': {
-		'left': {
-			'left': {
-				'left': {},
-				'right': {},
-			},
-			'right': {
-				'left': {},
-				'right': {},
-			},
-		},
-		'right': {
-			'left': {
-				'left': {},
-				'right': {},
-			},
-			'right': {
-				'left': {},
-				'right': {},
-			},
-		},
-	},
-	'right': {
-		'left': {
-			'left': {
-				'left': {},
-				'right': {},
-			},
-			'right': {
-				'left': {},
-				'right': {},
-			},
-		},
-		'right': {
-			'left': {
-				'left': {},
-				'right': {},
-			},
-			'right': {
-				'left': {},
-				'right': {},
-			},
-		},
-	},
-}
-
-print is_balanced(root)
+if __name__ == '__main__':
+    main()
