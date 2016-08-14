@@ -40,8 +40,17 @@ func TestSelectionSort(t *testing.T) {
 	}
 }
 
-func TestQuickSort(t *testing.T) {
+func TestQuickSortNoDups(t *testing.T) {
 	array := []int{2, 4, 6, 2, 2, -2, 2, 3, 6, -4, 5, 6, 8, 5, 7, 8}
+	QuickSort(array)
+
+	if !IsSorted(array) {
+		t.Errorf("QuickSort returned an unsorted array")
+	}
+}
+
+func TestQuickSortWithDups(t *testing.T) {
+	array := []int{2, 4, 6, 1, 5, 0}
 	QuickSort(array)
 
 	if !IsSorted(array) {

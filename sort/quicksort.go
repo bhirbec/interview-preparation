@@ -6,33 +6,32 @@ import (
 )
 
 func QuickSort(array []int) {
-	n := len(array)
-	if n > 1 {
-		p := partition(array, n)
-		QuickSort(array[:p])
-		QuickSort(array[p+1:])
+	quickSort(array, 0, len(array)-1)
+}
+
+func quickSort(array []int, l, r int) {
+	if r-l > 0 {
+		p := partition(array, l, r)
+		quickSort(array, 0, p-1)
+		quickSort(array, p+1, r)
 	}
 }
 
-func partition(array []int, n int) int {
-	p := rand.Intn(n)
+func partition(array []int, l, r int) int {
+	p := rand.Intn(r-l+1) + l
 	pivot := array[p]
-	array[p], array[0] = array[0], array[p]
-	left := 0
+	array[p], array[l] = array[l], array[p]
+	i := l + 1
 
-	for i := 1; i < n; i++ {
-		if array[i] < pivot {
-			left++
-			array[left], array[i] = array[i], array[left]
+	for j := l + 1; j < r+1; j++ {
+		if array[j] < pivot {
+			array[j], array[i] = array[i], array[j]
+			i++
 		}
 	}
 
-	if left == 0 {
-		return 0
-	}
-
-	array[left], array[0] = array[0], array[left]
-	return left
+	array[l], array[i-1] = array[i-1], array[l]
+	return i - 1
 }
 
 func init() {
