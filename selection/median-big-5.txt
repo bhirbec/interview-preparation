@@ -1,0 +1,30 @@
+Problem
+-------
+Set of n numbers {x1, x2, ..., xn}. Find the median
+
+Method: find the ith smallest element
+-------------------------------------
+
+Assume n = 5*k
+
+select(i):
+- divide the set into group of 5 => O(n)
+- find the median of each group => O(n)
+- find the median of the n/5 medians. Let X* be the median of the medians
+- compare X* with every numbers to find 
+  A = the numbers smaller than X* 
+  B = the numbers larger than X*
+- Let K be the size of A
+  if k >= i:
+  	select(i) on set A
+  else
+    select(i-k-1) on set B
+
+Analysis
+--------
+O(n)
+
+
+Source
+------
+https://www.youtube.com/watch?v=PBu2QgU6Qfk

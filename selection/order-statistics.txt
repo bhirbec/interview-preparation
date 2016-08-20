@@ -1,0 +1,41 @@
+Order Statistics
+----------------
+
+Given n elements in an array find the kth smallest element (element with rank k)
+
+Naive approach:
+Sort the array and take the kth element
+
+k = 1 minimum 
+k = n maximum
+k = (n+1) / 2
+
+1. Randomized Divide-and-conquier 
+---------------------------------
+
+// ith smallest element in A[p:q]
+random_select(A, p, q, i):
+	if p = q return A[q]
+
+	// call sub routine of quicksort (which return the rank of a random element)
+	r = random_partition(A, p, q)
+	
+	// rank of the pivot in A[p:q]
+	k = r - p + 1
+
+	if k == i:
+		return A[r]
+	elif k < i:
+		return random_select(A, p, r-1, i)
+	else:
+		return random_select(A, r+1, q, i)
+
+2. Worst-Case linear-time order statistics
+------------------------------------------
+
+Select(i, n):
+	1) Divide the n element in to n/5 groups of 5 elements and find the median of the group
+	2) Recursively Select the median X of the n/5 group median
+	3) Partition with X for pivot
+	
+

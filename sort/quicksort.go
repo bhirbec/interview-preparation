@@ -6,7 +6,10 @@ import (
 )
 
 func QuickSort(array []int) {
-	quickSort(array, 0, len(array)-1)
+	n := len(array)
+	if n > 0 {
+		quickSort(array, 0, n-1)
+	}
 }
 
 func quickSort(array []int, l, r int) {

@@ -11,34 +11,34 @@
 # Note if there are multiple correct answers you only need to return 1 palindrome.
 
 def main(s):
-	'''
-	Time complexity: O(n)
-	Space complexity: O(n)
+    '''
+    Time complexity: O(n)
+    Space complexity: O(n)
 
-	- set S = a map that will stores number of occurences per char
-	- for each c in s:
-		- S[c] += 1
-		- if S[c] == 2 then we can keep the char
-	- the map can only have 0 or 1. We keep the first char with 1 occurence.
-	'''
-	chars = []
-	char_counts = {}
+    - set S = a map that will stores number of occurences per char
+    - for each c in s:
+        - S[c] += 1
+        - if S[c] == 2 then we can keep the char
+    - the map can only have 0 or 1. We keep the first char with 1 occurence.
+    '''
+    chars = []
+    char_counts = {}
 
-	for c in s:
-		if c not in char_counts:
-			char_counts[c] = 0
-		char_counts[c] += 1
+    for c in s:
+        if c not in char_counts:
+            char_counts[c] = 0
+        char_counts[c] += 1
 
-		if char_counts[c] == 2:
-			chars.append(c)
-			char_counts[c] = 0
+        if char_counts[c] == 2:
+            chars.append(c)
+            char_counts[c] = 0
 
-	middle = ''
-	for c, count in char_counts.iteritems():
-		if count > 0:
-			middle = c
-			break
+    middle = ''
+    for c, count in char_counts.iteritems():
+        if count > 0:
+            middle = c
+            break
 
-	return ''.join(chars) + middle + '' .join(reversed(chars))
+    return ''.join(chars) + middle + '' .join(reversed(chars))
 
 print main(s="baazzxkkkuiuoioiikaab")

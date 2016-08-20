@@ -27,53 +27,53 @@
 from Queue import Queue
 
 tree = {
-	'value': 1,
-	'left': {
-		'value': 2,
-		'left': {
-			'value': 4,
-		},
-		'right' : {
-			'value': 5
-		},
-	},
-	'right': {
-		'value': 3,
-		'left': {
-			'value': 6,
-		},
-		'right' : {
-			'value': 7
-		},
-	},
+    'value': 1,
+    'left': {
+        'value': 2,
+        'left': {
+            'value': 4,
+        },
+        'right' : {
+            'value': 5
+        },
+    },
+    'right': {
+        'value': 3,
+        'left': {
+            'value': 6,
+        },
+        'right' : {
+            'value': 7
+        },
+    },
 }
 
 def print_tree_columns(n):
-	columns = {}
-	min_col = 0
-	max_col = 0
-	q = Queue()
-	q.put((n, 0))
+    columns = {}
+    min_col = 0
+    max_col = 0
+    q = Queue()
+    q.put((n, 0))
 
-	while not q.empty():
-		n, col = q.get()
-		min_col = min(min_col, col)
-		max_col = max(max_col, col)
+    while not q.empty():
+        n, col = q.get()
+        min_col = min(min_col, col)
+        max_col = max(max_col, col)
 
-		left_node = n.get('left')
-		if left_node:
-			q.put((left_node, col-1))
+        left_node = n.get('left')
+        if left_node:
+            q.put((left_node, col-1))
 
-		right_node = n.get('right')
-		if right_node:
-			q.put((right_node, col+1))
+        right_node = n.get('right')
+        if right_node:
+            q.put((right_node, col+1))
 
-		column = columns.setdefault(col, [])
-		column.append(n['value'])
+        column = columns.setdefault(col, [])
+        column.append(n['value'])
 
-	for i in xrange(min_col, max_col+1):
-		for v in columns[i]:
-			print v
+    for i in xrange(min_col, max_col+1):
+        for v in columns[i]:
+            print v
 
 if __name__ == '__main__':
-	print_tree_columns(tree)
+    print_tree_columns(tree)

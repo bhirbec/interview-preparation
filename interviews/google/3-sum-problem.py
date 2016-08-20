@@ -11,35 +11,35 @@
 
 
 def main():
-	array = [-1, 0, 1, 2, -1, -4]
-	triplets = three_sum(array, 0)
-	for t in triplets:
-		print t
+    array = [-1, 0, 1, 2, -1, -4]
+    triplets = three_sum(array, 0)
+    for t in triplets:
+        print t
 
 def three_sum(array, sum):
-	array.sort()
+    array.sort()
 
-	positions = {}
-	for i, v in enumerate(array):
-		indexes = positions.setdefault(v, [])
-		indexes.append(i)
+    positions = {}
+    for i, v in enumerate(array):
+        indexes = positions.setdefault(v, [])
+        indexes.append(i)
 
-	# the solution on programcreek.com doesn't use a set...
-	triplets = set([])
-	n = len(array)
+    # the solution on programcreek.com doesn't use a set...
+    triplets = set([])
+    n = len(array)
 
-	for i in xrange(n-3):
-		for j in xrange(i+1, n-2):
-			s = array[i] + array[j]
-			reminder = sum - s
-			indexes = positions.get(reminder, [])
+    for i in xrange(n-3):
+        for j in xrange(i+1, n-2):
+            s = array[i] + array[j]
+            reminder = sum - s
+            indexes = positions.get(reminder, [])
 
-			for k in indexes:
-				if k > j:
-					triplet = array[i], array[j], array[k]
-					triplets.add(triplet)
-					break
+            for k in indexes:
+                if k > j:
+                    triplet = array[i], array[j], array[k]
+                    triplets.add(triplet)
+                    break
 
-	return list(triplets)
+    return list(triplets)
 
 main()
