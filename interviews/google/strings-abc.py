@@ -34,4 +34,4 @@ def find_strings(n):
 
     _f(0, 0, 0)
 
-find_strings(3)
+find_strings(7)
