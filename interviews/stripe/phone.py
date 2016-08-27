@@ -1,5 +1,6 @@
 
 
+# https://gist.github.com/ChimeraCoder/1906326162eb88742952
 class Tracker(object):
     def __init__(self):
         self.pools = {}
@@ -36,6 +37,7 @@ class Tracker(object):
         return None
 
 
+# https://gist.github.com/antifuchs/dd5344b60693dd1d073b
 def next_server_number(servers):
     if len(servers) == 0:
         return 1
@@ -54,11 +56,11 @@ def next_server_number(servers):
 
 
 if __name__ == '__main__':
-    # print next_server_number([5, 3, 1])
-    # print next_server_number([5, 4, 1, 2])
-    # print next_server_number([3, 2, 1])
-    # print next_server_number([2, 3])
-    # print next_server_number([])
+    print next_server_number([5, 3, 1])
+    print next_server_number([5, 4, 1, 2])
+    print next_server_number([3, 2, 1])
+    print next_server_number([2, 3])
+    print next_server_number([])
 
     tracker = Tracker()
     print tracker.allocate("apibox")
