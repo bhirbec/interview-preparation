@@ -24,16 +24,10 @@ class Tracker(object):
         host = hostname[:select_i]
         server_number = int(hostname[select_i:]) # do we need to convert?
 
-        if host not in self.pools:
-            return None
+        if host in self.pools:
+            new_pool = [i for i in self.pools[host] if server_number != i]
+            self.pools[host] = new_pool
 
-        select_i = None
-        for i in self.pools[host]:
-            if server_number == i:
-                select_i = i
-
-        if select_i is not None:
-            self.pools[host] = [n for n in self.pools[host] if n != select_i]
         return None
 
 
