@@ -1,43 +1,47 @@
-import time
+
 
 class TimeHashTable(object):
-	def __init__(self):
-		self._storage = {}
+    def __init__(self, start_ts=0):
+        self._ts = start_ts
+        self._storage = {}
 
-	def set(self, key, value):
-		l = self._storage.get(key)
-		if l is None:
-			self._storage[key] = l = []
+    def set(self, key, value):
+        l = self._storage.get(key)
+        if l is None:
+            self._storage[key] = l = []
 
-		ts = time.time()
-		l.append( (ts, value) )
-		return ts
+        l.append( (self._ts, value) )
+        self._ts += 1
 
-	def get(self, key, ts=None):
-		target_ts = ts or time.time()
-		l = self._storage.get(key, [])
-		select_i = None
+    def get(self, key, ts=None):
+        l = self._storage.get(key, [])
+        if len(l) == 0:
+            return None
 
-		for i, (ts, value) in enumerate(l):
-			if ts == target_ts:
-				return value
-			elif ts > target_ts:
-				select_i = i - 1
-				break
+        target_ts = self._ts if ts is None else ts
+        prev_value = None
 
-		if len(l) == 0 or select_i <= 0:
-			return None
-		elif select_i is None:
-				return l[-1][1]
-		else:
-		 	return l[select_i][1]
+        for ts, value in l:
+            if ts == target_ts:
+                return value
+            elif ts > target_ts:
+                return prev_value
+            prev_value = value
+
+        return l[-1][1]
 
 def main():
-	h = TimeHashTable()
-	t0 = h.set('a', 1)
-	t1 = h.set('a', 4)
-	# t2 = h.set('a', 8)
-	print t0, t1
-	print h.get('a', t0-10)
+    h = TimeHashTable()
+    print h.get('a') is None
+
+    h = TimeHashTable(10)
+    h.set('a', 1)
+    print h.get('a') == 1
+
+    h.set('a', 123)
+    print h.get('a', 10) == 1
+    print h.get('a') == 123
+    print h.get('a', 32) == 123
+    print h.get('a', 2) is None
 
 main()
