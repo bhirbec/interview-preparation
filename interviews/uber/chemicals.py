@@ -11,25 +11,22 @@
 # If the chemical string matches more than one symbol, then choose the one with longest length.
 # (ex. 'Microsoft' matches 'i' and 'cro')
 
-# My solution:
-# (I sorted the symbols array in descending order of length and ran loop over chemicals array
-# to find a symbol match(using indexOf in javascript) which worked. But I din't make it through
-# the interview, I am guessing my solution was O(n2) and they expected an efficient algorithm.
-
 def main():
 	chemicals = ['Amazon', 'Microsoft', 'Google']
 	symbols = ['i', 'Am', 'cro', 'Na', 'le', 'abc']
 	print_chemicals(chemicals, symbols)
 
 def print_chemicals(chemicals, symbols):
-	symbols = sorted(symbols, reverse=True)
+	sort_func = lambda x, y: len(x) > len(y)
+	symbols = sorted(symbols, cmp=sort_func)
+
 	for c in chemicals:
 		for s in symbols:
 			try:
 				i = c.index(s)
 			except ValueError:
 				continue
-			print c[:i] + '[' + s + ']' + c[i+len(s) + 1:]
+			print '{0}[{1}]{2}'.format(c[:i], s, c[i+len(s):])
 			break
 
 main()
