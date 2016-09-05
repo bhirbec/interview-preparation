@@ -1,7 +1,10 @@
 
 def main():
-    print add(30, 19)
-    print add(8, 1)
+    for i in xrange(1000):
+        for j in xrange(15000):
+            if add(i, j) != (i + j):
+                print 'problem'
+    print '=)'
 
 def add(a, b):
     # TODO: doesn't work with negative value
