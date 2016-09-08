@@ -224,4 +224,3 @@ RB-Insert(T, X):
 case 1: ![case 1](./case-1.jpg "Case 1")
 case 2: ![case 2](./case-2.jpg "Case 2")
 case 3: ![case 3](./case-3.jpg "Case 3")
-
