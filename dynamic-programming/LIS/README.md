@@ -1,4 +1,4 @@
-# Longuest Increasing Subsequence
+# Longest Increasing Subsequence
 
 Problem:
 For a vector of size N, find its LIS
