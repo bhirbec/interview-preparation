@@ -10,7 +10,7 @@ alphabet = 'abcedfghijklmnopqrstuvwxyx'
 
 def main():
     d = distance('cat', 'dog')
-    print d
+    print(d)
 
 def distance(a, b):
     n, m = len(a), len(b)
@@ -48,7 +48,7 @@ def _compute_replace_cost(a, b, i, j, max_cost):
     a[i] = b[j]
     word = ''.join(a)
     if word in dictionary:
-        print word
+        print(word)
     a[i] = tmp
     return 2 if word in dictionary else None
 
@@ -56,7 +56,7 @@ def _compute_insertion_cost(a, b, i, j, max_cost):
     a.insert(i, b[j])
     word = ''.join(a)
     if word in dictionary:
-        print word
+        print(word)
     a.pop(i)
     return 1 if word in dictionary else None
 
@@ -64,13 +64,13 @@ def _compute_deletion_cost(a, b, i, j, max_cost):
     tmp = a.pop(i)
     word = ''.join(a)
     if word in dictionary:
-        print word
+        print(word)
 
     a.insert(i, tmp)
     return 1 if word in dictionary else None
 
 def print_mat(mat):
     for r in mat:
-        print ' '.join('%2s' % (v or 0) for v in r)
+        print(' '.join('%2s' % (v or 0) for v in r))
 
 main()

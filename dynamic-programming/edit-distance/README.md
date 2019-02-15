@@ -41,6 +41,6 @@ for i = |X|....0:
 	for j = |Y|...0:
 ```
 
-DAG will a 2-dimensial array that has to be computed starting from the bottom rigth.
+DAG with a 2-dimensial array that has to be computed starting from the bottom rigth.
 
 Runnin Time: Theta(|X|.|Y|)

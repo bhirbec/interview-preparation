@@ -30,7 +30,7 @@ def main():
 	print find_exec_time(tasks)
 
 
-def find_exec_time(tasks, k=3):
+def find_exec_time(tasks, k=9):
 	output = []
 	times = {}
 	c, t, n = 0, 0, len(tasks)
@@ -47,6 +47,6 @@ def find_exec_time(tasks, k=3):
 			output.append('.')
 		t += 1
 
-	return output, t
+	return ' '.join(output), t
 
 main()

@@ -1,6 +1,6 @@
 # https://www.careercup.com/question?id=5701279419465728
 
-# GIven a list of words, and the number of rows and columns, return the number of words
+# Given a list of words, and the number of rows and columns, return the number of words
 # that can be fit into the rows and columns by stringing together each consecutive word. If the next word doesn't fit in the same line, it should move to the next line. Find an efficient solution for this. For eg.
 
 # List of words: { "Do", "Run" }
@@ -13,37 +13,38 @@
 # result: 5
 
 def main():
-    words = ['Do', 'Run']
-    max_words(words, 2, 9)
+    text = 'Please use this doc to code'
+    max_words(text, 5, 20)
 
-def max_words(words, nb_rows, nb_cols):
+def max_words(text, nb_rows, nb_cols):
+    words = text.split(' ')
     n = len(words)
+    size = 0
+    r = 0
+    k = 0
 
-    def f(i, r):
-        if r > 1:
-            return 0
+    row = []
+    rows = []
 
-        size = 0
-        current_words = []
-        max_words_count = 0
+    while r < nb_rows:
+        i = k % n
+        w = words[i]
+        w_length = len(w)
 
-        while 1:
-            w = words[i]
-            size += len(w) + max(len(current_words) - 1, 0)
+        if size + w_length <= nb_cols:
+            row.append(w)
+            size += w_length + 1
+            k += 1
+        else:
+            rows.append(row)
+            row = []
+            size = 0
+            r += 1
 
-            if size < nb_cols:
-                current_words.append(w)
-                i = (i + 1) % n
-                print r, current_words
-                words_count = f(i, r+1) + len(current_words)
-                if words_count > max_words_count:
-                    max_words_count = words_count
-            else:
-                break
+    for row in rows:
+        print row
 
-        return max_words_count
-
-    print f(0, 0)
+    print k // n
 
 
 main()

@@ -1,0 +1,55 @@
+==================================================================
+
+You have a file with session information per user:
+user_id;start_ts;end_ts;nb_query
+user1;0;10;25
+user2;3;15;12
+user3;8;29;47
+user1;4;14;90
+...
+
+Find the time where traffic peaks
+
+==================================================================
+
+You're given a sentence and a grid (n x m). How many time can you
+fit that sentence in the matrix
+
+input = "use this doc during the coding interview"
+
+def find_max_sentences(text, n, m):
+
+==================================================================
+
+You're given the following functions:
+- words() -> returns S, a set of strings all having the same length n
+- guess(w) -> returns the number of characters in common with a password included in S
+
+You have a limited number of guess() calls. Find the password.
+
+Beginning of solution:
+- w1 = take a word at random in S
+- n1 = guess(w1)
+- knowing n1 we can remove entries from S like such:
+	- new_S = []
+	- for w in words:
+		if compare(w1, w) != n1:
+			new_S.append(w)
+
+==================================================================
+
+Design security card system to access Google buildings.
+- role based
+- What happen if someone loses his card?
+- network is down -> put a cache on the readers...
+
+==================================================================
+
+You're given a shell string:
+foo bar "foo_bar"
+
+Parse the string so it returns tokens:
+["foo", "bar", "foo_bar"]
+
+Follow up: what if the string is stored on n servers?
+
