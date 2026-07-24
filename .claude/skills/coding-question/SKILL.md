@@ -57,6 +57,12 @@ with the problem description, an implementation, and passing unit tests.
          - name the technique/data-structure/topic (`#sorting`, `#hashtable`,
            `#math`, `#greedy`, `#recursion`, `#string`) — these are examples,
            not an allow-list
+         - every tag must carry real signal that distinguishes this problem
+           from others. Do NOT use vague catch-all tags that could apply to
+           almost any question — `#implementation`, `#simulation`, `#easy`,
+           `#logic`, `#coding` say nothing useful when grepping. If the best
+           you can do for a problem is a generic tag, prefer a more specific
+           one (`#matrix`, `#prefix-sum`, `#counting`) or just fewer tags.
          - do NOT tag the implementation language: every solution here is
            Python, so `#python` adds no search value
      - A faithful statement of the problem, written the way a real interview
