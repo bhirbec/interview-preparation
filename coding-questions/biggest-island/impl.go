@@ -1,8 +1,7 @@
-package main
+package island
 
 import (
 	"errors"
-	"fmt"
 )
 
 // You're given a matrix that stores the following values:
@@ -15,17 +14,6 @@ import (
 // "W", "L", "W", "L"
 //
 // Compute the size of the biggest island (4 )
-
-func main() {
-	matrix := [][]string{
-		[]string{"L", "W", "W", "L"},
-		[]string{"L", "W", "L", "L"},
-		[]string{"L", "W", "W", "L"},
-	}
-
-	fmt.Println(findBiggestLand(matrix))
-	fmt.Println(findBiggestLand2(matrix))
-}
 
 func findBiggestLand(matrix [][]string) int {
 	/* DFS with recursion  */
