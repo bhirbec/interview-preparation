@@ -8,9 +8,9 @@ import random
 def main():
     a = random_sorted_array(101)
     b = random_sorted_array(101)
-    print median_naive(a, b)
-    print median_merge(a, b)
-    print median_recursive(a, b)
+    print(median_naive(a, b))
+    print(median_merge(a, b))
+    print(median_recursive(a, b))
 
 def median_naive(a, b):
     return sorted(a + b)[len(a)]
@@ -37,7 +37,7 @@ def _median(a, b, start1, start2, n):
     if n == 1:
         return max(a[start1], b[start2])
 
-    l = n / 2
+    l = n // 2
     m1 = start1 + l
     m2 = start2 + l
     med1 = a[m1]

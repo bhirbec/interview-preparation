@@ -1,7 +1,7 @@
 # https://careercup.com/question?id=5726440612954112
 
 def main():
-    print sum_to_x([1, 5, 10, 3], 18)
+    print(sum_to_x([1, 5, 10, 3], 18))
 
 def sum_to_x(arr, target):
     '''

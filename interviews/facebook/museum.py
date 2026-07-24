@@ -23,7 +23,7 @@ def main():
     ]
 
     for row in museum(matrix):
-        print ' '.join(str(i) for i in row)
+        print(' '.join(str(i) for i in row))
 
 
 def museum(matrix):

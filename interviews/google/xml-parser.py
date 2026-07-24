@@ -92,6 +92,6 @@ class XMLParser(object):
 def main():
     parser = XMLParser()
     parser.Parse()
-    print parser._db
+    print(parser._db)
 
 main()

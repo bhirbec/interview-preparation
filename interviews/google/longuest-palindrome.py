@@ -34,11 +34,11 @@ def main(s):
             char_counts[c] = 0
 
     middle = ''
-    for c, count in char_counts.iteritems():
+    for c, count in char_counts.items():
         if count > 0:
             middle = c
             break
 
     return ''.join(chars) + middle + '' .join(reversed(chars))
 
-print main(s="baazzxkkkuiuoioiikaab")
+print(main(s="baazzxkkkuiuoioiikaab"))

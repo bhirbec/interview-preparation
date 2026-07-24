@@ -14,7 +14,7 @@ def main():
 	A = [1, 2, 3, 3]
 	B = [2, 3, 3, 4]
 	C = [1, 2, 2, 2]
-	print target_sum(A, B, C, 7)
+	print(target_sum(A, B, C, 7))
 
 def target_sum(A, B, C, target):
 	sums = {}

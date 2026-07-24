@@ -1,9 +1,9 @@
 
 def main():
     array = [1, 2, 0, -8, 0, 6, 7, 3, 3, -89]
-    print(recursive(array))
-    print(bottom_up(array))
-    print(longuest_increasing_subseq(array))
+    print((recursive(array)))
+    print((bottom_up(array)))
+    print((longuest_increasing_subseq(array)))
 
 
 def recursive(array):

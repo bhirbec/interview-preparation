@@ -36,7 +36,7 @@ SIZE = 6
 
 def main():
     n = 10
-    seq = range(100)
+    seq = list(range(100))
     # shuffle(seq)
     numbers = [_int_to_bits(i) for i in seq]
 
@@ -63,9 +63,9 @@ def main():
             prefix += '1'
             total += count
         else:
-            print 'fu'
+            print('fu')
 
-    print int(prefix, 2)
+    print(int(prefix, 2))
 
 
 def _int_to_bits(number):

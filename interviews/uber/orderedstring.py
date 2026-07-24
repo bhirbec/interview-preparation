@@ -23,19 +23,19 @@
 def main():
 	string = "hello world!"
 	ordering = "hlo!"
-	print check_ordering(string, ordering) # False (all Ls are not before all Os)
+	print(check_ordering(string, ordering)) # False (all Ls are not before all Os)
 
 	string = "hello world!"
 	ordering = "!od"
-	print check_ordering(string, ordering) # False (the string has '!' coming after 'o' and after 'd', but the pattern needs it to come before 'o' and 'd')
+	print(check_ordering(string, ordering)) # False (the string has '!' coming after 'o' and after 'd', but the pattern needs it to come before 'o' and 'd')
 
 	string = "hello world!"
 	ordering = "he!"
-	print check_ordering(string, ordering) # True
+	print(check_ordering(string, ordering)) # True
 
 	string = "aaaabbbcccc"
 	ordering = "ac"
-	print check_ordering(string, ordering) # True
+	print(check_ordering(string, ordering)) # True
 
 
 def check_ordering(string, ordering):

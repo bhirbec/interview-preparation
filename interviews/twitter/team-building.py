@@ -5,11 +5,11 @@
 
 def main():
 	n = 10
-	print find_k(n)
+	print(find_k(n))
 
 def find_k(n):
 	selected_team = []
-	for k in xrange(1, n+1):
+	for k in range(1, n+1):
 		ok = False
 		for team, score in iter_team_score(n, k):
 			if score == 0:
@@ -30,9 +30,9 @@ def iter_team_score(n, k):
 			yield '-'.join(str(p) for p in team), score
 			return
 
-		for i in xrange(prev_i, n - (k - count) + 1):
+		for i in range(prev_i, n - (k - count) + 1):
 			team[count] = i
-			player_score = sum(1 for j in xrange(count) if i % team[j] == 0)
+			player_score = sum(1 for j in range(count) if i % team[j] == 0)
 			for s in f(count+1, score+player_score, i+1):
 				yield s
 

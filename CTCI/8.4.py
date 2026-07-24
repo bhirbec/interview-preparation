@@ -6,9 +6,9 @@ def subsets(S):
 		if d > n:
 			return
 
-		print ''.join(buf[:d])
+		print(''.join(buf[:d]))
 
-		for j in xrange(i, n):
+		for j in range(i, n):
 			buf[d] = S[j]
 			_f(j + 1, d + 1)
 

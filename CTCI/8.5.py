@@ -13,7 +13,7 @@ def multiply(a, b):
 def main():
     a = 123
     b = 123312
-    print multiply(a, b)
-    print a * b
+    print(multiply(a, b))
+    print(a * b)
 
 main()

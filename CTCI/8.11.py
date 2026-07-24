@@ -18,4 +18,4 @@ def count_repr(n):
 
     return f(n)
 
-print count_repr(100)
+print(count_repr(100))

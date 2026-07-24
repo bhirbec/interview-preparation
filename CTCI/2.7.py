@@ -9,7 +9,7 @@ def main():
     n1 = Node(70, Node(134, Node(3, Node(1, Node(10, Node(9, common))))))
     n2 = Node(7, Node(11, common))
     i = find_intercept(n1, n2)
-    print i.value
+    print(i.value)
 
 def find_intercept(n1, n2):
     t1, l1 = _get_tail_and_size(n1)
@@ -22,7 +22,7 @@ def find_intercept(n1, n2):
         return _find_intercept(n2, n1, l1 - l2)
 
 def _find_intercept(shortest, longest, diff):
-    for _ in xrange(diff):
+    for _ in range(diff):
         longest = longest.next_node
 
     while longest is not shortest:

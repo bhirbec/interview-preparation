@@ -1,4 +1,4 @@
-from Queue import Queue
+from queue import Queue
 
 
 def main():
@@ -25,7 +25,7 @@ def main():
     }
 
     for layer in get_layers(tree):
-        print layer
+        print(layer)
 
 
 class LinkedList():

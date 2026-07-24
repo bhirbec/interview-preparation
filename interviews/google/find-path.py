@@ -16,7 +16,7 @@ def find(root, path):
       if isinstance(node, list):
         next_framents = list(range(len(node)))
       else:
-        next_framents = node.keys()
+        next_framents = list(node.keys())
     elif isinstance(node, list):
       next_framents = [int(fragment)]
     else:

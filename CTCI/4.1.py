@@ -1,4 +1,4 @@
-from Queue import Queue
+from queue import Queue
 
 def main():
     graph = {
@@ -10,7 +10,7 @@ def main():
         6: [5]
     }
 
-    print exists_path(graph, 1, 5)
+    print(exists_path(graph, 1, 5))
 
 def exists_path(graph, origin, dest):
     q = Queue()

@@ -14,11 +14,11 @@
 def main():
     coins = [(0, 1), (3, 5), (1, 8), (3, 7), (5, 0), (8, 9), (2, 4)]
     coins = sorted(coins)
-    print max_coin_longest_incr_subseq(coins)
+    print(max_coin_longest_incr_subseq(coins))
 
     # first attempt to solve the problem (not correct)
     coins = [(0, 1), (3, 5), (1, 8), (3, 7), (5, 0), (8, 9), (2, 4)]
-    print max_coin_naive(coins)
+    print(max_coin_naive(coins))
 
 
 def max_coin_longest_incr_subseq(seq):
@@ -28,10 +28,10 @@ def max_coin_longest_incr_subseq(seq):
     - find size of the LIS on x, y (where both x and y increase)
     '''
     n = len(seq)
-    sizes = [1 for i in xrange(n)]
+    sizes = [1 for i in range(n)]
 
-    for i in xrange(1, n):
-        for j in xrange(0, i):
+    for i in range(1, n):
+        for j in range(0, i):
             if seq[j][0] < seq[i][0] and seq[j][1] < seq[i][1]:
                 if sizes[i] < sizes[j] + 1:
                     sizes[i] = sizes[j] + 1
@@ -48,23 +48,23 @@ def max_coin_naive(coins):
     m = 10
 
     # 1 for coin else 0
-    matrix = [ [0 for i in xrange(m)] for i in xrange(m) ]
+    matrix = [ [0 for i in range(m)] for i in range(m) ]
     for x, y in coins:
         matrix[x][y] = 1
 
-    cumuls = [[0 for i in  xrange(m)] for i in xrange(m)]
+    cumuls = [[0 for i in  range(m)] for i in range(m)]
     cumuls[0][0] = matrix[0][0]
 
-    for i in xrange(1, m):
-        for j in xrange(1, m):
+    for i in range(1, m):
+        for j in range(1, m):
 
             max_coin = 0
 
-            for k in xrange(0, j):
+            for k in range(0, j):
                 v = cumuls[i-1][k]
                 max_coin = max(v, max_coin)
 
-            for k in xrange(0, i):
+            for k in range(0, i):
                 v = cumuls[k][j-1]
                 max_coin = max(v, max_coin)
 

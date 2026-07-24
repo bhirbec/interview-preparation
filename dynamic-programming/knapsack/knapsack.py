@@ -1,10 +1,10 @@
 
 def bottom_up(items, W):
 	n = len(items)
-	A = [[0 for _ in xrange(W+1)] for _ in xrange(n)]
+	A = [[0 for _ in range(W+1)] for _ in range(n)]
 
 	for i, (vi, wi) in enumerate(items):
-		for x in xrange(W+1):
+		for x in range(W+1):
 			if wi > x:
 				A[i][x] = A[i-1][x]
 			else:
@@ -37,4 +37,4 @@ if __name__ == '__main__':
 		(7, 5),
 	]
 	W = 9
-	print bottom_up(items, W)
+	print(bottom_up(items, W))

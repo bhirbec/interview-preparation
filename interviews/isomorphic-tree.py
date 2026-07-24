@@ -26,7 +26,7 @@ B = dict(
 )
 
 def main():
-    print isIsomorphic(A, B)
+    print(isIsomorphic(A, B))
 
 def isIsomorphic(a, b):
     if a is None and b is None:

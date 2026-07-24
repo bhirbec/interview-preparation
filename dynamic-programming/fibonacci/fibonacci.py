@@ -24,5 +24,5 @@ def bottom_up_fib(n):
             memo[k] = memo[k-2] + memo[k-1]
     return memo[n]
 
-print recursive_fib(10)
-print bottom_up_fib(10)
+print(recursive_fib(10))
+print(bottom_up_fib(10))

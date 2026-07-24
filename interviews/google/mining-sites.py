@@ -16,7 +16,7 @@
 #   #  #  *#
 ############
 
-from Queue import Queue
+from queue import Queue
 
 def main():
     array = [
@@ -32,7 +32,7 @@ def main():
 
     result = base(array)
     if not result:
-        print 'The base cannot be setup'
+        print('The base cannot be setup')
         return
 
     x, y = result
@@ -105,6 +105,6 @@ def _find_min_distance(destination):
 
 def _print_map(array):
     for row in array:
-        print ' '.join('{:>2}'.format(v) for v in row)
+        print(' '.join('{:>2}'.format(v) for v in row))
 
 main()

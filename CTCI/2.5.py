@@ -38,7 +38,7 @@ def print_list(n):
     while n is not None:
         digits.append(n.value)
         n = n.next
-    print ''.join(str(d) for d in digits)
+    print(''.join(str(d) for d in digits))
 
 if __name__ == '__main__':
     main()

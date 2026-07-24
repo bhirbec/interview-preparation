@@ -9,7 +9,7 @@ def sort_anagram(arr):
         radix_table[key].append(w)
 
     output = []
-    for words in radix_table.values():
+    for words in list(radix_table.values()):
         for w in words:
             output.append(w)
 

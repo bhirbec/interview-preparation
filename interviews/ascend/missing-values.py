@@ -21,10 +21,10 @@ def get_prices(f):
     '''
     Read sys.input and return a list of prices. We indicate a missing price with None
     '''
-    n = int(raw_input())
+    n = int(input())
     prices = []
-    for i in xrange(n):
-        value = raw_input().split('\t')[1]
+    for i in range(n):
+        value = input().split('\t')[1]
         if value.startswith('Missing'):
             prices.append(None)
         else:
@@ -72,7 +72,7 @@ def find_missing(prices):
 def get_rates(prices):
     n = len(prices)
     rates = []
-    for t in xrange(n):
+    for t in range(n):
         prev = prices[t-1]
         current = prices[t]
         if prev is not None and current is not None:
@@ -104,4 +104,4 @@ prices = [
 ]
 
 for v in find_missing(prices):
-    print v
+    print(v)

@@ -5,8 +5,8 @@ def valid_braces(s):
 		'}': '{',
 	}
 
-	open_braces = braces.values()
-	closing_braces = braces.keys()
+	open_braces = list(braces.values())
+	closing_braces = list(braces.keys())
 
 	stack = []
 	for ch in s:
@@ -22,4 +22,4 @@ def valid_braces(s):
 
 	return len(stack) == 0
 
-print valid_braces("{[]{}[{{{}}}]{{}}}")
+print(valid_braces("{[]{}[{{{}}}]{{}}}"))

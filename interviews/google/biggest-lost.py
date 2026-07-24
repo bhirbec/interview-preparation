@@ -25,4 +25,4 @@ def find_biggest_loss(prices):
 
 
 prices = [23, 24, 27, 532, 14, 12, 17, 121, 24, 1344, 0]
-print(find_biggest_loss(prices))
+print((find_biggest_loss(prices)))

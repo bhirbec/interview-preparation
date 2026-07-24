@@ -14,10 +14,10 @@
 
 def main():
     zombies = ['1100', '1110', '0110', '0001']
-    print zombie_clans(zombies)
+    print(zombie_clans(zombies))
 
     zombies = ['10000', '01000', '00100', '00010', '00001']
-    print zombie_clans(zombies)
+    print(zombie_clans(zombies))
 
 def zombie_clans(zombies):
     '''
@@ -29,8 +29,8 @@ def zombie_clans(zombies):
     counter = 0
     n = len(zombies)
 
-    for i in xrange(n):
-        for j in xrange(i, n):
+    for i in range(n):
+        for j in range(i, n):
             if (i, j) in visited:
                 continue
             if zombies[i][j] == '1':
@@ -45,7 +45,7 @@ def dfs(i, j, n, zombies, visited):
 
     visited[(i, j)] = 1
 
-    for k in xrange(n):
+    for k in range(n):
         # add zombies on the same line
         dfs(i, k, n, zombies, visited)
         # add zombies on the same column

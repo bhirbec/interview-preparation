@@ -46,17 +46,17 @@ def main():
     R = len(matrix)
     C = len(matrix[0])
     path = find_best_path(matrix, R, C)
-    print path
+    print(path)
 
 def find_best_path(matrix, R, C):
     locations = [0]*(R*C+1)
-    for i in xrange(R):
-        for j in xrange(C):
+    for i in range(R):
+        for j in range(C):
             number = matrix[i][j]
             locations[number] = (i,j)
 
     positions = []
-    for number in xrange(1, R*C+1):
+    for number in range(1, R*C+1):
         i, j = locations[number]
 
         if matrix[i][j] == 0:
@@ -70,15 +70,15 @@ def find_best_path(matrix, R, C):
     return [matrix[i][j] for i, j in positions]
 
 def mark_top_right(matrix, i, j, C):
-    for row in xrange(i-1, -1, -1):
-        for col in xrange(j+1, C):
+    for row in range(i-1, -1, -1):
+        for col in range(j+1, C):
             if matrix[row][col] == 0:
                 return
             matrix[row][col] = 0
 
 def mark_bottom_left(matrix, i, j, R):
-    for row in xrange(i+1, R):
-        for col in xrange(j-1, -1, -1):
+    for row in range(i+1, R):
+        for col in range(j-1, -1, -1):
             if matrix[row][col] == 0:
                 return
             matrix[row][col] = 0

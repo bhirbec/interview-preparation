@@ -6,16 +6,16 @@ class Node():
 
 def main():
     head = Node(12, Node(10, Node(3, Node(1, Node(156, Node(43))))))
-    print find_kth_from_tail(head, 2)
-    print find_kth_from_tail_runner(head, 2)
+    print(find_kth_from_tail(head, 2))
+    print(find_kth_from_tail_runner(head, 2))
 
-    print find_kth_from_tail(None, 2)
-    print find_kth_from_tail_runner(None, 2)
+    print(find_kth_from_tail(None, 2))
+    print(find_kth_from_tail_runner(None, 2))
 
 
 def find_kth_from_tail_runner(n, k):
     runner = n
-    for _ in xrange(k):
+    for _ in range(k):
         if runner is None:
             return None
         runner = runner.next_node

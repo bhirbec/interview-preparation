@@ -18,16 +18,16 @@
 
 def main():
 	tasks = ['A', 'B', 'C', 'D']
-	print find_exec_time(tasks)
+	print(find_exec_time(tasks))
 
 	tasks = ['A', 'B', 'A', 'D']
-	print find_exec_time(tasks)
+	print(find_exec_time(tasks))
 
 	tasks = ['A', 'A', 'A', 'A']
-	print find_exec_time(tasks)
+	print(find_exec_time(tasks))
 
 	tasks = ['A', 'B', 'C', 'A', 'C', 'B', 'D', 'A']
-	print find_exec_time(tasks)
+	print(find_exec_time(tasks))
 
 
 def find_exec_time(tasks, k=9):

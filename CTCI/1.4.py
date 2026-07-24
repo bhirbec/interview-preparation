@@ -10,7 +10,7 @@ def check_perm_of_palindrome(s):
 
     print(chars)
     found_odd = False
-    for counter in chars.values():
+    for counter in list(chars.values()):
         if is_even(counter):
             continue
 

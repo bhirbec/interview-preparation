@@ -37,7 +37,7 @@ def is_unival_tree(root):
             return False
 
         for child in n.children:
-            if not _dfs(child)
+            if not _dfs(child):
                 return False
 
         return True

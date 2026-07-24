@@ -43,5 +43,5 @@ def _reconstruct_solution(n, cache):
 
 if __name__ == '__main__':
     graph = [17, 14, 5, 4, 82, 12, 1, 34, 1080, 222]
-    print recursive(graph)
-    print bottom_up(graph)
+    print(recursive(graph))
+    print(bottom_up(graph))

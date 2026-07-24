@@ -2,7 +2,7 @@ import random
 
 
 def main():
-    print shuffle(52)
+    print(shuffle(52))
 
 def shuffle(n):
     if n == 0:

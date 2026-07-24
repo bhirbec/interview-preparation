@@ -1,8 +1,8 @@
 
 def main():
     n = 134859
-    print count_twos(n)
-    print brut_force(n)
+    print(count_twos(n))
+    print(brut_force(n))
 
 def count_twos(n):
     digits = [int(d) for d in str(n)]
@@ -13,7 +13,7 @@ def count_twos(n):
         A[i] = A[i-1] * 10 + 10**(i-1)
 
     s = 0
-    for i in xrange(nb_digits):
+    for i in range(nb_digits):
         digit = digits[nb_digits - i - 1]
         if digit >= 2:
             base = 10 ** i

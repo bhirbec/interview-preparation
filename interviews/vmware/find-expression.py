@@ -19,7 +19,7 @@ def find_expr(arr, total):
         #     print(value)
 
         mid = int((i+j) / 2)
-        print(mid, i, j)
+        print((mid, i, j))
         for k in range(i, j):
             _f(i, k)
             _f(k, j)

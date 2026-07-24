@@ -30,8 +30,8 @@ def main():
 	]
 
 	n = len(prices) - 1
-	print rod_cutting_recursive(prices, n)
-	print rod_cutting_bottom_up(prices, n)
+	print(rod_cutting_recursive(prices, n))
+	print(rod_cutting_bottom_up(prices, n))
 
 def rod_cutting_recursive(prices, n):
 	cache = {}
@@ -46,7 +46,7 @@ def rod_cutting_recursive(prices, n):
 
 		profit = prices[n]
 
-		for i in xrange(1, n):
+		for i in range(1, n):
 			tmp = prices[i] + _rod_cutting(prices, n-i)
 			if tmp > profit:
 				profit = tmp
@@ -59,9 +59,9 @@ def rod_cutting_recursive(prices, n):
 def rod_cutting_bottom_up(prices, n):
 	profits = [0] * (n+1)
 
-	for i in xrange(1, n+1):
+	for i in range(1, n+1):
 		cut = None
-		for j in xrange(1, i+1):
+		for j in range(1, i+1):
 			tmp = prices[j] + profits[i-j]
 			if tmp > profits[i]:
 				profits[i] = tmp

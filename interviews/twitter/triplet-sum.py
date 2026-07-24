@@ -16,15 +16,15 @@ def main():
 	array = [2, 3, 1, -2, -1, 0, 2, -3, 0]
 	triplets = find_triplets(array)
 
-	for triplet in triplets.values():
-		print triplet
+	for triplet in list(triplets.values()):
+		print(triplet)
 
 def find_triplets(array, target_sum=0):
 	h = {}
 	n = len(array)
 
-	for i in xrange(n):
-		for j in xrange(i+1, n):
+	for i in range(n):
+		for j in range(i+1, n):
 			s = array[i] + array[j]
 			h.setdefault(s, []).append([i, j])
 

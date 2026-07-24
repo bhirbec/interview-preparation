@@ -32,6 +32,6 @@ def unique_char_bitvector(s):
 
     return True
 
-print unique_char("coucou")
-print unique_char_bitvector("qwertyuio")
+print(unique_char("coucou"))
+print(unique_char_bitvector("qwertyuio"))
 

@@ -7,16 +7,16 @@
 def main():
     s1 = 'HELLO'
     s2 = 'MELODY'
-    print(lcs_recursive(s1, s2))
-    print(lcs_bottom_up(s1, s2))
+    print((lcs_recursive(s1, s2)))
+    print((lcs_bottom_up(s1, s2)))
 
     s1 = 'ATGCACTGAACCTGCACGT'
     s2 = 'ACTGCGCAAACGCGTTGTACGGGG'
-    print(lcs_recursive(s1, s2))
-    print(lcs_bottom_up(s1, s2))
+    print((lcs_recursive(s1, s2)))
+    print((lcs_bottom_up(s1, s2)))
 
-    print(longuest_common_subseq1(s1, s2))
-    print(longuest_common_subseq2(s1, s2))
+    print((longuest_common_subseq1(s1, s2)))
+    print((longuest_common_subseq2(s1, s2)))
 
 
 def lcs_recursive(s1, s2):
