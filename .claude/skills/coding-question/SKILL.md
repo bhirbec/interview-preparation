@@ -113,7 +113,14 @@ identical.
      problem-description comment block and before the implementation (e.g.
      `import unittest`). Do not scatter imports lower down next to the tests.
    - **Implementation**: a single clearly-named function. Prefer integer/exact
-     arithmetic over floating point where it matters.
+     arithmetic over floating point where it matters. When the local source is
+     Go only (no Python implementation), do NOT re-derive the solution from
+     scratch — port the Go algorithm into idiomatic Python: keep the same
+     approach and complexity, but use Python data structures and naming
+     (`snake_case`, no exported-capital names), drop Go-isms like manual stacks
+     or `interface{}`, and let the function `return` its result rather than
+     print it. The copied `impl.go` and your `impl.py` should be two faithful
+     renderings of the same algorithm.
    - **Unit tests**: a `unittest.TestCase` covering the video's examples plus
      a thorough set of edge/boundary cases, ending with:
      ```python
