@@ -68,8 +68,17 @@ identical.
    - **Problem description** as a top-of-file comment block, in this order:
      - The problem title on line 1. Just the title — do not append the source
        (e.g. write `# Century From Year`, not `# Century From Year (CodeSignal)`).
-     - A **metadata** block with two fields:
+     - A **metadata** block with these fields:
        - `# Difficulty: <easy|medium|hard>`
+       - `# Source: <url>` — **only if the input carries a reference link**;
+         omit the field entirely when there is none. Preserve every genuine
+         reference URL from the original: in video mode that's the YouTube URL
+         you were given; in local-path mode it's any link in the source's
+         comments or README (e.g. a Coursera lecture, a YouTube explainer, a
+         GeeksforGeeks/LeetCode page). Keep them even though you strip the prose
+         narrative — a link is provenance, not flavor. Use one `# Source:` line
+         per URL when there are several. (This is the only place source URLs
+         belong — still keep them out of the title per the line above.)
        - `# Tags: #tag1 #tag2 ...` — hashtags describing the techniques, data
          structures, and topics the problem involves. There is no fixed list:
          choose whatever tags genuinely fit the content. The leading `#` makes
@@ -107,8 +116,10 @@ identical.
        value ranges, guarantees like distinctness). Do NOT copy the source's
        flavor narrative — strip cutesy backstories (mascots, character names,
        gift-giving framings) and state the underlying task in plain, precise
-       terms. Then give 2-4 concrete examples (include the tricky boundary
-       cases), and a one-line note on the approach.
+       terms. (Reference links are the exception: they are preserved in the
+       `# Source:` metadata above, not discarded with the narrative.) Then give
+       2-4 concrete examples (include the tricky boundary cases), and a one-line
+       note on the approach.
    - **Imports**: all imports go at the top of the file, immediately after the
      problem-description comment block and before the implementation (e.g.
      `import unittest`). Do not scatter imports lower down next to the tests.
