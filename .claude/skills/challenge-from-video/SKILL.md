@@ -33,7 +33,8 @@ problem description, an implementation, and passing unit tests.
 
 3. **Write `./challenges/<name>/impl.py`** with three parts, in this order:
    - **Problem description** as a top-of-file comment block, in this order:
-     - The problem title (and source, e.g. CodeSignal / LeetCode) on line 1.
+     - The problem title on line 1. Just the title — do not append the source
+       (e.g. write `# Century From Year`, not `# Century From Year (CodeSignal)`).
      - A **metadata** block with two fields:
        - `# Difficulty: <easy|medium|hard>`
        - `# Tags: #tag1 #tag2 ...` — one or more lowercase hashtags describing

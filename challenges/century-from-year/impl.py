@@ -1,4 +1,4 @@
-# Century From Year (CodeSignal)
+# Century From Year
 #
 # Difficulty: easy
 # Tags: #math #implementation
