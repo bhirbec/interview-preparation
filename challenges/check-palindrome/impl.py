@@ -18,6 +18,8 @@
 #
 # Approach: walk two pointers inward from both ends, comparing characters;
 # mismatch means not a palindrome. This is O(n) time and O(1) extra space.
+import unittest
+
 
 def check_palindrome(input_string):
   left, right = 0, len(input_string) - 1
@@ -27,9 +29,6 @@ def check_palindrome(input_string):
     left += 1
     right -= 1
   return True
-
-
-import unittest
 
 
 class TestCheckPalindrome(unittest.TestCase):
