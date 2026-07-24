@@ -22,12 +22,10 @@ import unittest
 
 
 def check_palindrome(input_string):
-  left, right = 0, len(input_string) - 1
-  while left < right:
-    if input_string[left] != input_string[right]:
+  n = len(input_string)
+  for i in range(n):
+    if input_string[i] != input_string[-(i+1)]:
       return False
-    left += 1
-    right -= 1
   return True
 
 
