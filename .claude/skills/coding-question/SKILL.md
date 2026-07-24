@@ -1,14 +1,14 @@
 ---
-name: challenge-from-video
-description: Turn a YouTube coding-challenge video into a new solved challenge under ./challenges. Use when the user provides a YouTube URL (e.g. a CodeSignal/LeetCode explainer) and wants the problem scaffolded with a description, implementation, and unit tests. Invoke with the video URL as the argument.
+name: coding-question
+description: Turn a YouTube coding-challenge video into a new solved coding question under ./coding-questions. Use when the user provides a YouTube URL (e.g. a CodeSignal/LeetCode explainer) and wants the problem scaffolded with a description, implementation, and unit tests. Invoke with the video URL as the argument.
 argument-hint: <youtube-url>
 ---
 
-# Challenge from video
+# Coding question
 
 Given a YouTube URL for a coding-challenge video, create a new self-contained
-challenge folder under `./challenges/` containing a single `impl.py` with the
-problem description, an implementation, and passing unit tests.
+coding-question folder under `./coding-questions/` containing a single `impl.py`
+with the problem description, an implementation, and passing unit tests.
 
 ## Steps
 
@@ -28,10 +28,10 @@ problem description, an implementation, and passing unit tests.
 
 2. **Pick a folder name.** Use a short, descriptive kebab-case name that matches
    the problem's actual name (e.g. `century-from-year`, not a paraphrase).
-   If a folder for the same problem already exists under `./challenges/`, tell
-   the user and ask before overwriting rather than silently clobbering it.
+   If a folder for the same problem already exists under `./coding-questions/`,
+   tell the user and ask before overwriting rather than silently clobbering it.
 
-3. **Write `./challenges/<name>/impl.py`** with three parts, in this order:
+3. **Write `./coding-questions/<name>/impl.py`** with three parts, in this order:
    - **Problem description** as a top-of-file comment block, in this order:
      - The problem title on line 1. Just the title — do not append the source
        (e.g. write `# Century From Year`, not `# Century From Year (CodeSignal)`).
@@ -40,15 +40,15 @@ problem description, an implementation, and passing unit tests.
        - `# Tags: #tag1 #tag2 ...` — hashtags describing the techniques, data
          structures, and topics the problem involves. There is no fixed list:
          choose whatever tags genuinely fit the content. The leading `#` makes
-         them greppable, e.g. `grep -rl '#hashtable' challenges/`.
+         them greppable, e.g. `grep -rl '#hashtable' coding-questions/`.
 
          **Reuse existing tags — don't invent near-duplicates.** Before picking
-         tags, list the ones already used across challenges and prefer an
+         tags, list the ones already used across coding questions and prefer an
          existing tag whenever it means the same thing (so we never end up with
          `#hashtable` vs `#hash-table` vs `#hashmap` for one concept):
 
          ```
-         grep -rhoE '#[a-z0-9-]+' challenges/ | sort | uniq -c | sort -rn
+         grep -rhoE '#[a-z0-9-]+' coding-questions/ | sort | uniq -c | sort -rn
          ```
 
          Only coin a new tag when nothing existing fits. Normalize every tag:
@@ -74,7 +74,7 @@ problem description, an implementation, and passing unit tests.
    (notably: 2-space Python indentation, and `snake_case` identifiers — rename
    camelCase names from the source problem, e.g. `inputString` → `input_string`).
 
-5. **Verify.** Run `python3 ./challenges/<name>/impl.py` and confirm the tests
+5. **Verify.** Run `python3 ./coding-questions/<name>/impl.py` and confirm the tests
    report `OK`. Fix until green.
 
 6. **Report** the folder created, the one-line problem summary, and the test
