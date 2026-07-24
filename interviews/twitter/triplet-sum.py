@@ -16,7 +16,7 @@ def main():
 	array = [2, 3, 1, -2, -1, 0, 2, -3, 0]
 	triplets = find_triplets(array)
 
-	for triplet in list(triplets.values()):
+	for triplet in triplets.values():
 		print(triplet)
 
 def find_triplets(array, target_sum=0):
