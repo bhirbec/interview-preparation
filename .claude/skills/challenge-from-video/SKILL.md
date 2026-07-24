@@ -37,11 +37,28 @@ problem description, an implementation, and passing unit tests.
        (e.g. write `# Century From Year`, not `# Century From Year (CodeSignal)`).
      - A **metadata** block with two fields:
        - `# Difficulty: <easy|medium|hard>`
-       - `# Tags: #tag1 #tag2 ...` — one or more lowercase hashtags describing
-         the techniques/topics (e.g. `#sorting`, `#hashtable`, `#math`,
-         `#two-pointers`, `#dynamic-programming`, `#string`, `#greedy`,
-         `#binary-search`, `#recursion`, `#implementation`). The leading `#`
-         makes tags greppable, e.g. `grep -rl '#hashtable' challenges/`.
+       - `# Tags: #tag1 #tag2 ...` — hashtags describing the techniques, data
+         structures, and topics the problem involves. There is no fixed list:
+         choose whatever tags genuinely fit the content. The leading `#` makes
+         them greppable, e.g. `grep -rl '#hashtable' challenges/`.
+
+         **Reuse existing tags — don't invent near-duplicates.** Before picking
+         tags, list the ones already used across challenges and prefer an
+         existing tag whenever it means the same thing (so we never end up with
+         `#hashtable` vs `#hash-table` vs `#hashmap` for one concept):
+
+         ```
+         grep -rhoE '#[a-z0-9-]+' challenges/ | sort | uniq -c | sort -rn
+         ```
+
+         Only coin a new tag when nothing existing fits. Normalize every tag:
+         - lowercase, kebab-case for multi-word (`#two-pointers`,
+           `#dynamic-programming`, `#binary-search`)
+         - name the technique/data-structure/topic (`#sorting`, `#hashtable`,
+           `#math`, `#greedy`, `#recursion`, `#string`) — these are examples,
+           not an allow-list
+         - do NOT tag the implementation language: every solution here is
+           Python, so `#python` adds no search value
      - A faithful statement of the problem, 2-4 concrete examples (include the
        tricky boundary cases), and a one-line note on the approach.
    - **Implementation**: a single clearly-named function. Prefer integer/exact
