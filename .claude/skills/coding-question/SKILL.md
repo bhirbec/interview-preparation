@@ -59,8 +59,15 @@ with the problem description, an implementation, and passing unit tests.
            not an allow-list
          - do NOT tag the implementation language: every solution here is
            Python, so `#python` adds no search value
-     - A faithful statement of the problem, 2-4 concrete examples (include the
-       tricky boundary cases), and a one-line note on the approach.
+     - A faithful statement of the problem, written the way a real interview
+       question or a clean LeetCode-style prompt would read: address the reader
+       directly ("You are given...", "Return..."), describe the input and the
+       required output precisely, and list the constraints (input size bounds,
+       value ranges, guarantees like distinctness). Do NOT copy the source's
+       flavor narrative — strip cutesy backstories (mascots, character names,
+       gift-giving framings) and state the underlying task in plain, precise
+       terms. Then give 2-4 concrete examples (include the tricky boundary
+       cases), and a one-line note on the approach.
    - **Imports**: all imports go at the top of the file, immediately after the
      problem-description comment block and before the implementation (e.g.
      `import unittest`). Do not scatter imports lower down next to the tests.
