@@ -7,8 +7,13 @@ argument-hint: <youtube-url>
 # Coding question
 
 Given a YouTube URL for a coding-challenge video, create a new self-contained
-coding-question folder under `./coding-questions/` containing a single `impl.py`
-with the problem description, an implementation, and passing unit tests.
+coding-question folder under `./coding-questions/` containing two files:
+
+- `impl.py` — the problem description, a working implementation, and passing
+  unit tests.
+- `impl_empty.py` — a practice copy for the user to solve: byte-for-byte
+  identical to `impl.py` except the function body is replaced with a stub, so
+  the user can fill it in themselves.
 
 ## Steps
 
@@ -80,18 +85,68 @@ with the problem description, an implementation, and passing unit tests.
    - **Implementation**: a single clearly-named function. Prefer integer/exact
      arithmetic over floating point where it matters.
    - **Unit tests**: a `unittest.TestCase` covering the video's examples plus
-     edge/boundary cases, ending with:
+     a thorough set of edge/boundary cases, ending with:
      ```python
      if __name__ == '__main__':
          unittest.main()
      ```
 
-4. **Match the local style.** Follow the repo conventions in `CLAUDE.md`
+     Aim for genuinely thorough coverage — the video's examples are a starting
+     point, not the finish line. Derive edge cases from the problem's own
+     constraints and structure, not just from the examples shown. Before
+     finalizing the tests, walk this checklist and add a test for each item
+     that applies to this problem (skip the ones that don't — e.g. don't test
+     an empty array when the constraints guarantee `len >= 1`):
+     - **Smallest valid input**: single element, single-char string, `1x1`
+       matrix, or whatever the lower size bound allows.
+     - **Empty input**, but only if the constraints actually permit it.
+     - **Boundary values**: the minimum and maximum allowed values, and inputs
+       at the upper size bound where behavior could differ.
+     - **Uniformity**: all elements identical / all duplicates; all the same
+       length; a single distinct value.
+     - **Special numeric cases where relevant**: zero, negatives, the number
+       that trips off-by-one errors, values that would overflow float precision.
+     - **Ordering**: already sorted, reverse sorted, and unsorted inputs when
+       order matters to the logic.
+     - **Position of the "interesting" element**: at the start, in the middle,
+       and at the end of the input (a bug at index 0 or the last index is
+       common and easy to miss).
+     - **Every branch of the intended solution**: pick inputs so that each
+       distinct code path / rule in the problem is exercised at least once,
+       including the case where a rule does NOT fire.
+     - **The problem's designed trap**: the specific boundary the question is
+       built to catch (e.g. a `0` that blocks the rest of a column, ties for a
+       maximum, wrap-around) — test it head-on.
+
+     Give each test a descriptive `snake_case` name stating the scenario it
+     covers, and make each test target a distinct scenario rather than
+     re-checking the same path with different numbers.
+
+4. **Write `./coding-questions/<name>/impl_empty.py`.** This is the user's
+   practice copy. It must be identical to `impl.py` in every respect — same
+   problem-description comment block, same imports, same function name and
+   signature, and the exact same `unittest.TestCase` (same test names, same
+   assertions) — with only ONE difference: the function body is replaced by a
+   stub so the tests fail until the user solves it. Use:
+   ```python
+   def some_function(args):
+     # TODO: implement
+     raise NotImplementedError
+   ```
+   Do not weaken or remove any tests in `impl_empty.py`; the whole point is that
+   the user's future solution is judged against the same tests that `impl.py`
+   passes. If you later refine the tests in `impl.py`, mirror the change into
+   `impl_empty.py` so the two stay in sync.
+
+5. **Match the local style.** Follow the repo conventions in `CLAUDE.md`
    (notably: 2-space Python indentation, and `snake_case` identifiers — rename
    camelCase names from the source problem, e.g. `inputString` → `input_string`).
 
-5. **Verify.** Run `python3 ./coding-questions/<name>/impl.py` and confirm the tests
-   report `OK`. Fix until green.
+6. **Verify.** Run `python3 ./coding-questions/<name>/impl.py` and confirm the
+   tests report `OK`; fix until green. Then run
+   `python3 ./coding-questions/<name>/impl_empty.py` and confirm it instead
+   FAILS (every test erroring with `NotImplementedError`) — this proves the
+   tests actually exercise the function and that the practice stub is empty.
 
-6. **Report** the folder created, the one-line problem summary, and the test
-   result. Do not commit or open a PR unless the user asks.
+7. **Report** the folder created, the one-line problem summary, and the test
+   results for both files. Do not commit or open a PR unless the user asks.
