@@ -71,7 +71,8 @@ problem description, an implementation, and passing unit tests.
      ```
 
 4. **Match the local style.** Follow the repo conventions in `CLAUDE.md`
-   (notably: 2-space Python indentation).
+   (notably: 2-space Python indentation, and `snake_case` identifiers — rename
+   camelCase names from the source problem, e.g. `inputString` → `input_string`).
 
 5. **Verify.** Run `python3 ./challenges/<name>/impl.py` and confirm the tests
    report `OK`. Fix until green.
