@@ -32,7 +32,7 @@
 from queue import Queue
 
 
-def search_word(mat, word)
+def search_word(mat, word):
     x, y = 2, 0
     i = 0
     m = len(word)

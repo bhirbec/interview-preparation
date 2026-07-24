@@ -12,7 +12,7 @@ def main():
     ]
 
     C = matrix_mult(A, B)
-    print '\n'.join(str(r) for r in  C) + '\n'
+    print('\n'.join(str(r) for r in  C) + '\n')
 
 class UncompatibleSizeError(Exception):
     pass
@@ -27,11 +27,11 @@ def matrix_mult(A, B):
     raise UncompatibleSizeError("Matrices must be the compatible in size to be multiplied")
 
 def _mult(A, B, r, c, n):
-    output = [ [0 for j in xrange(c)] for i in xrange(r) ]
+    output = [ [0 for j in range(c)] for i in range(r) ]
 
-    for i in xrange(r):
-        for j in xrange(c):
-            output[i][j] = sum(A[i][k] * B[k][j] for k in xrange(n))
+    for i in range(r):
+        for j in range(c):
+            output[i][j] = sum(A[i][k] * B[k][j] for k in range(n))
 
     return output
 

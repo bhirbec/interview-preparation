@@ -8,11 +8,11 @@
 
 def main():
     n = 5
-    origin = range(1, n+1)
+    origin = list(range(1, n+1))
     buff = []
     dest = []
     move_disks(n, origin, buff, dest)
-    print dest
+    print(dest)
 
 def move_disks(n, origin, buff, dest):
     if n == 1:

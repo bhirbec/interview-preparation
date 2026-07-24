@@ -20,7 +20,7 @@ def right_problem(arr, start, end, m):
 
 def compute_water_level(arr, start, end, m):
     s = 0
-    for i in xrange(start, end+1):
+    for i in range(start, end+1):
         s += m - arr[i]
     return s
 

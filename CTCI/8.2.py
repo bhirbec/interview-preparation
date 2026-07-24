@@ -9,7 +9,7 @@ def main():
         [0, 0, 1, 0, 1, 1],
         [0, 0, 1, 0, 0, 0],
     ]
-    print find_path(matrix)
+    print(find_path(matrix))
 
 def find_path(matrix):
     '''

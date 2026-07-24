@@ -31,7 +31,7 @@ def is_permutation(s1, s2):
             return False
         chars[c] -= 1
 
-    return all(v == 0 for v in chars.values())
+    return all(v == 0 for v in list(chars.values()))
 
 
 class TestPerm(unittest.TestCase):

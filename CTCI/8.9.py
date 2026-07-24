@@ -5,7 +5,7 @@ def print_pairs(n):
 
     def f(n, pos=0, open=0, closed=0):
         if pos == depth:
-            print ''.join(buff)
+            print(''.join(buff))
             return
 
         if open < n:

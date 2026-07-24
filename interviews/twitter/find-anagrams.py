@@ -6,7 +6,7 @@
 
 def main():
 	words = ["tea", "ate", "eat", "apple", "java", "vaja", "cut", "utc"]
-	print find_anagrams(words)
+	print(find_anagrams(words))
 
 def find_anagrams(words):
 	counters = {}

@@ -12,8 +12,8 @@ def main():
     a2 = [1, 4,  7,  9, 12, 23]
     a3 = [5, 6, 11, 14, 17, 22]
     a4 = [3, 4,  9, 15, 18, 32]
-    print merge_naive([a1, a2, a3, a4], 6)
-    print merge_with_heap([a1, a2, a3, a4], 6)
+    print(merge_naive([a1, a2, a3, a4], 6))
+    print(merge_with_heap([a1, a2, a3, a4], 6))
 
 
 def merge_with_heap(arrays, n):
@@ -26,11 +26,11 @@ def merge_with_heap(arrays, n):
     h = []
     merged = [0]*size
 
-    for i in xrange(m):
+    for i in range(m):
         val = arrays[i][0]
         heapq.heappush(h, (val, i, 0))
 
-    for k in xrange(size):
+    for k in range(size):
         val, i, j = heapq.heappop(h)
         merged[k] = val
 
@@ -65,7 +65,7 @@ def merge_naive(arrays, n):
 
         return min_val, i, j
 
-    for k in xrange(size):
+    for k in range(size):
         merged[k], i, j = _find_min()
         if j < n-1:
             mins[i] = j+1

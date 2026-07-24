@@ -2,7 +2,7 @@
 def main():
     projects = 'a', 'b', 'c', 'd', 'e', 'f'
     dependencies = ('a', 'd'), ('f', 'b'), ('b', 'd'), ('f', 'a'), ('d', 'c')
-    print build_order(projects, dependencies)
+    print(build_order(projects, dependencies))
 
 def build_order(projects, dependencies):
     adjacency_list = _build_adjacency_list(projects, dependencies)

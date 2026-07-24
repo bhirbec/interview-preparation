@@ -42,9 +42,9 @@ def max_words(text, nb_rows, nb_cols):
             r += 1
 
     for row in rows:
-        print row
+        print(row)
 
-    print k // n
+    print(k // n)
 
 
 main()

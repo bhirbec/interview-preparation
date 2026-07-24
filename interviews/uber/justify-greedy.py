@@ -13,7 +13,7 @@ def main():
 
     text = text[1:].replace('\n', ' ').replace('    ', '')
     for line in justify(text, 60):
-        print line
+        print(line)
 
 def justify(text, buff_size):
     words = text.split(' ')

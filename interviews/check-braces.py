@@ -22,4 +22,4 @@ def valid_braces(s):
 
 	return len(stack) == 0
 
-print valid_braces("{[]{}[{{{}}}]{{}}}")
+print(valid_braces("{[]{}[{{{}}}]{{}}}"))

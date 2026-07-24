@@ -72,4 +72,4 @@ root = {
     },
 }
 
-print is_balanced(root)
+print(is_balanced(root))

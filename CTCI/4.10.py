@@ -51,7 +51,7 @@ def main():
         )
     )
 
-    print is_subtree(n1, n2)
+    print(is_subtree(n1, n2))
 
 def is_subtree(n1, n2):
     d2 = get_depth(n2)

@@ -22,4 +22,4 @@ def combine(chars, pos, n, output):
         combine(chars, pos+1, n, output)
 
 combinations = find_combinations('10??1??01???')
-print '\n'.join(combinations)
+print('\n'.join(combinations))

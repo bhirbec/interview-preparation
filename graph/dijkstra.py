@@ -14,7 +14,7 @@ def shortest_path(V, E, src, dest):
       path = reconstruct_path(src, dest, E, distances)
       return path, dist_u
 
-    for v, w in E.get(u, {}).items():
+    for v, w in list(E.get(u, {}).items()):
       dist_v = dist_u + w
       if v not in distances:
         distances[v] = dist_v
@@ -68,7 +68,7 @@ def main():
     "e": {"f": 9}
   }
 
-  print(shortest_path(V, E, "a", "e"))
+  print((shortest_path(V, E, "a", "e")))
 
 
 main()

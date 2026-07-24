@@ -84,20 +84,20 @@ class Node(object):
 
 def main():
     lru = LRU(load=lambda x: x**1, size=5)
-    print lru.get(1)
-    print lru.get(2)
-    print lru.get(3)
-    print '*', lru._list
+    print(lru.get(1))
+    print(lru.get(2))
+    print(lru.get(3))
+    print('*', lru._list)
 
-    print lru.get(1)
-    print '*', lru._list
+    print(lru.get(1))
+    print('*', lru._list)
 
-    print lru.get(4)
-    print lru.get(5)
-    print '*', lru._list
+    print(lru.get(4))
+    print(lru.get(5))
+    print('*', lru._list)
 
-    print lru.get(1)
-    print lru.get(6)
-    print '*', lru._list
+    print(lru.get(1))
+    print(lru.get(6))
+    print('*', lru._list)
 
 main()

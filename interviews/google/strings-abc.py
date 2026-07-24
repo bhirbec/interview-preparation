@@ -20,7 +20,7 @@ def find_strings(n):
             return
 
         if p == n:
-            print ''.join(buf)
+            print(''.join(buf))
             return
 
         buf[p] = 'a'

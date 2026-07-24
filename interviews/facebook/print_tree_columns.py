@@ -24,7 +24,7 @@
 # Time: O(n)
 # Space: O(n)
 
-from Queue import Queue
+from queue import Queue
 
 tree = {
     'value': 1,
@@ -71,9 +71,9 @@ def print_tree_columns(n):
         column = columns.setdefault(col, [])
         column.append(n['value'])
 
-    for i in xrange(min_col, max_col+1):
+    for i in range(min_col, max_col+1):
         for v in columns[i]:
-            print v
+            print(v)
 
 if __name__ == '__main__':
     print_tree_columns(tree)

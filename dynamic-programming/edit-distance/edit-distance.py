@@ -30,8 +30,8 @@
 # - time / subproblem = O(1)
 
 def main():
-    print distance('intention', 'execution')
-    print distance_bottom_up('intention', 'execution')
+    print(distance('intention', 'execution'))
+    print(distance_bottom_up('intention', 'execution'))
 
 def distance(a, b):
     n, m = len(a), len(b)

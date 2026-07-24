@@ -6,13 +6,13 @@ def countPalindromes(s):
 
 def iter_substr(s):
     n = len(s)
-    for i in xrange(0, n):
-        for j in xrange(i+1, n+1):
+    for i in range(0, n):
+        for j in range(i+1, n+1):
             yield s[i:j]
 
 def is_palindrom(s):
     n = len(s)
-    for i in xrange(int(n / 2)):
+    for i in range(int(n / 2)):
         if s[i] != s[n- i - 1]:
             return False
     return True
@@ -27,13 +27,13 @@ def countPalindromes(s):
     mid = int(n / 2)
     counter = 0
 
-    for i in xrange(n):
-        for diff in xrange(mid+1):
+    for i in range(n):
+        for diff in range(mid+1):
             before = i - diff
             after = i + diff
             if before < 0 or after > n - 1:
                 break
-            print s[before:after+1]
+            print(s[before:after+1])
             if s[before] == s[after]:
                 counter += 1
             else:
@@ -43,4 +43,4 @@ def countPalindromes(s):
 
 
 # print is_palindrom('a')
-print countPalindromes('abccba')
+print(countPalindromes('abccba'))

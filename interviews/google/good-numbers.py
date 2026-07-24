@@ -5,12 +5,12 @@
 
 # Time: O(n^2) Space: O(n)
 def good_numbers(n):
-    counts = [0 for _ in xrange(n+1)]
+    counts = [0 for _ in range(n+1)]
     n_sqrt = int(n**0.5)
 
-    for x in xrange(n_sqrt+1):
+    for x in range(n_sqrt+1):
         x_squared = x**2
-        for y in xrange(x, n_sqrt+1):
+        for y in range(x, n_sqrt+1):
             s = x_squared + y**2
             # TODO: can we remove this if statement?
             if s > n:
@@ -19,6 +19,6 @@ def good_numbers(n):
 
     for i, c in enumerate(counts):
         if c > 1:
-            print i
+            print(i)
 
 good_numbers(2900)

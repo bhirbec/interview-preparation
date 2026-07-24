@@ -28,7 +28,7 @@ def justify(words, page_width=40):
 		for j in range(i+1, n+1):
 			cost_dp_j, pointer = _dp(j)
 			cost = _cost(i, j) + cost_dp_j
-			if cost < min_cost or min_cost is None:
+			if min_cost is None or cost < min_cost:
 				min_cost = cost
 				parent_pointer = (j, pointer)
 
@@ -36,9 +36,9 @@ def justify(words, page_width=40):
 		return memo[i]
 
 	def _cost(i, j):
-		line_width = sum(len(words[k]) for k in xrange(i, j)) + (j - i - 1)
+		line_width = sum(len(words[k]) for k in range(i, j)) + (j - i - 1)
 		if line_width > page_width:
-			return sys.maxint
+			return sys.maxsize
 		else:
 			return (page_width - line_width)**3
 
@@ -47,7 +47,7 @@ def justify(words, page_width=40):
 	i = 0
 	while seq is not None:
 		j, seq = seq[0], seq[1]
-		print ' '.join(words[i:j])
+		print(' '.join(words[i:j]))
 		i = j
 
 if __name__ == '__main__':

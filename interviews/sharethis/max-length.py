@@ -18,6 +18,6 @@ def  maxLength(a, k):
 
 	return 0
 
-print maxLength([3, 1, 2, 3, 4], 3)
+print(maxLength([3, 1, 2, 3, 4], 3))
 
 

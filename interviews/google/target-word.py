@@ -77,8 +77,8 @@ def find_path2(w1, w2):
     path[i] = w
 
     if w1 == w2:
-      print('*', path, '*')
-      print(w1, w2)
+      print(('*', path, '*'))
+      print((w1, w2))
       return
 
     if w1[i] != w2[i]:
@@ -100,6 +100,6 @@ def find_path2(w1, w2):
 
 
 
-print(find_path('cat', 'dog'))
+print((find_path('cat', 'dog')))
 # input: cat -> dog
 # output: cat->dat -> dot -> dog

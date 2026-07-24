@@ -9,7 +9,7 @@ def main():
 
     n = partition(n, 10)
     while n:
-        print n.value
+        print(n.value)
         n = n.next_node
 
 def partition(n, k):

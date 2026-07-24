@@ -41,7 +41,7 @@ def main():
         )
     )
 
-    print is_bst(n)
+    print(is_bst(n))
 
 def is_bst(n):
     def _f(n, min_val, max_val):

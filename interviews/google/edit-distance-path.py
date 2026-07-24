@@ -71,6 +71,6 @@ def _compute_deletion_cost(a, b, i, j, max_cost):
 
 def print_mat(mat):
     for r in mat:
-        print(' '.join('%2s' % (v or 0) for v in r))
+        print((' '.join('%2s' % (v or 0) for v in r)))
 
 main()

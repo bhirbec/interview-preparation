@@ -1,7 +1,7 @@
 
 def main():
 	for p in place_queens(16):
-		print p
+		print(p)
 
 def place_queens(n):
 	queens = [0] * n
@@ -12,14 +12,14 @@ def _place(n, r, queens):
 		yield list(queens)
 		return
 
-	for c in xrange(n):
+	for c in range(n):
 		if is_valid(r, c, queens):
 			queens[r] = c
 			for p in _place(n, r+1, queens):
 				yield p
 
 def is_valid(r, c, queens):
-	for row in xrange(r):
+	for row in range(r):
 		col_delta = abs(c - queens[row])
 		if col_delta == 0:
 			return False

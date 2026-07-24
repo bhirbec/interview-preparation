@@ -16,7 +16,7 @@ def insert_bits(n, m, i, j):
 	return n | m
 
 def print_bin(v):
-	print v, '{0:08b}'.format(v)
+	print(v, '{0:08b}'.format(v))
 
 if __name__ == '__main__':
 	main()

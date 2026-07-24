@@ -24,7 +24,7 @@ def main():
 		for key in iter_words_window(sentence):
 			chuncks[key] = True
 
-	print chuncks
+	print(chuncks)
 
 def iter_words_window(s):
 	words = s.split(" ")

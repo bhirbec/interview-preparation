@@ -21,7 +21,7 @@ def _make_bst(array, i, j):
     if n < 0:
         return None
 
-    mid = i + n / 2
+    mid = i + n // 2
     left = _make_bst(array, i, mid-1)
     right = _make_bst(array, mid+1, j)
     return Node(left, right, array[mid])
@@ -31,7 +31,7 @@ def in_order_traversal(n):
         return
 
     in_order_traversal(n.left)
-    print n.value
+    print(n.value)
     in_order_traversal(n.right)
 
 main()

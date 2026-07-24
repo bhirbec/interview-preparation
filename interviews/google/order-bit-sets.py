@@ -17,7 +17,7 @@ from itertools import product
 def generate_bits(k):
     for i in range(1, k+1):
         for bits in _generate_combinations(i, k):
-            print bits
+            print(bits)
 
 def _generate_combinations(n, size):
     def _f(bits, i, start, end):
@@ -25,7 +25,7 @@ def _generate_combinations(n, size):
             yield format_str.format(bits)
             return
 
-        for p in xrange(start, end+1):
+        for p in range(start, end+1):
             mask = 1 << p
             bits |= mask
             for v in _f(bits, i+1, p+1, end+1):
@@ -79,9 +79,9 @@ def generate_bits_2(k):
         # now let's work with what was left on the left
         original_group = n & (new_group_head - 1)
         # remove group old head - it has migrated one bit left
-        new_group = original_group ^ (new_group_head / 2)
+        new_group = original_group ^ (new_group_head // 2)
         # move the tail to the beginning
-        new_group /= lowest_set_bit
+        new_group //= lowest_set_bit
 
         # reassemble result
         result = n & ~original_group
@@ -94,7 +94,7 @@ def generate_bits_2(k):
 
     yield '0' * k
     mask = 1 << k
-    for num_bits in xrange(1, k + 1):
+    for num_bits in range(1, k + 1):
         n = (1 << num_bits) - 1
         while n < mask:
             yield bin(n)[2:].rjust(k, '0')
@@ -123,7 +123,7 @@ def generate_bits_3(k):
         for _c, p in _combinations(vector, pos+1, k, c+1):
             yield _c, p
 
-    store = list( [] for i in xrange(k+1) )
+    store = list( [] for i in range(k+1) )
     for c, p in _combinations(vector, 0, k, 0):
         store[c].append(p)
 

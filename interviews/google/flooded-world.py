@@ -52,7 +52,7 @@ def main():
         [2,   3,   3,   9,   2],
         [9,   9,   9,   9,   1],
     ]
-    print find_first_day(matrix)
+    print(find_first_day(matrix))
 
 
 def find_first_day(matrix):

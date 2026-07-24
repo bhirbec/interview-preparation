@@ -14,7 +14,7 @@ def main():
     array = [-1, 0, 1, 2, -1, -4]
     triplets = three_sum(array, 0)
     for t in triplets:
-        print t
+        print(t)
 
 def three_sum(array, sum):
     array.sort()
@@ -28,8 +28,8 @@ def three_sum(array, sum):
     triplets = set([])
     n = len(array)
 
-    for i in xrange(n-3):
-        for j in xrange(i+1, n-2):
+    for i in range(n-3):
+        for j in range(i+1, n-2):
             s = array[i] + array[j]
             reminder = sum - s
             indexes = positions.get(reminder, [])

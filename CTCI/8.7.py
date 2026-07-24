@@ -8,7 +8,7 @@ def perms(chars):
             yield ''.join(buff)
             return
 
-        for j in xrange(n):
+        for j in range(n):
             if buff[j] == '':
                 buff[j] = chars[i]
                 for p in _f(i+1):
@@ -19,6 +19,6 @@ def perms(chars):
 
 def main():
     for p in perms('abcde'):
-        print p
+        print(p)
 
 main()

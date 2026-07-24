@@ -1,10 +1,10 @@
 
 def main():
     array = [-1, 1, 3, 5, 7]
-    print magix_index_distinct_array(array)
+    print(magix_index_distinct_array(array))
 
     array = [-1, 0, 3, 5, 7]
-    print magix_index_distinct_array(array)
+    print(magix_index_distinct_array(array))
 
 def magix_index_distinct_array(array):
     '''

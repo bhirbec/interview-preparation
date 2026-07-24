@@ -31,11 +31,11 @@ def count_eval(expr, result):
 
 def split(expr):
     n = len(expr)
-    for i in xrange(1, n, 2):
+    for i in range(1, n, 2):
         yield expr[0:i], expr[i], expr[i+1:]
 
 expr = '1^0|0|1'
-print count_eval(expr, 0)
+print(count_eval(expr, 0))
 
 expr = '0&0&0&1^1|0'
-print count_eval(expr, 1)
+print(count_eval(expr, 1))
