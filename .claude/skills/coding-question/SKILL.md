@@ -31,7 +31,7 @@ with the problem description, an implementation, and passing unit tests.
    If a folder for the same problem already exists under `./coding-questions/`,
    tell the user and ask before overwriting rather than silently clobbering it.
 
-3. **Write `./coding-questions/<name>/impl.py`** with three parts, in this order:
+3. **Write `./coding-questions/<name>/impl.py`** with these parts, in this order:
    - **Problem description** as a top-of-file comment block, in this order:
      - The problem title on line 1. Just the title — do not append the source
        (e.g. write `# Century From Year`, not `# Century From Year (CodeSignal)`).
@@ -61,6 +61,9 @@ with the problem description, an implementation, and passing unit tests.
            Python, so `#python` adds no search value
      - A faithful statement of the problem, 2-4 concrete examples (include the
        tricky boundary cases), and a one-line note on the approach.
+   - **Imports**: all imports go at the top of the file, immediately after the
+     problem-description comment block and before the implementation (e.g.
+     `import unittest`). Do not scatter imports lower down next to the tests.
    - **Implementation**: a single clearly-named function. Prefer integer/exact
      arithmetic over floating point where it matters.
    - **Unit tests**: a `unittest.TestCase` covering the video's examples plus
