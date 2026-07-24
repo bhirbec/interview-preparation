@@ -69,7 +69,7 @@ def biggest_island(grid):
           if 0 <= next_i < n and 0 <= next_j < m:
             adjacent_value = grid[next_i][next_j]
 
-            if adjacent_value == 'L' or (i, j) not in visited:
+            if adjacent_value == 'L' and (next_i, next_j) not in visited:
               stack.append((next_i, next_j))
 
       if size > max_size:
