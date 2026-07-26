@@ -1,7 +1,7 @@
 # Binary Wildcard Combinations
 #
 # Difficulty: easy
-# Tags: #recursion #backtracking #string
+# Tags: #recursion #backtracking #string #google-interview
 # Source: https://www.careercup.com/question?id=20308668
 #
 # You are given a string `s` consisting only of the characters '0', '1', and
@@ -52,6 +52,30 @@ def binary_wildcard_combinations(s):
 
   backtrack(0)
   return results
+
+
+def binary_wildcard_combinations_1(s):
+  n = len(s)
+  output = [''] * n
+  outputs = []
+
+  def traverse(pos):
+    if pos == n:
+      outputs.append(''.join(output))
+      return
+
+    if s[pos] == '?':
+      output[pos] = '0'
+      traverse(pos + 1)
+
+      output[pos] = '1'
+      traverse(pos + 1)
+    else:
+      output[pos] = s[pos]
+      traverse(pos + 1)
+
+  traverse(0)
+  return outputs
 
 
 class TestBinaryWildcardCombinations(unittest.TestCase):
