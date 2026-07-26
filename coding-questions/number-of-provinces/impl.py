@@ -42,24 +42,22 @@ import unittest
 
 def number_of_provinces(matrix):
   n = len(matrix)
-  visited = set()
+  visited = [False] * n
   groups = 0
 
   for start in range(n):
-    if start in visited:
+    if visited[start]:
       continue
-
     groups += 1
     stack = [start]
-    visited.add(start)
-
+    visited[start] = True
     while stack:
       node = stack.pop()
-      for other in range(n):
-        if matrix[node][other] == '1' and other not in visited:
-          visited.add(other)
-          stack.append(other)
-
+      row = matrix[node]
+      for nxt in range(n):
+        if row[nxt] == '1' and not visited[nxt]:
+          visited[nxt] = True
+          stack.append(nxt)
   return groups
 
 
