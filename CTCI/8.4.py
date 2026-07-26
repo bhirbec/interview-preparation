@@ -1,17 +1,19 @@
 
 def subsets(S):
-	n = len(S)
-	buf = [''] * n
-	def _f(i, d):
-		if d > n:
-			return
+  n = len(S)
+  buf = [''] * n
 
-		print(''.join(buf[:d]))
+  def _f(i, d):
+    if d > n:
+      return
 
-		for j in range(i, n):
-			buf[d] = S[j]
-			_f(j + 1, d + 1)
+    print(''.join(buf[:d]))
 
-	_f(0, 0)
+    for j in range(i, n):
+      buf[d] = S[j]
+      _f(j + 1, d + 1)
+
+  _f(0, 0)
+
 
 subsets('abc')

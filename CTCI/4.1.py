@@ -1,36 +1,39 @@
 from queue import Queue
 
-def main():
-    graph = {
-        1: [2, 3],
-        2: [4, 3],
-        3: [],
-        4: [1, 5],
-        5: [2],
-        6: [5]
-    }
 
-    print(exists_path(graph, 1, 5))
+def main():
+  graph = {
+      1: [2, 3],
+      2: [4, 3],
+      3: [],
+      4: [1, 5],
+      5: [2],
+      6: [5]
+  }
+
+  print(exists_path(graph, 1, 5))
+
 
 def exists_path(graph, origin, dest):
-    q = Queue()
-    q.put(origin)
-    visited = {}
+  q = Queue()
+  q.put(origin)
+  visited = {}
 
-    while not q.empty():
-        n = q.get()
-        if n in visited:
-            continue
+  while not q.empty():
+    n = q.get()
+    if n in visited:
+      continue
 
-        if n == dest:
-            return True
+    if n == dest:
+      return True
 
-        for ni in graph[n]:
-            q.put(ni)
+    for ni in graph[n]:
+      q.put(ni)
 
-        visited[n] = True
+    visited[n] = True
 
-    return False
+  return False
+
 
 if __name__ == '__main__':
-    main()
+  main()
