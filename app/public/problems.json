@@ -1,0 +1,172 @@
+[
+  {
+    "slug": "adjacent-elements-product",
+    "title": "Adjacent Elements Product",
+    "difficulty": "easy",
+    "tags": [
+      "array"
+    ],
+    "sources": [],
+    "description": "Given an array of integers, find the pair of adjacent elements that has the\nlargest product and return that product.\n\nThe array has at least 2 elements. Elements may be negative, so the largest\nproduct can come from two negatives (e.g. -6 * -1 = 6) rather than the two\nlargest positives.\n\nExamples:\n  [3, 6, -2, -5, 7, 3]  -> 21   (7 * 3)\n  [5, 1, 2, 3, 1, 40]   -> 40    (1 * 40)\n  [-1, -2]              -> 2     (-1 * -2)\n  [9, 5, 10, 2, 24, -1, -48]  -> 50  (5 * 10)\n  [1, 0, 1, 0, 1000]   -> 0     (best adjacent pair still multiplies to 0)\n\nApproach: scan each adjacent pair once, tracking the running maximum product.",
+    "primaryFunction": "adjacent_elements_product",
+    "starter": "def adjacent_elements_product(arr):\n  # TODO: implement\n  pass\n",
+    "solution": "def adjacent_elements_product(arr):\n  max_product = None\n  for i in range(1, len((arr))):\n    product = arr[i-1] * arr[i]\n    if max_product is None or product > max_product:\n      max_product = product\n\n  return max_product\n",
+    "tests": "class TestAdjacentElementsProduct(unittest.TestCase):\n  def test_mixed_signs(self):\n    self.assertEqual(adjacent_elements_product([3, 6, -2, -5, 7, 3]), 21)\n\n  def test_all_positive(self):\n    self.assertEqual(adjacent_elements_product([5, 1, 2, 3, 1, 40]), 40)\n\n  def test_two_negatives(self):\n    self.assertEqual(adjacent_elements_product([-1, -2]), 2)\n\n  def test_negative_tail(self):\n    self.assertEqual(adjacent_elements_product([9, 5, 10, 2, 24, -1, -48]), 50)\n\n  def test_zeros(self):\n    self.assertEqual(adjacent_elements_product([1, 0, 1, 0, 1000]), 0)\n\n  def test_minimum_length(self):\n    self.assertEqual(adjacent_elements_product([4, 7]), 28)\n\n  def test_all_negative(self):\n    self.assertEqual(adjacent_elements_product([-6, -1, -3, -4]), 12)\n\n  def test_best_is_first_pair(self):\n    self.assertEqual(adjacent_elements_product([100, 100, 1, 2]), 10000)\n"
+  },
+  {
+    "slug": "all-longest-strings",
+    "title": "All Longest Strings",
+    "difficulty": "easy",
+    "tags": [
+      "array",
+      "string"
+    ],
+    "sources": [],
+    "description": "You are given an array of strings `input_array`. Return an array containing all\nof its longest strings \u2014 every string whose length equals the maximum string\nlength in the array \u2014 keeping their original relative order.\n\nConstraints:\n  - 1 <= len(input_array) <= 10\n  - 1 <= len(input_array[i]) <= 10\n  - the array contains at least one string\n\nExamples:\n  [\"aba\", \"aa\", \"ad\", \"vcd\", \"aba\"]  -> [\"aba\", \"vcd\", \"aba\"]\n    (max length is 3; \"aba\", \"vcd\", \"aba\" all have length 3, in order)\n\n  [\"abc\", \"eeee\", \"abcd\", \"dcd\"]     -> [\"eeee\", \"abcd\"]\n    (max length is 4)\n\n  [\"a\", \"abc\", \"cba\"]                -> [\"abc\", \"cba\"]\n\n  [\"enn\", \"b\"]                       -> [\"enn\"]\n\nApproach: find the maximum length in one pass, then collect all strings that\nmatch it in a second pass, preserving order.",
+    "primaryFunction": "all_longest_strings",
+    "starter": "def all_longest_strings(input_array):\n  # TODO: implement\n  pass\n",
+    "solution": "def all_longest_strings(input_array):\n  max_len = max(len(s) for s in input_array)\n  return [s for s in input_array if len(s) == max_len]\n\n\ndef all_longest_strings_1(input_array):\n  current_max = len(input_array[0])\n  output = [input_array[0]]\n\n  for item in input_array[1:]:\n    candidate_max = len(item)\n    if candidate_max > current_max:\n      current_max = candidate_max\n      output = [item]\n    elif candidate_max == current_max:\n      output.append(item)\n\n  return output\n",
+    "tests": "class TestAllLongestStrings(unittest.TestCase):\n  def test_example_one(self):\n    self.assertEqual(\n        all_longest_strings([\"aba\", \"aa\", \"ad\", \"vcd\", \"aba\"]),\n        [\"aba\", \"vcd\", \"aba\"],\n    )\n\n  def test_example_two(self):\n    self.assertEqual(\n        all_longest_strings([\"abc\", \"eeee\", \"abcd\", \"dcd\"]),\n        [\"eeee\", \"abcd\"],\n    )\n\n  def test_two_of_same_max(self):\n    self.assertEqual(all_longest_strings([\"a\", \"abc\", \"cba\"]), [\"abc\", \"cba\"])\n\n  def test_single_longest(self):\n    self.assertEqual(all_longest_strings([\"enn\", \"b\"]), [\"enn\"])\n\n  def test_single_element(self):\n    self.assertEqual(all_longest_strings([\"hello\"]), [\"hello\"])\n\n  def test_all_same_length(self):\n    self.assertEqual(all_longest_strings([\"ab\", \"cd\", \"ef\"]), [\"ab\", \"cd\", \"ef\"])\n\n  def test_order_preserved(self):\n    self.assertEqual(\n        all_longest_strings([\"xx\", \"y\", \"zz\", \"w\", \"vv\"]),\n        [\"xx\", \"zz\", \"vv\"],\n    )\n"
+  },
+  {
+    "slug": "biggest-island",
+    "title": "Biggest Island",
+    "difficulty": "medium",
+    "tags": [
+      "matrix",
+      "graph",
+      "dfs"
+    ],
+    "sources": [],
+    "description": "You are given a rectangular grid `grid` where each cell is either \"L\" (land) or\n\"W\" (water). An island is a maximal group of land cells connected\nhorizontally or vertically (NOT diagonally). Return the size (number of land\ncells) of the largest island. If the grid has no land, return 0.\n\nConstraints:\n  - 0 <= number of rows, and every row has the same number of columns\n  - each cell is either \"L\" or \"W\"\n\nExamples:\n  [[\"L\", \"W\", \"W\", \"L\"],      biggest island has size 4\n   [\"L\", \"W\", \"L\", \"L\"],      (the L-shaped group on the right:\n   [\"L\", \"W\", \"W\", \"L\"]]       (0,3),(1,3),(1,2),(2,3); the left column is 3)\n\n  [[\"W\", \"L\", \"W\", \"L\"],      biggest island has size 4\n   [\"W\", \"L\", \"L\", \"W\"],      (the middle group; the lone L at (0,3)/(2,3)\n   [\"W\", \"L\", \"W\", \"L\"]]       are not connected to it)\n\n  [[\"L\"]]                     -> 1\n  [[\"W\", \"W\"], [\"W\", \"W\"]]    -> 0    (no land)\n  [[\"L\", \"W\"], [\"W\", \"L\"]]    -> 1    (diagonals do not connect)\n\nApproach: scan every cell; when an unvisited land cell is found, flood-fill its\nwhole island with iterative DFS (4-directional), counting cells, and track the\nmaximum island size seen.",
+    "primaryFunction": "biggest_island",
+    "starter": "def biggest_island(grid):\n  # TODO: implement\n  pass\n",
+    "solution": "def biggest_island(grid):\n  if not grid:\n    return 0\n\n  n = len(grid)\n  m = len(grid[0])\n\n  visited = {}\n  max_size = 0\n\n  for i in range(n):\n    for j in range(m):\n      value = grid[i][j]\n      if value != 'L' or (i, j) in visited:\n        continue\n\n      size = 0\n      stack = []\n      stack.append((i, j))\n\n      while len(stack) > 0:\n        i, j = stack.pop()\n        if (i, j) in visited:\n          continue\n\n        visited[(i, j)] = True\n        size += 1\n\n        top = (i + 1, j)\n        right = (i, j + 1)\n        bottom = (i - 1, j)\n        left = (i, j - 1)\n\n        for next_i, next_j in [top, right, bottom, left]:\n          if 0 <= next_i < n and 0 <= next_j < m:\n            adjacent_value = grid[next_i][next_j]\n\n            if adjacent_value == 'L' and (next_i, next_j) not in visited:\n              stack.append((next_i, next_j))\n\n      if size > max_size:\n        max_size = size\n\n  return max_size\n",
+    "tests": "class TestBiggestIsland(unittest.TestCase):\n  def test_go_source_example(self):\n    grid = [\n        ['L', 'W', 'W', 'L'],\n        ['L', 'W', 'L', 'L'],\n        ['L', 'W', 'W', 'L'],\n    ]\n    self.assertEqual(biggest_island(grid), 4)\n\n  def test_comment_example(self):\n    grid = [\n        ['W', 'L', 'W', 'L'],\n        ['W', 'L', 'L', 'W'],\n        ['W', 'L', 'W', 'L'],\n    ]\n    self.assertEqual(biggest_island(grid), 4)\n\n  def test_single_land_cell(self):\n    self.assertEqual(biggest_island([['L']]), 1)\n\n  def test_single_water_cell(self):\n    self.assertEqual(biggest_island([['W']]), 0)\n\n  def test_all_water(self):\n    self.assertEqual(biggest_island([['W', 'W'], ['W', 'W']]), 0)\n\n  def test_all_land(self):\n    self.assertEqual(biggest_island([['L', 'L'], ['L', 'L']]), 4)\n\n  def test_diagonal_not_connected(self):\n    self.assertEqual(biggest_island([['L', 'W'], ['W', 'L']]), 1)\n\n  def test_two_islands_returns_larger(self):\n    grid = [\n        ['L', 'L', 'W', 'L'],\n        ['L', 'W', 'W', 'W'],\n        ['W', 'W', 'L', 'L'],\n    ]\n    # left island: (0,0),(0,1),(1,0) = 3; right islands: {(0,3)}=1, {(2,2),(2,3)}=2\n    self.assertEqual(biggest_island(grid), 3)\n\n  def test_island_touching_all_borders(self):\n    grid = [\n        ['L', 'W', 'L'],\n        ['L', 'L', 'L'],\n        ['L', 'W', 'L'],\n    ]\n    # the H-shape: left column (3) + middle row bridge (2) + right column (3) = 7\n    self.assertEqual(biggest_island(grid), 7)\n\n  def test_single_row(self):\n    self.assertEqual(biggest_island([['L', 'L', 'W', 'L', 'L', 'L']]), 3)\n\n  def test_single_column(self):\n    self.assertEqual(biggest_island([['L'], ['W'], ['L'], ['L']]), 2)\n\n  def test_empty_grid(self):\n    self.assertEqual(biggest_island([]), 0)\n"
+  },
+  {
+    "slug": "binary-wildcard-combinations",
+    "title": "Binary Wildcard Combinations",
+    "difficulty": "easy",
+    "tags": [
+      "recursion",
+      "backtracking",
+      "string",
+      "google-interview"
+    ],
+    "sources": [
+      "https://www.careercup.com/question?id=20308668"
+    ],
+    "description": "You are given a string `s` consisting only of the characters '0', '1', and\n'?'. Each '?' is a wildcard that can be either '0' or '1'. Return a list of\nall strings obtainable by replacing every '?' with '0' or '1'. Fixed '0'/'1'\ncharacters stay in place.\n\nIf there are k wildcards, there are exactly 2^k results. Return them in\nascending binary order: at each wildcard, try '0' before '1', scanning left\nto right (so the leftmost '?' is the most significant bit).\n\nConstraints:\n  - 0 <= len(s)\n  - every character is '0', '1', or '?'\n  - the number of '?' is small enough that 2^k results fit in memory\n\nExamples:\n  \"1?\"    -> [\"10\", \"11\"]\n  \"?0?\"   -> [\"000\", \"001\", \"100\", \"101\"]\n  \"101\"   -> [\"101\"]          (no wildcards: the string itself)\n  \"?\"     -> [\"0\", \"1\"]\n  \"\"      -> [\"\"]             (one empty combination)\n\nApproach: backtracking. Walk the string; at a fixed character recurse to the\nnext position; at a '?' set it to '0' then '1', recursing after each, and\nrestore it to '?' on the way back. Record the string when the end is reached.",
+    "primaryFunction": "binary_wildcard_combinations",
+    "starter": "def binary_wildcard_combinations(s):\n  # TODO: implement\n  pass\n",
+    "solution": "def binary_wildcard_combinations(s):\n  results = []\n  chars = list(s)\n  n = len(chars)\n\n  def backtrack(pos):\n    if pos == n:\n      results.append(''.join(chars))\n      return\n\n    if chars[pos] == '?':\n      for bit in ('0', '1'):\n        chars[pos] = bit\n        backtrack(pos + 1)\n      chars[pos] = '?'\n    else:\n      backtrack(pos + 1)\n\n  backtrack(0)\n  return results\n\n\ndef binary_wildcard_combinations_1(s):\n  n = len(s)\n  output = [''] * n\n  outputs = []\n\n  def traverse(pos):\n    if pos == n:\n      outputs.append(''.join(output))\n      return\n\n    if s[pos] == '?':\n      output[pos] = '0'\n      traverse(pos + 1)\n\n      output[pos] = '1'\n      traverse(pos + 1)\n    else:\n      output[pos] = s[pos]\n      traverse(pos + 1)\n\n  traverse(0)\n  return outputs\n",
+    "tests": "class TestBinaryWildcardCombinations(unittest.TestCase):\n  def test_trailing_wildcard(self):\n    self.assertEqual(binary_wildcard_combinations('1?'), ['10', '11'])\n\n  def test_wildcard_between_fixed(self):\n    self.assertEqual(\n        binary_wildcard_combinations('?0?'),\n        ['000', '001', '100', '101'],\n    )\n\n  def test_no_wildcard_returns_itself(self):\n    self.assertEqual(binary_wildcard_combinations('101'), ['101'])\n\n  def test_single_wildcard(self):\n    self.assertEqual(binary_wildcard_combinations('?'), ['0', '1'])\n\n  def test_empty_string(self):\n    self.assertEqual(binary_wildcard_combinations(''), [''])\n\n  def test_two_wildcards_ascending_order(self):\n    self.assertEqual(\n        binary_wildcard_combinations('??'),\n        ['00', '01', '10', '11'],\n    )\n\n  def test_three_wildcards_full_binary_count(self):\n    self.assertEqual(\n        binary_wildcard_combinations('???'),\n        ['000', '001', '010', '011', '100', '101', '110', '111'],\n    )\n\n  def test_all_fixed_no_expansion(self):\n    self.assertEqual(binary_wildcard_combinations('0010'), ['0010'])\n\n  def test_count_is_two_to_the_k(self):\n    s = '10??1??01???'\n    out = binary_wildcard_combinations(s)\n    self.assertEqual(len(out), 2 ** s.count('?'))\n    self.assertEqual(len(set(out)), len(out))  # all distinct\n\n  def test_fixed_positions_are_preserved(self):\n    out = binary_wildcard_combinations('1?0?')\n    for combo in out:\n      self.assertEqual(combo[0], '1')\n      self.assertEqual(combo[2], '0')\n"
+  },
+  {
+    "slug": "century-from-year",
+    "title": "Century From Year",
+    "difficulty": "easy",
+    "tags": [
+      "math"
+    ],
+    "sources": [],
+    "description": "Given a year, return the century it is in. The first century spans from the\nyear 1 up to and including the year 100, the second - from the year 101 up to\nand including the year 200, etc.\n\nExample:\n  century_from_year(1905) == 20   # years 1901..2000 are the 20th century\n  century_from_year(1700) == 17   # 1700 is the last year of the 17th century\n  century_from_year(100)  == 1    # year 100 still belongs to the 1st century\n  century_from_year(101)  == 2    # year 101 starts the 2nd century\n\nIdea: century = ceil(year / 100). Since a year that is an exact multiple of\n100 belongs to the century it ends (not the next one), we can compute this\nwith integer arithmetic as (year + 99) // 100, which avoids floating point.",
+    "primaryFunction": "century_from_year",
+    "starter": "def century_from_year(year):\n  # TODO: implement\n  pass\n",
+    "solution": "def century_from_year(year):\n  return (year + 99) // 100\n\n\ndef century_from_year_1(year):\n  base = year // 100\n  remain = year % 100\n\n  if remain == 0:\n    return base\n  else:\n    return base + 1\n",
+    "tests": "class TestCenturyFromYear(unittest.TestCase):\n  def test_examples(self):\n    self.assertEqual(century_from_year(1905), 20)\n    self.assertEqual(century_from_year(1700), 17)\n\n  def test_century_boundaries(self):\n    # A year that is a multiple of 100 is the LAST year of its century.\n    self.assertEqual(century_from_year(100), 1)\n    self.assertEqual(century_from_year(200), 2)\n    self.assertEqual(century_from_year(2000), 20)\n    # The next year starts a new century.\n    self.assertEqual(century_from_year(101), 2)\n    self.assertEqual(century_from_year(201), 3)\n    self.assertEqual(century_from_year(2001), 21)\n\n  def test_smallest_years(self):\n    self.assertEqual(century_from_year(1), 1)\n    self.assertEqual(century_from_year(99), 1)\n"
+  },
+  {
+    "slug": "check-palindrome",
+    "title": "Check Palindrome",
+    "difficulty": "easy",
+    "tags": [
+      "string",
+      "two-pointers"
+    ],
+    "sources": [],
+    "description": "Given the string, check if it is a palindrome \u2014 i.e. it reads the same left\nto right and right to left. Return True if it is a palindrome, otherwise\nreturn False. Comparison is character-for-character over the whole string\n(no case-folding or whitespace stripping); the input is a plain string that\nmay be empty.\n\nExamples:\n  \"aabaa\"  -> True   (reversed is \"aabaa\")\n  \"abac\"   -> False  (reversed is \"caba\")\n  \"a\"      -> True   (single character)\n  \"\"       -> True   (empty string is trivially a palindrome)\n  \"xx\"     -> True   (reversed is \"xx\")\n\nApproach: walk two pointers inward from both ends, comparing characters;\nmismatch means not a palindrome. This is O(n) time and O(1) extra space.",
+    "primaryFunction": "check_palindrome",
+    "starter": "def check_palindrome(input_string):\n  # TODO: implement\n  pass\n",
+    "solution": "def check_palindrome(input_string):\n  n = len(input_string) // 2\n  for i in range(n):\n    if input_string[i] != input_string[-(i+1)]:\n      return False\n  return True\n",
+    "tests": "class TestCheckPalindrome(unittest.TestCase):\n  def test_example_palindrome(self):\n    self.assertTrue(check_palindrome(\"aabaa\"))\n\n  def test_example_not_palindrome(self):\n    self.assertFalse(check_palindrome(\"abac\"))\n\n  def test_single_character(self):\n    self.assertTrue(check_palindrome(\"a\"))\n\n  def test_empty_string(self):\n    self.assertTrue(check_palindrome(\"\"))\n\n  def test_two_equal_characters(self):\n    self.assertTrue(check_palindrome(\"xx\"))\n\n  def test_two_different_characters(self):\n    self.assertFalse(check_palindrome(\"ab\"))\n\n  def test_even_length_palindrome(self):\n    self.assertTrue(check_palindrome(\"abba\"))\n\n  def test_case_sensitive_not_palindrome(self):\n    self.assertFalse(check_palindrome(\"Aa\"))\n\n  def test_longer_palindrome(self):\n    self.assertTrue(check_palindrome(\"racecar\"))\n\n  def test_mismatch_at_ends(self):\n    self.assertFalse(check_palindrome(\"abca\"))\n"
+  },
+  {
+    "slug": "longest-increasing-subsequence",
+    "title": "Longest Increasing Subsequence",
+    "difficulty": "medium",
+    "tags": [
+      "dynamic-programming",
+      "subsequence",
+      "array"
+    ],
+    "sources": [],
+    "description": "You are given an integer array `nums`. Return the length of the longest\nstrictly increasing subsequence.\n\nA subsequence is a sequence derived from the array by deleting zero or more\nelements without changing the order of the remaining elements. \"Strictly\nincreasing\" means each element is greater than the one before it (equal\nvalues cannot both be used).\n\nConstraints:\n  - 0 <= len(nums) <= 2500\n  - -10^4 <= nums[i] <= 10^4\n\nExamples:\n  [10, 9, 2, 5, 3, 7, 101, 18] -> 4   (e.g. 2, 3, 7, 101 or 2, 5, 7, 101)\n  [3, 2, 6, 4, 5, 1]           -> 3   (2, 4, 5)\n  [0, 1, 0, 3, 2, 3]           -> 4   (0, 1, 2, 3)\n  [7, 7, 7, 7, 7]              -> 1   (equal values can't extend each other)\n  []                           -> 0\n\nApproach: O(n^2) dynamic programming. dp[i] = length of the longest strictly\nincreasing subsequence ending at index i; dp[i] = 1 + max(dp[j]) over all\nj < i with nums[j] < nums[i], or 1 if none. The answer is max(dp).",
+    "primaryFunction": "length_of_lis",
+    "starter": "def length_of_lis(nums):\n  # TODO: implement\n  pass\n",
+    "solution": "def length_of_lis(nums):\n  if not nums:\n    return 0\n\n  n = len(nums)\n  dp = [1] * n\n\n  for i in range(1, n):\n    for j in range(i):\n      if nums[i] > nums[j] and dp[j] + 1 > dp[i]:\n        dp[i] = dp[j] + 1\n\n  return max(dp)\n",
+    "tests": "class TestLengthOfLis(unittest.TestCase):\n  def test_leetcode_example(self):\n    self.assertEqual(length_of_lis([10, 9, 2, 5, 3, 7, 101, 18]), 4)\n\n  def test_readme_example(self):\n    self.assertEqual(length_of_lis([3, 2, 6, 4, 5, 1]), 3)\n\n  def test_with_repeats_between_runs(self):\n    self.assertEqual(length_of_lis([0, 1, 0, 3, 2, 3]), 4)\n\n  def test_all_equal_is_strict(self):\n    self.assertEqual(length_of_lis([7, 7, 7, 7, 7]), 1)\n\n  def test_empty(self):\n    self.assertEqual(length_of_lis([]), 0)\n\n  def test_single_element(self):\n    self.assertEqual(length_of_lis([42]), 1)\n\n  def test_two_increasing(self):\n    self.assertEqual(length_of_lis([1, 2]), 2)\n\n  def test_two_decreasing(self):\n    self.assertEqual(length_of_lis([2, 1]), 1)\n\n  def test_already_sorted(self):\n    self.assertEqual(length_of_lis([1, 2, 3, 4, 5]), 5)\n\n  def test_strictly_decreasing(self):\n    self.assertEqual(length_of_lis([5, 4, 3, 2, 1]), 1)\n\n  def test_negatives(self):\n    self.assertEqual(length_of_lis([-8, -2, -3, -1]), 3)\n\n  def test_duplicates_do_not_count(self):\n    # 1, 2, 3, 4 is length 4; the duplicate 3 cannot extend a 3.\n    self.assertEqual(length_of_lis([1, 3, 2, 3, 4]), 4)\n\n  def test_best_run_at_end(self):\n    self.assertEqual(length_of_lis([9, 8, 1, 2, 3, 4]), 4)\n"
+  },
+  {
+    "slug": "make-array-consecutive",
+    "title": "Make Array Consecutive",
+    "difficulty": "easy",
+    "tags": [
+      "array",
+      "math"
+    ],
+    "sources": [],
+    "description": "You are given an array of distinct non-negative integers `statues`, where each\nvalue is the size of a statue you own. You want your collection to contain\nevery size in a consecutive range with no gaps \u2014 that is, for the smallest and\nlargest sizes you end up with, you must own a statue of every integer size in\nbetween.\n\nReturn the minimum number of additional statues you need to acquire so that the\nsizes you own form such a gap-free consecutive range.\n\nConstraints:\n  - 1 <= len(statues) <= 1000\n  - 0 <= statues[i] <= 20000\n  - all values in statues are distinct\n\nExamples:\n  [6, 2, 3, 8]  -> 3   (needs 4, 5, 7 to fill 2..8)\n  [0, 3]        -> 2   (needs 1, 2)\n  [5, 4, 6]     -> 0   (already consecutive)\n  [6]           -> 0   (a single statue is trivially consecutive)\n\nApproach: answer = (max - min + 1) - len(statues), using exact integer math.",
+    "primaryFunction": "make_array_consecutive",
+    "starter": "def make_array_consecutive(statues):\n  # TODO: implement\n  pass\n",
+    "solution": "def make_array_consecutive(statues):\n  return (max(statues) - min(statues)) - len(statues) + 1\n",
+    "tests": "class TestMakeArrayConsecutive(unittest.TestCase):\n  def test_example(self):\n    self.assertEqual(make_array_consecutive([6, 2, 3, 8]), 3)\n\n  def test_two_element_gap(self):\n    self.assertEqual(make_array_consecutive([0, 3]), 2)\n\n  def test_already_consecutive(self):\n    self.assertEqual(make_array_consecutive([5, 4, 6]), 0)\n\n  def test_single_statue(self):\n    self.assertEqual(make_array_consecutive([6]), 0)\n\n  def test_unsorted_input(self):\n    self.assertEqual(make_array_consecutive([8, 3, 6, 2]), 3)\n\n  def test_large_gap(self):\n    self.assertEqual(make_array_consecutive([1, 10]), 8)\n\n  def test_starts_at_zero(self):\n    self.assertEqual(make_array_consecutive([0]), 0)\n\n  def test_outlier_high_value(self):\n    self.assertEqual(make_array_consecutive([6, 2, 3, 8, 15]), 9)\n"
+  },
+  {
+    "slug": "matrix-elements-sum",
+    "title": "Matrix Elements Sum",
+    "difficulty": "easy",
+    "tags": [
+      "matrix",
+      "array"
+    ],
+    "sources": [],
+    "description": "You are given a matrix of integers `matrix` where matrix[i][j] is the price of\nthe room on floor i, column j of a hotel (row 0 is the top floor). A price of 0\nmeans that room is unavailable, and \u2014 because guests are superstitious \u2014 every\nroom directly below an unavailable room, in the same column, is also considered\nunavailable, regardless of its own price.\n\nReturn the total price of all available rooms: for each column, add up prices\nfrom the top floor downward, stopping as soon as you reach a 0 in that column.\n\nConstraints:\n  - 1 <= len(matrix), len(matrix[0]) <= 100\n  - 0 <= matrix[i][j] <= 10000\n  - every row has the same number of columns\n\nExamples:\n  [[0, 1, 1, 2],       col sums: 0 | 1+5 | 1 | 2   -> 9\n   [0, 5, 0, 0],\n   [2, 0, 3, 3]]\n\n  [[1, 1, 1, 0],       col sums: 1 | 1+5+1 | 1 | 0 -> 9\n   [0, 5, 0, 1],\n   [2, 1, 3, 10]]\n\n  [[0]]                col sums: 0                  -> 0\n  [[1, 5], [3, 2]]     col sums: 1+3 | 5+2          -> 11\n\nApproach: walk each column top-to-bottom, accumulating prices until a 0 breaks\nthe column.",
+    "primaryFunction": "matrix_elements_sum",
+    "starter": "def matrix_elements_sum(matrix):\n  # TODO: implement\n  pass\n",
+    "solution": "def matrix_elements_sum(matrix):\n  total = 0\n  nb_rows = len(matrix)\n  nb_cols = len(matrix[0])\n  for j in range(nb_cols):\n    for i in range(nb_rows):\n      cost = matrix[i][j]\n      if cost == 0:\n        break\n      total += cost\n\n  return total\n",
+    "tests": "class TestMatrixElementsSum(unittest.TestCase):\n  def test_example_one(self):\n    matrix = [\n        [0, 1, 1, 2],\n        [0, 5, 0, 0],\n        [2, 0, 3, 3],\n    ]\n    self.assertEqual(matrix_elements_sum(matrix), 9)\n\n  def test_example_two(self):\n    matrix = [\n        [1, 1, 1, 0],\n        [0, 5, 0, 1],\n        [2, 1, 3, 10],\n    ]\n    self.assertEqual(matrix_elements_sum(matrix), 9)\n\n  def test_single_zero(self):\n    self.assertEqual(matrix_elements_sum([[0]]), 0)\n\n  def test_no_haunted_rooms(self):\n    self.assertEqual(matrix_elements_sum([[1, 5], [3, 2]]), 11)\n\n  def test_single_row(self):\n    self.assertEqual(matrix_elements_sum([[1, 0, 2, 3]]), 6)\n\n  def test_single_column(self):\n    self.assertEqual(matrix_elements_sum([[4], [0], [9]]), 4)\n\n  def test_all_zeros(self):\n    self.assertEqual(matrix_elements_sum([[0, 0], [0, 0]]), 0)\n\n  def test_top_row_zero_blocks_column(self):\n    self.assertEqual(matrix_elements_sum([[0, 3], [7, 4]]), 7)\n"
+  },
+  {
+    "slug": "maximum-subarray",
+    "title": "Maximum Subarray",
+    "difficulty": "medium",
+    "tags": [
+      "array",
+      "dynamic-programming"
+    ],
+    "sources": [],
+    "description": "You are given an array of integers (which may be positive or negative). Find\nthe contiguous subarray with the largest sum and return that sum together\nwith the start and end indices of the subarray, as a tuple\n(max_sum, start, end).\n\nIf every element is negative (or the array is empty), the largest achievable\nsum is 0 \u2014 obtained by choosing the empty subarray \u2014 and (0, 0, 0) is\nreturned; the indices are unused in that case.\n\nConstraints:\n  - 0 <= len(array)\n  - array values may be negative, zero, or positive\n\nExamples:\n  [-1, 2, 3, -3, 2, 3, 4, -4]     -> (11, 1, 6)   (subarray [2, 3, -3, 2, 3, 4])\n  [-2, 1, -3, 4, -1, 2, 1, -5, 4] -> (6, 3, 6)    (subarray [4, -1, 2, 1])\n  [5]                             -> (5, 0, 0)\n  [-1, -2, -3]                    -> max sum 0     (empty subarray wins)\n  []                             -> (0, 0, 0)\n\nApproach: Kadane's algorithm. Sweep the array keeping a running sum; reset it\nto 0 (and advance the candidate start index) whenever it drops below 0, and\nrecord a new maximum with its end index whenever the running sum exceeds the\nbest seen so far.",
+    "primaryFunction": "max_subarray",
+    "starter": "def max_subarray(array):\n  # TODO: implement\n  pass\n",
+    "solution": "def max_subarray(array):\n  current_sum = 0\n  max_sum = 0\n  start, end = 0, 0\n\n  for k, value in enumerate(array):\n    current_sum += value\n    if current_sum < 0:\n      current_sum = 0\n      start = k + 1\n    elif current_sum > max_sum:\n      max_sum = current_sum\n      end = k\n\n  return max_sum, start, end\n",
+    "tests": "class TestMaxSubarray(unittest.TestCase):\n  def test_canonical_example(self):\n    self.assertEqual(max_subarray([-1, 2, 3, -3, 2, 3, 4, -4]), (11, 1, 6))\n\n  def test_kadane_example(self):\n    self.assertEqual(max_subarray([-2, 1, -3, 4, -1, 2, 1, -5, 4]), (6, 3, 6))\n\n  def test_single_positive(self):\n    self.assertEqual(max_subarray([5]), (5, 0, 0))\n\n  def test_all_negative_returns_zero(self):\n    # No non-empty subarray beats the empty one, so the max sum is 0.\n    # (The returned indices are meaningless in this case and not asserted.)\n    self.assertEqual(max_subarray([-1, -2, -3])[0], 0)\n\n  def test_empty_array(self):\n    self.assertEqual(max_subarray([]), (0, 0, 0))\n\n  def test_all_positive(self):\n    self.assertEqual(max_subarray([1, 2, 3, 4]), (10, 0, 3))\n\n  def test_leading_negative(self):\n    self.assertEqual(max_subarray([-5, 4]), (4, 1, 1))\n\n  def test_best_subarray_at_end(self):\n    self.assertEqual(max_subarray([1, -5, 2, 6]), (8, 2, 3))\n\n  def test_single_negative(self):\n    self.assertEqual(max_subarray([-7])[0], 0)\n\n  def test_zeros_and_positives(self):\n    self.assertEqual(max_subarray([0, 0, 3, 0]), (3, 0, 2))\n"
+  },
+  {
+    "slug": "number-of-provinces",
+    "title": "Number of Provinces",
+    "difficulty": "medium",
+    "tags": [
+      "graph",
+      "connected-components",
+      "dfs"
+    ],
+    "sources": [],
+    "description": "You are given the adjacency matrix of an undirected graph on `n` nodes,\nencoded as a list of `n` strings each of length `n`. `matrix[i][j] == '1'`\nmeans there is a direct edge between node i and node j, and '0' means there\nis not. The matrix is symmetric and `matrix[i][i] == '1'`.\n\nTwo nodes belong to the same group if they are connected directly or\nindirectly (through a chain of edges). Return the number of connected\ncomponents (groups).\n\nConstraints:\n  - 0 <= n, and every string has length n\n  - each character is '0' or '1'\n  - matrix[i][j] == matrix[j][i] (symmetric)\n\nExamples:\n  [\"1100\",                    -> 2   nodes {0,1,2} form one group (0-1, 1-2),\n   \"1110\",                          node 3 is alone\n   \"0110\",\n   \"0001\"]\n\n  [\"10000\",                   -> 5   identity matrix: every node is isolated\n   \"01000\",\n   \"00100\",\n   \"00010\",\n   \"00001\"]\n\n  [\"110\", \"111\", \"011\"]       -> 1   0-1 and 1-2 connect all three transitively\n  [\"1\"]                       -> 1\n  []                          -> 0\n\nApproach: treat each row index as a graph node and each '1' as an edge. Scan\nnodes; from each unvisited node run an iterative DFS over its row to mark the\nwhole component visited, incrementing the group count once per component.",
+    "primaryFunction": "number_of_provinces",
+    "starter": "def number_of_provinces(matrix):\n  # TODO: implement\n  pass\n",
+    "solution": "def number_of_provinces(matrix):\n  n = len(matrix)\n  visited = [False] * n\n  groups = 0\n\n  for start in range(n):\n    if visited[start]:\n      continue\n    groups += 1\n    stack = [start]\n    visited[start] = True\n    while stack:\n      node = stack.pop()\n      row = matrix[node]\n      for nxt in range(n):\n        if row[nxt] == '1' and not visited[nxt]:\n          visited[nxt] = True\n          stack.append(nxt)\n  return groups\n",
+    "tests": "class TestNumberOfProvinces(unittest.TestCase):\n  def test_source_example(self):\n    self.assertEqual(number_of_provinces(['1100', '1110', '0110', '0001']), 2)\n\n  def test_identity_all_isolated(self):\n    matrix = ['10000', '01000', '00100', '00010', '00001']\n    self.assertEqual(number_of_provinces(matrix), 5)\n\n  def test_transitive_chain_is_one_group(self):\n    self.assertEqual(number_of_provinces(['110', '111', '011']), 1)\n\n  def test_single_node(self):\n    self.assertEqual(number_of_provinces(['1']), 1)\n\n  def test_empty(self):\n    self.assertEqual(number_of_provinces([]), 0)\n\n  def test_fully_connected(self):\n    self.assertEqual(number_of_provinces(['111', '111', '111']), 1)\n\n  def test_two_separate_pairs(self):\n    matrix = ['1100', '1100', '0011', '0011']\n    self.assertEqual(number_of_provinces(matrix), 2)\n\n  def test_two_isolated_nodes(self):\n    self.assertEqual(number_of_provinces(['10', '01']), 2)\n\n  def test_two_connected_nodes(self):\n    self.assertEqual(number_of_provinces(['11', '11']), 1)\n\n  def test_last_node_bridges_two_halves(self):\n    # 0-1 linked, 2-3 linked, and 4 links to both 1 and 2 -> all one group\n    matrix = [\n        '11001',\n        '11001',\n        '00111',\n        '00111',\n        '11111',\n    ]\n    self.assertEqual(number_of_provinces(matrix), 1)\n\n  def test_component_discovered_from_later_index(self):\n    # node 0 isolated; nodes 1,2,3 form a component reached only from index 1\n    matrix = ['1000', '0110', '0111', '0011']\n    self.assertEqual(number_of_provinces(matrix), 2)\n"
+  }
+]
