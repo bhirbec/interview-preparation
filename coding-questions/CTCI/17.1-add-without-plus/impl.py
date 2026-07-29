@@ -13,10 +13,6 @@
 # unbounded, negatives are handled by masking to 32-bit two's complement so
 # the carry terminates and the sign is reconstructed from the top bit.
 #
-# NOTE: the original implementation only worked for non-negative inputs — with
-# a negative operand the carry propagated forever (Python ints never overflow),
-# causing infinite recursion. Fixed here with 32-bit masking.
-#
 # Examples:
 #   add(5, 3)   -> 8
 #   add(0, 0)   -> 0

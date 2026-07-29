@@ -18,9 +18,6 @@
 #   multiply(7, 1)   -> 7
 #   multiply(3, 4)   -> 12
 #   multiply(9, 9)   -> 81
-#
-# Note: the original solution recursed forever on b == 0 (its only base case was
-# b == 1). A minimal `b == 0` guard was added so the function is total on b >= 0.
 
 
 def multiply(a, b):

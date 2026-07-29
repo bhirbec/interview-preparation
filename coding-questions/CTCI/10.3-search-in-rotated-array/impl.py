@@ -25,11 +25,6 @@
 # a high run arr[0 .. r-1] and a low run arr[r .. n-1]. Decide which run can
 # contain the value by comparing against the endpoints, then binary-search that
 # run.
-#
-# NOTE: the original find() compared the value against arr[r] (the minimum) and
-# searched arr[0..r], so the high run was never searched -- find(15) on the
-# canonical array wrongly returned None. Fixed to test arr[0..r-1] and to make
-# find_rotation_point return 0 for a non-rotated array.
 
 
 def find(arr, value):

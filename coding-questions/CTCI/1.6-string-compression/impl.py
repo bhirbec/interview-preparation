@@ -19,8 +19,8 @@
 #   ""                   -> ""
 #
 # Note: the canonical CTCI variant returns the original string when the encoded
-# form would not be shorter (e.g. "abc" -> "abc"); this port always returns the
-# encoded form, matching the original Go implementation.
+# form would not be shorter (e.g. "abc" -> "abc"); this variant always returns
+# the encoded form.
 #
 # Approach: walk the string tracking the current character and its run length;
 # when the character changes, flush "<char><count>" and reset the count.
