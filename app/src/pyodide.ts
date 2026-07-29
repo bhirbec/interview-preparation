@@ -1,35 +1,68 @@
 import type { TestResult } from './types'
 
-declare global {
-  interface Window {
-    loadPyodide: (config?: { indexURL?: string }) => Promise<PyodideLike>
-  }
+// The test run is capped so an infinite loop in the user's code can't hang the
+// page. Pyodide runs in a worker; on timeout we terminate it (killing the loop)
+// and the next run transparently spins up a fresh one.
+const RUN_TIMEOUT_MS = 2000
+const READY_TIMEOUT_MS = 60000
+
+export interface RunOutcome {
+  results: TestResult[]
+  durationMs: number
 }
 
-interface PyodideLike {
-  runPythonAsync: (code: string, options?: { globals?: unknown }) => Promise<string>
-  toPy: (obj: unknown) => { destroy: () => void }
+type Pending = {
+  resolve: (m: { json: string; durationMs: number }) => void
+  reject: (e: Error) => void
+  timer: number
 }
 
-const PYODIDE_VERSION = 'v0.28.0'
-let pyodidePromise: Promise<PyodideLike> | null = null
+let worker: Worker | null = null
+let ready: Promise<void> | null = null
+let seq = 0
+const pending = new Map<number, Pending>()
 
-// Pyodide is a multi-MB WASM download; load it once and reuse.
-function loadPyodideOnce(): Promise<PyodideLike> {
-  if (!pyodidePromise) {
-    pyodidePromise = window.loadPyodide({
-      indexURL: `https://cdn.jsdelivr.net/pyodide/${PYODIDE_VERSION}/full/`,
-    })
-  }
-  return pyodidePromise
+function ensureWorker() {
+  if (worker) return
+  const w = new Worker(`${import.meta.env.BASE_URL}pyodide.worker.js`)
+  worker = w
+  ready = new Promise<void>((resolve, reject) => {
+    const readyTimer = window.setTimeout(
+      () => reject(new Error('Pyodide failed to load')),
+      READY_TIMEOUT_MS,
+    )
+    w.onmessage = (e: MessageEvent) => {
+      const m = e.data
+      if (m.type === 'ready') {
+        clearTimeout(readyTimer)
+        resolve()
+      } else if (m.type === 'result') {
+        const p = pending.get(m.id)
+        if (!p) return
+        clearTimeout(p.timer)
+        pending.delete(m.id)
+        if (m.ok) p.resolve({ json: m.json, durationMs: m.durationMs })
+        else p.reject(new Error(m.error))
+      }
+    }
+  })
 }
 
+// Terminate the worker (e.g. to kill an infinite loop) and reset state so the
+// next run creates a fresh one.
+function resetWorker() {
+  if (worker) worker.terminate()
+  worker = null
+  ready = null
+  for (const p of pending.values()) clearTimeout(p.timer)
+  pending.clear()
+}
+
+// Pyodide is a multi-MB WASM download; start it early (once).
 export function warmUpPyodide(): void {
-  void loadPyodideOnce()
+  ensureWorker()
 }
 
-// Appended after the user's code + the test class. Collects every TestCase
-// subclass defined in the run namespace, runs them, and returns JSON.
 const HARNESS = `
 import unittest as _ut, json as _json
 
@@ -58,26 +91,33 @@ _suite.run(_res)
 _json.dumps([{"name": n, "status": s, "message": m} for (n, s, m) in _res.records])
 `
 
-export interface RunOutcome {
-  results: TestResult[]
-  durationMs: number
-}
-
 export async function runTests(
   userCode: string,
   testsCode: string,
 ): Promise<RunOutcome> {
-  const pyodide = await loadPyodideOnce()
+  ensureWorker()
+  await ready // one-time Pyodide load is not subject to the run timeout
+
   const script = `import unittest\n\n${userCode}\n\n${testsCode}\n${HARNESS}`
-  // Fresh namespace each run so classes from a previous problem never linger.
-  const namespace = pyodide.toPy({})
-  // Time only the test execution, not the (one-time) Pyodide download above.
-  const start = performance.now()
-  try {
-    const json = await pyodide.runPythonAsync(script, { globals: namespace })
-    const durationMs = performance.now() - start
-    return { results: JSON.parse(json) as TestResult[], durationMs }
-  } finally {
-    namespace.destroy()
-  }
+  const id = ++seq
+  const w = worker!
+
+  return new Promise<RunOutcome>((resolve, reject) => {
+    const timer = window.setTimeout(() => {
+      pending.delete(id)
+      resetWorker() // kill the (possibly infinite) run
+      reject(
+        new Error(
+          `Timed out after ${RUN_TIMEOUT_MS / 1000}s — your code may have an infinite loop.`,
+        ),
+      )
+    }, RUN_TIMEOUT_MS)
+
+    pending.set(id, {
+      resolve: (m) => resolve({ results: JSON.parse(m.json), durationMs: m.durationMs }),
+      reject,
+      timer,
+    })
+    w.postMessage({ type: 'run', id, script })
+  })
 }
