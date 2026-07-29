@@ -11,6 +11,15 @@ import { api } from '../api'
 import { timeAgo } from '../time'
 
 type Tab = 'impl' | 'solution' | 'test' | 'history'
+type SaveState = 'idle' | 'unsaved' | 'saving' | 'saved' | 'error'
+
+const SAVE_LABELS: Record<SaveState, string> = {
+  idle: '',
+  unsaved: '● Unsaved',
+  saving: 'Saving…',
+  saved: 'Saved ✓',
+  error: 'Save failed',
+}
 
 export default function ProblemDetail({ problems }: { problems: Problem[] }) {
   const { slug } = useParams()
@@ -26,10 +35,27 @@ export default function ProblemDetail({ problems }: { problems: Problem[] }) {
   const [running, setRunning] = useState(false)
   const [runs, setRuns] = useState<RunRecord[]>([])
   const [lastAllPassedAt, setLastAllPassedAt] = useState<string | null>(null)
+  const [saveState, setSaveState] = useState<SaveState>('idle')
   const saveTimer = useRef<number | undefined>(undefined)
+  const codeRef = useRef(code)
+  codeRef.current = code
+  // Holds the latest "save now" action so the keydown listener never goes stale.
+  const saveNowRef = useRef<() => void>(() => {})
 
   useEffect(() => {
     warmUpPyodide()
+  }, [])
+
+  // Cmd/Ctrl+S saves immediately (and suppresses the browser's Save dialog).
+  useEffect(() => {
+    function onKey(e: KeyboardEvent) {
+      if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === 's') {
+        e.preventDefault()
+        saveNowRef.current()
+      }
+    }
+    window.addEventListener('keydown', onKey)
+    return () => window.removeEventListener('keydown', onKey)
   }, [])
 
   // Load the saved implementation (falling back to the starter) and run history
@@ -39,6 +65,7 @@ export default function ProblemDetail({ problems }: { problems: Problem[] }) {
     let cancelled = false
     setResults(null)
     setError(null)
+    setSaveState('idle')
     setTab('impl')
     api
       .getProblem(slug)
@@ -73,12 +100,25 @@ export default function ProblemDetail({ problems }: { problems: Problem[] }) {
     )
   }
 
+  function doSave(next: string) {
+    setSaveState('saving')
+    return api
+      .saveCode(slug!, next)
+      .then(() => setSaveState('saved'))
+      .catch(() => setSaveState('error'))
+  }
+
   // Debounced autosave — only fires on user edits.
   function scheduleSave(next: string) {
+    setSaveState('unsaved')
     clearTimeout(saveTimer.current)
-    saveTimer.current = window.setTimeout(() => {
-      api.saveCode(slug!, next).catch(() => {})
-    }, 700)
+    saveTimer.current = window.setTimeout(() => doSave(next), 700)
+  }
+
+  // Flush the pending save right away (used by Cmd/Ctrl+S).
+  saveNowRef.current = () => {
+    clearTimeout(saveTimer.current)
+    doSave(codeRef.current)
   }
 
   function onCodeChange(next: string) {
@@ -102,7 +142,7 @@ export default function ProblemDetail({ problems }: { problems: Problem[] }) {
       const passed = res.filter((r) => r.status === 'pass').length
       const failed = res.length - passed
       clearTimeout(saveTimer.current)
-      await api.saveCode(slug!, code).catch(() => {})
+      await doSave(code)
       await api.createRun(slug!, { code, passed, failed, total: res.length, durationMs })
       const [freshRuns, state] = await Promise.all([
         api.listRuns(slug!),
@@ -194,6 +234,12 @@ export default function ProblemDetail({ problems }: { problems: Problem[] }) {
                 <button className="reset" onClick={() => loadCode(problem.starter)}>
                   Reset
                 </button>
+                <span
+                  className={`save-status ${saveState}`}
+                  title="Cmd/Ctrl+S to save now"
+                >
+                  {SAVE_LABELS[saveState]}
+                </span>
               </div>
               {error && <pre className="run-error">{error}</pre>}
               {results && <TestResults results={results} />}

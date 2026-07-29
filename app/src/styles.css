@@ -464,6 +464,22 @@ button.tag:hover {
   color: var(--muted);
 }
 
+.save-status {
+  margin-left: auto;
+  align-self: center;
+  font-size: 0.8rem;
+  color: var(--muted);
+  transition: color 0.2s ease;
+}
+
+.save-status.saved {
+  color: var(--pass);
+}
+
+.save-status.error {
+  color: var(--fail);
+}
+
 .run-error {
   margin: 0;
   padding: 0.8rem 1rem;
