@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from 'react'
 import { Link, useParams } from 'react-router-dom'
 import type { Problem, TestResult } from '../types'
 import CodeEditor from '../components/CodeEditor'
+import Description from '../components/Description'
 import TestResults from '../components/TestResults'
 import ThemeToggle from '../components/ThemeToggle'
 import { runTests, warmUpPyodide } from '../pyodide'
@@ -65,7 +66,7 @@ export default function ProblemDetail({ problems }: { problems: Problem[] }) {
 
       <div className="columns">
         <section className="description">
-          <pre className="prose">{problem.description}</pre>
+          <Description text={problem.description} />
           <div className="tags">
             {problem.tags.map((t) => (
               <span key={t} className="tag">

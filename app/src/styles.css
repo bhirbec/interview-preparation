@@ -192,7 +192,7 @@ button.tag:hover {
 .detail .columns {
   display: grid;
   /* Cap the description column; let the workspace take the rest of the width. */
-  grid-template-columns: minmax(320px, 460px) minmax(0, 1fr);
+  grid-template-columns: minmax(320px, 560px) minmax(0, 1fr);
   gap: 1.2rem;
   align-items: start;
 }
@@ -211,11 +211,30 @@ button.tag:hover {
 }
 
 .prose {
-  white-space: pre-wrap;
-  font-family: inherit;
   font-size: 0.92rem;
   line-height: 1.5;
   margin: 0 0 1rem;
+}
+
+/* Reflowing prose paragraph. */
+.prose .para {
+  margin: 0 0 0.85rem;
+}
+
+/* Preformatted block (constraints, aligned example tables) — keep line breaks
+   and alignment; scroll horizontally rather than wrap. */
+.prose .block {
+  margin: 0 0 0.85rem;
+  padding: 0.6rem 0.75rem;
+  background: var(--code-bg);
+  border-radius: 6px;
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 0.8rem;
+  line-height: 1.45;
+  /* Wrap instead of scrolling: no horizontal scrollbars, alignment kept for
+     lines that fit the column (most of them). */
+  white-space: pre-wrap;
+  overflow-wrap: break-word;
 }
 
 .sources {
