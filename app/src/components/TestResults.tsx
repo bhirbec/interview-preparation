@@ -1,13 +1,29 @@
 import type { TestResult } from '../types'
 
-export default function TestResults({ results }: { results: TestResult[] }) {
+interface Props {
+  results: TestResult[]
+  onClose: () => void
+}
+
+export default function TestResults({ results, onClose }: Props) {
   const passed = results.filter((r) => r.status === 'pass').length
   const allPass = passed === results.length && results.length > 0
 
   return (
     <div className="results">
       <div className={`summary ${allPass ? 'all-pass' : 'has-fail'}`}>
-        {passed}/{results.length} passed
+        <span>
+          {passed}/{results.length} passed
+        </span>
+        <button
+          type="button"
+          className="results-close"
+          onClick={onClose}
+          title="Close results"
+          aria-label="Close results"
+        >
+          ✕
+        </button>
       </div>
       <ul>
         {results.map((r) => (

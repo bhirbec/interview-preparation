@@ -557,10 +557,28 @@ button.tag:hover {
 }
 
 .summary {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
   font-weight: 700;
   padding: 0.5rem 0.75rem;
   border-radius: 8px;
   margin-bottom: 0.5rem;
+}
+
+.results-close {
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  color: inherit;
+  opacity: 0.7;
+  font-size: 0.9rem;
+  line-height: 1;
+  padding: 0.15rem 0.3rem;
+}
+
+.results-close:hover {
+  opacity: 1;
 }
 
 .summary.all-pass {

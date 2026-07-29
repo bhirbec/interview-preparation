@@ -225,7 +225,9 @@ export default function ProblemDetail() {
                 </span>
               </div>
               {error && <pre className="run-error">{error}</pre>}
-              {results && <TestResults results={results} />}
+              {results && (
+                <TestResults results={results} onClose={() => setResults(null)} />
+              )}
             </>
           )}
 
