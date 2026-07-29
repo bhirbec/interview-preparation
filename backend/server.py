@@ -1,10 +1,12 @@
 """Coding-trainer API.
 
-No auth (single implicit user). Problems are identified by their slug, which is
-stable and comes straight from build.py's problems.json — so this API never has
-to know anything about the catalog itself.
+No auth (single implicit user). Problems live in the `problem` table (populated
+by build.py) and are identified by their path-based id (e.g. "maximum-subarray"
+or "CTCI/1.1-is-unique"). Ids can contain "/", so id-specific endpoints take the
+id as a query parameter or request-body field rather than a path segment.
 """
 
+import json
 from contextlib import asynccontextmanager
 from datetime import datetime, timezone
 
@@ -22,8 +24,6 @@ async def lifespan(_app: FastAPI):
 
 app = FastAPI(title="Coding Trainer API", lifespan=lifespan)
 
-# No auth; allow any origin (the frontend normally reaches us via a same-origin
-# Vite proxy, but this keeps direct access working too).
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
@@ -37,10 +37,12 @@ def now_iso() -> str:
 
 
 class CodePayload(BaseModel):
+  id: str
   code: str
 
 
 class RunPayload(BaseModel):
+  id: str
   code: str
   passed: int
   failed: int
@@ -67,34 +69,58 @@ def health():
   return {"ok": True}
 
 
-@app.get("/api/summary")
-def summary():
-  """Per-problem aggregate for the list view."""
+@app.get("/api/problems")
+def list_problems(search: str = "", page: int = 1, pageSize: int = 20):
+  """Paginated, searchable problem list for the catalog view."""
+  page = max(1, page)
+  page_size = max(1, min(100, pageSize))
+  offset = (page - 1) * page_size
+  like = f"%{search.strip().lower()}%"
+  where = "WHERE lower(p.title) LIKE :like OR lower(p.tags) LIKE :like" if search.strip() else ""
+
   with db.connect() as conn:
+    total = conn.execute(
+        f"SELECT COUNT(*) AS n FROM problem p {where}", {"like": like}
+    ).fetchone()["n"]
     rows = conn.execute(
-        """
-        SELECT problem_id,
-               COUNT(*) AS runs,
-               MAX(CASE WHEN all_passed = 1 THEN created_at END) AS last_all_passed_at
-        FROM run
-        GROUP BY problem_id
-        """
+        f"""
+        SELECT p.id, p.title, p.difficulty, p.tags,
+               r.last_all_passed_at
+        FROM problem p
+        LEFT JOIN (
+          SELECT problem_id,
+                 MAX(CASE WHEN all_passed = 1 THEN created_at END) AS last_all_passed_at
+          FROM run GROUP BY problem_id
+        ) r ON r.problem_id = p.id
+        {where}
+        ORDER BY p.position
+        LIMIT :limit OFFSET :offset
+        """,
+        {"like": like, "limit": page_size, "offset": offset},
     ).fetchall()
-  return {
-      r["problem_id"]: {
-          "runCount": r["runs"],
+
+  items = [
+      {
+          "id": r["id"],
+          "title": r["title"],
+          "difficulty": r["difficulty"],
+          "tags": json.loads(r["tags"] or "[]"),
           "lastAllPassedAt": r["last_all_passed_at"],
       }
       for r in rows
-  }
+  ]
+  return {"items": items, "total": total, "page": page, "pageSize": page_size}
 
 
-@app.get("/api/problems/{pid}")
-def get_problem(pid: str):
-  """Saved code + status for one problem."""
+@app.get("/api/problem")
+def get_problem(id: str):
+  """Full problem definition + saved code + status."""
   with db.connect() as conn:
+    p = conn.execute("SELECT * FROM problem WHERE id = ?", (id,)).fetchone()
+    if p is None:
+      return {"error": "not found"}
     sub = conn.execute(
-        "SELECT code, updated_at FROM submission WHERE problem_id = ?", (pid,)
+        "SELECT code FROM submission WHERE problem_id = ?", (id,)
     ).fetchone()
     agg = conn.execute(
         """
@@ -102,18 +128,28 @@ def get_problem(pid: str):
                MAX(CASE WHEN all_passed = 1 THEN created_at END) AS last
         FROM run WHERE problem_id = ?
         """,
-        (pid,),
+        (id,),
     ).fetchone()
+
   return {
+      "id": p["id"],
+      "title": p["title"],
+      "difficulty": p["difficulty"],
+      "tags": json.loads(p["tags"] or "[]"),
+      "sources": json.loads(p["sources"] or "[]"),
+      "description": p["description"],
+      "primaryFunction": p["primary_function"],
+      "starter": p["starter"],
+      "solution": p["solution"],
+      "tests": p["tests"],
       "code": sub["code"] if sub else None,
-      "updatedAt": sub["updated_at"] if sub else None,
       "runCount": agg["runs"] or 0,
       "lastAllPassedAt": agg["last"],
   }
 
 
-@app.put("/api/problems/{pid}/code")
-def save_code(pid: str, payload: CodePayload):
+@app.put("/api/problem/code")
+def save_code(payload: CodePayload):
   ts = now_iso()
   with db.connect() as conn:
     conn.execute(
@@ -123,13 +159,13 @@ def save_code(pid: str, payload: CodePayload):
         ON CONFLICT(problem_id)
         DO UPDATE SET code = excluded.code, updated_at = excluded.updated_at
         """,
-        (pid, payload.code, ts),
+        (payload.id, payload.code, ts),
     )
   return {"ok": True, "updatedAt": ts}
 
 
-@app.get("/api/problems/{pid}/runs")
-def list_runs(pid: str, limit: int = 50):
+@app.get("/api/problem/runs")
+def list_runs(id: str, limit: int = 50):
   with db.connect() as conn:
     rows = conn.execute(
         """
@@ -138,13 +174,13 @@ def list_runs(pid: str, limit: int = 50):
         ORDER BY created_at DESC, id DESC
         LIMIT ?
         """,
-        (pid, limit),
+        (id, limit),
     ).fetchall()
   return [_run_dict(r) for r in rows]
 
 
-@app.post("/api/problems/{pid}/runs")
-def create_run(pid: str, payload: RunPayload):
+@app.post("/api/problem/runs")
+def create_run(payload: RunPayload):
   all_passed = 1 if payload.failed == 0 and payload.total > 0 else 0
   ts = now_iso()
   with db.connect() as conn:
@@ -154,7 +190,7 @@ def create_run(pid: str, payload: RunPayload):
           (problem_id, code, passed, failed, total, duration_ms, all_passed, created_at)
         VALUES (?, ?, ?, ?, ?, ?, ?, ?)
         """,
-        (pid, payload.code, payload.passed, payload.failed, payload.total,
+        (payload.id, payload.code, payload.passed, payload.failed, payload.total,
          payload.durationMs, all_passed, ts),
     )
     row = conn.execute("SELECT * FROM run WHERE id = ?", (cur.lastrowid,)).fetchone()

@@ -27,10 +27,12 @@ services:
       - "${API_PORT:-8000}:8000"
     volumes:
       - ./backend:/app
+      - ./coding-questions:/coding-questions:ro
       - api_data:/data
       - ./logs:/logs
     environment:
       DB_PATH: /data/trainer.db
+      QUESTIONS_DIR: /coding-questions
     command: /bin/sh -c "mkdir -p /logs && uvicorn server:app --host 0.0.0.0 --port 8000 --reload 2>&1 | tee /logs/api.log"
 
 volumes:
