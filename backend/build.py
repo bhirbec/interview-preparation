@@ -1,38 +1,27 @@
 #!/usr/bin/env python3
 """Import the coding-questions catalog into the database.
 
-Recursively finds every coding-questions/**/impl.py (any depth), parses each
-into its problem fields, and upserts them into the `problem` table. The problem
-id is the folder path relative to coding-questions/ (e.g. "maximum-subarray" or
-"CTCI/1.1-is-unique"), which is stable across runs.
+Recursively finds every coding-questions/**/ folder that has the three-file
+layout and imports it into the `problem` table. The problem id is the folder
+path relative to coding-questions/ (e.g. "maximum-subarray" or
+"CTCI/1.1-is-unique").
+
+Each problem folder has three files (no parsing/stubbing heuristics — the files
+are authored directly):
+
+    impl.py      # description comment + input classes + the STUBBED primary
+    solution.py  # input classes + the full solution
+    tests.py     # import unittest + test helpers + the unittest.TestCase
+
+The stored `starter` is impl.py with its leading description comment stripped
+(the description is shown in its own panel). The stored `tests` is tests.py with
+its `if __name__ == '__main__'` guard stripped (the app collects the TestCase
+itself).
 
 Run it inside the api container (which has the DB + a read-only mount of
 coding-questions):
 
     docker compose exec api python build.py
-
-Each impl.py looks like:
-
-    # Title
-    # Difficulty: <level>
-    # Source: <url>            (optional, zero or more)
-    # Tags: #tag1 #tag2
-    #
-    # <problem statement...>
-
-    import unittest
-    <other imports>           (optional)
-
-    class Node: ...           (optional helper class(es))
-    def primary(...): ...     (first top-level def == the function to solve)
-    ...
-
-    class TestX(unittest.TestCase): ...
-
-    if __name__ == '__main__':
-      unittest.main()
-
-The starter keeps only the primary function's signature with a stubbed body.
 """
 
 import json
@@ -48,22 +37,46 @@ QUESTIONS_DIR = os.environ.get(
 )
 
 
-def find_impls(root):
+def find_problem_dirs(root):
   for dirpath, _dirnames, filenames in os.walk(root):
     if "impl.py" in filenames:
-      yield os.path.join(dirpath, "impl.py")
+      yield dirpath
 
 
-def _strip_blanks(block):
-  while block and block[0].strip() == "":
-    block.pop(0)
-  while block and block[-1].strip() == "":
-    block.pop()
-  return block
+def _read(path):
+  with open(path) as f:
+    return f.read()
+
+
+def _strip(text):
+  return text.strip("\n") + "\n" if text.strip() else ""
+
+
+def split_comment(text):
+  """Return (comment_lines, code_str) splitting off the leading '#' comment."""
+  lines = text.splitlines()
+  i = 0
+  comment = []
+  while i < len(lines) and lines[i].startswith("#"):
+    comment.append(lines[i])
+    i += 1
+  while i < len(lines) and lines[i].strip() == "":
+    i += 1
+  return comment, "\n".join(lines[i:])
+
+
+def strip_guard(text):
+  """Drop the `if __name__ == '__main__':` guard block from a test file."""
+  out = []
+  for ln in text.splitlines():
+    if ln.startswith("if __name__"):
+      break
+    out.append(ln)
+  return "\n".join(out)
 
 
 def parse_metadata(comment_lines):
-  title = comment_lines[0].lstrip("#").strip()
+  title = comment_lines[0].lstrip("#").strip() if comment_lines else ""
   difficulty = ""
   sources = []
   tags = []
@@ -95,69 +108,18 @@ def parse_metadata(comment_lines):
   }
 
 
-def make_starter(solution_lines):
-  """Stub only the primary (first top-level) function's body, keeping everything
-  else (helper classes like Node, needed imports, and test helpers) so the tests
-  can still build their inputs.
-  """
-  start = next(
-      (i for i, ln in enumerate(solution_lines) if ln.startswith("def ")), None
-  )
-  if start is None:
-    return "", "\n".join(solution_lines) + "\n"
-
-  name = re.match(r"def\s+([a-zA-Z_][a-zA-Z0-9_]*)", solution_lines[start]).group(1)
-
-  # End of the (possibly multi-line) signature: the line ending with ":".
-  sig_end = next(
-      j for j in range(start, len(solution_lines))
-      if solution_lines[j].rstrip().endswith(":")
-  )
-
-  # End of the function body: the next top-level (unindented, non-blank) line.
-  body_end = len(solution_lines)
-  for j in range(sig_end + 1, len(solution_lines)):
-    ln = solution_lines[j]
-    if ln.strip() and not ln[:1].isspace():
-      body_end = j
-      break
-
-  stub = ["  # TODO: implement", "  raise NotImplementedError"]
-  new_lines = solution_lines[:sig_end + 1] + stub
-  trailing = solution_lines[body_end:]
-  if trailing:
-    new_lines += ["", ""] + trailing
-
-  starter = "\n".join(new_lines).rstrip() + "\n"
-  return name, starter
-
-
-def build_problem(pid, path):
-  with open(path) as f:
-    lines = f.read().splitlines()
-
-  comment = []
-  i = 0
-  while i < len(lines) and lines[i].startswith("#"):
-    comment.append(lines[i])
-    i += 1
-
-  test_start = next(
-      i for i, ln in enumerate(lines)
-      if ln.startswith("class ") and "unittest.TestCase" in ln
-  )
-  guard = next(
-      (i for i, ln in enumerate(lines) if ln.startswith("if __name__")), len(lines)
-  )
-
-  # Everything between the comment block and the test class is the solution
-  # (helper classes, imports it needs, and the functions) minus `import unittest`.
-  body = [ln for ln in lines[len(comment):test_start] if ln.strip() != "import unittest"]
-  solution = _strip_blanks(body)
-  tests = _strip_blanks(lines[test_start:guard])
-
+def build_problem(pid, folder):
+  impl = _read(os.path.join(folder, "impl.py"))
+  comment, code = split_comment(impl)
   meta = parse_metadata(comment)
-  primary, starter = make_starter(list(solution))
+
+  solution = _read(os.path.join(folder, "solution.py"))
+  tests = strip_guard(_read(os.path.join(folder, "tests.py")))
+
+  primary = ""
+  m = re.search(r"^def\s+([a-zA-Z_][a-zA-Z0-9_]*)", code, re.MULTILINE)
+  if m:
+    primary = m.group(1)
 
   return {
       "id": pid,
@@ -167,22 +129,26 @@ def build_problem(pid, path):
       "sources": meta["sources"],
       "description": meta["description"],
       "primary_function": primary,
-      "starter": starter,
-      "solution": "\n".join(solution) + "\n",
-      "tests": "\n".join(tests) + "\n",
+      "starter": _strip(code),
+      "solution": _strip(solution),
+      "tests": _strip(tests),
   }
 
 
 def natural_key(pid):
-  # Zero-pad numbers so "1.10" sorts after "1.2".
   return re.sub(r"\d+", lambda m: m.group().zfill(6), pid)
 
 
 def main():
   problems = []
-  for path in find_impls(QUESTIONS_DIR):
-    pid = os.path.relpath(os.path.dirname(path), QUESTIONS_DIR).replace(os.sep, "/")
-    problems.append(build_problem(pid, path))
+  skipped = []
+  for folder in find_problem_dirs(QUESTIONS_DIR):
+    pid = os.path.relpath(folder, QUESTIONS_DIR).replace(os.sep, "/")
+    if not (os.path.exists(os.path.join(folder, "solution.py"))
+            and os.path.exists(os.path.join(folder, "tests.py"))):
+      skipped.append(pid)
+      continue
+    problems.append(build_problem(pid, folder))
 
   problems.sort(key=lambda p: natural_key(p["id"]))
 
@@ -208,12 +174,13 @@ def main():
            json.dumps(p["sources"]), p["description"], p["primary_function"],
            p["starter"], p["solution"], p["tests"], position),
       )
-    # Drop problems whose folder no longer exists.
     if ids:
       placeholders = ",".join("?" * len(ids))
       conn.execute(f"DELETE FROM problem WHERE id NOT IN ({placeholders})", ids)
 
   print(f"Imported {len(problems)} problems into the problem table.")
+  if skipped:
+    print(f"Skipped {len(skipped)} folders missing solution.py/tests.py: {skipped}")
 
 
 if __name__ == "__main__":

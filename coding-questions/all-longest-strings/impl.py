@@ -26,60 +26,7 @@
 # Approach: find the maximum length in one pass, then collect all strings that
 # match it in a second pass, preserving order.
 
-import unittest
-
 
 def all_longest_strings(input_array):
-  max_len = max(len(s) for s in input_array)
-  return [s for s in input_array if len(s) == max_len]
-
-
-def all_longest_strings_1(input_array):
-  current_max = len(input_array[0])
-  output = [input_array[0]]
-
-  for item in input_array[1:]:
-    candidate_max = len(item)
-    if candidate_max > current_max:
-      current_max = candidate_max
-      output = [item]
-    elif candidate_max == current_max:
-      output.append(item)
-
-  return output
-
-
-class TestAllLongestStrings(unittest.TestCase):
-  def test_example_one(self):
-    self.assertEqual(
-        all_longest_strings(["aba", "aa", "ad", "vcd", "aba"]),
-        ["aba", "vcd", "aba"],
-    )
-
-  def test_example_two(self):
-    self.assertEqual(
-        all_longest_strings(["abc", "eeee", "abcd", "dcd"]),
-        ["eeee", "abcd"],
-    )
-
-  def test_two_of_same_max(self):
-    self.assertEqual(all_longest_strings(["a", "abc", "cba"]), ["abc", "cba"])
-
-  def test_single_longest(self):
-    self.assertEqual(all_longest_strings(["enn", "b"]), ["enn"])
-
-  def test_single_element(self):
-    self.assertEqual(all_longest_strings(["hello"]), ["hello"])
-
-  def test_all_same_length(self):
-    self.assertEqual(all_longest_strings(["ab", "cd", "ef"]), ["ab", "cd", "ef"])
-
-  def test_order_preserved(self):
-    self.assertEqual(
-        all_longest_strings(["xx", "y", "zz", "w", "vv"]),
-        ["xx", "zz", "vv"],
-    )
-
-
-if __name__ == '__main__':
-  unittest.main()
+  # TODO: implement
+  raise NotImplementedError
