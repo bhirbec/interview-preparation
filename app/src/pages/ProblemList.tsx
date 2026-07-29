@@ -1,6 +1,7 @@
 import { useMemo, useState } from 'react'
 import { Link } from 'react-router-dom'
 import type { Problem } from '../types'
+import ThemeToggle from '../components/ThemeToggle'
 
 export default function ProblemList({ problems }: { problems: Problem[] }) {
   const [query, setQuery] = useState('')
@@ -19,6 +20,7 @@ export default function ProblemList({ problems }: { problems: Problem[] }) {
       <header className="app-header">
         <h1>Coding Trainer</h1>
         <span className="count">{problems.length} problems</span>
+        <ThemeToggle />
       </header>
 
       <input

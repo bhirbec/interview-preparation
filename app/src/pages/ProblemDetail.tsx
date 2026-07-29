@@ -3,6 +3,7 @@ import { Link, useParams } from 'react-router-dom'
 import type { Problem, TestResult } from '../types'
 import CodeEditor from '../components/CodeEditor'
 import TestResults from '../components/TestResults'
+import ThemeToggle from '../components/ThemeToggle'
 import { runTests, warmUpPyodide } from '../pyodide'
 
 type Tab = 'impl' | 'solution' | 'test'
@@ -59,6 +60,7 @@ export default function ProblemDetail({ problems }: { problems: Problem[] }) {
         <span className={`badge badge-${problem.difficulty}`}>
           {problem.difficulty}
         </span>
+        <ThemeToggle />
       </header>
 
       <div className="columns">
