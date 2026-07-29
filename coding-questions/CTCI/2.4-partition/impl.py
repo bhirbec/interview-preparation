@@ -14,10 +14,11 @@
 # Output: the head Node of the rearranged list.
 #
 # Examples:
-#   70 -> 134 -> 3 -> 1 -> 10 -> 9, k=10  =>  9 -> 1 -> 3 -> 70 -> 134 -> 10
-#     (all values < 10 precede all values >= 10)
-#   1 -> 2 -> 3,                    k=5   =>  all on the "less" side
-#   6 -> 7 -> 8,                    k=5   =>  all on the "greater/equal" side
+#   70 -> 134 -> 3 -> 1 -> 10 -> 9, k=10
+#     => every node < 10 (3, 1, 9) must precede every node >= 10 (70, 134, 10).
+#        The order within each group is arbitrary, e.g. 9 -> 1 -> 3 -> 10 -> 134 -> 70.
+#   1 -> 2 -> 3, k=5  =>  all nodes are < 5, so they all stay on the "less" side
+#   6 -> 7 -> 8, k=5  =>  all nodes are >= 5, so they all stay on the ">=" side
 #
 # Approach: walk the list once, prepending each node to a `left` list when its
 # value < k and to a `right` list otherwise, then splice left in front of right.
