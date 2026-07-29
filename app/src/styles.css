@@ -306,6 +306,13 @@ body {
   font-size: 0.9rem;
 }
 
+.list-total {
+  text-align: center;
+  color: var(--muted);
+  font-size: 0.85rem;
+  margin: 0.75rem 0 0;
+}
+
 /* "last time all tests passed" — plain green text in the list, a chip in the
    detail header. */
 .solved {

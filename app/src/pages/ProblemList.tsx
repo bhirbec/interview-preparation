@@ -57,7 +57,6 @@ export default function ProblemList() {
     <div className="page list-page">
       <header className="app-header">
         <h1>Coding Trainer</h1>
-        <span className="count">{data ? `${data.total} problems` : ''}</span>
         <ThemeToggle />
       </header>
 
@@ -189,6 +188,12 @@ export default function ProblemList() {
               Next →
             </button>
           </div>
+
+          {data && (
+            <p className="list-total">
+              {data.total} problem{data.total === 1 ? '' : 's'}
+            </p>
+          )}
         </main>
       </div>
     </div>
