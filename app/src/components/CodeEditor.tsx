@@ -14,7 +14,7 @@ export default function CodeEditor({ value, onChange, readOnly }: Props) {
     <div className="editor">
       <CodeMirror
         value={value}
-        height="380px"
+        height="100%"
         theme={theme}
         extensions={[python()]}
         editable={!readOnly}
