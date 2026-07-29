@@ -3,3 +3,8 @@ impl_empty.py
 
 # Docker service logs
 logs/*.log
+
+# Backend SQLite database + Python caches
+*.db
+__pycache__/
+*.pyc

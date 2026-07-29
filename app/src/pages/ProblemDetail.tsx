@@ -1,13 +1,16 @@
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import { Link, useParams } from 'react-router-dom'
-import type { Problem, TestResult } from '../types'
+import type { Problem, RunRecord, TestResult } from '../types'
 import CodeEditor from '../components/CodeEditor'
 import Description from '../components/Description'
 import TestResults from '../components/TestResults'
 import ThemeToggle from '../components/ThemeToggle'
+import History from '../components/History'
 import { runTests, warmUpPyodide } from '../pyodide'
+import { api } from '../api'
+import { timeAgo } from '../time'
 
-type Tab = 'impl' | 'solution' | 'test'
+type Tab = 'impl' | 'solution' | 'test' | 'history'
 
 export default function ProblemDetail({ problems }: { problems: Problem[] }) {
   const { slug } = useParams()
@@ -17,15 +20,47 @@ export default function ProblemDetail({ problems }: { problems: Problem[] }) {
   )
 
   const [tab, setTab] = useState<Tab>('impl')
-  const [code, setCode] = useState(problem?.starter ?? '')
+  const [code, setCode] = useState('')
   const [results, setResults] = useState<TestResult[] | null>(null)
   const [error, setError] = useState<string | null>(null)
   const [running, setRunning] = useState(false)
+  const [runs, setRuns] = useState<RunRecord[]>([])
+  const [lastAllPassedAt, setLastAllPassedAt] = useState<string | null>(null)
+  const saveTimer = useRef<number | undefined>(undefined)
 
-  // Start fetching the Pyodide runtime as soon as a problem is opened.
   useEffect(() => {
     warmUpPyodide()
   }, [])
+
+  // Load the saved implementation (falling back to the starter) and run history
+  // whenever the problem changes.
+  useEffect(() => {
+    if (!slug || !problem) return
+    let cancelled = false
+    setResults(null)
+    setError(null)
+    setTab('impl')
+    api
+      .getProblem(slug)
+      .then((state) => {
+        if (cancelled) return
+        setCode(state.code ?? problem.starter)
+        setLastAllPassedAt(state.lastAllPassedAt)
+      })
+      .catch(() => {
+        if (!cancelled) setCode(problem.starter)
+      })
+    api
+      .listRuns(slug)
+      .then((r) => {
+        if (!cancelled) setRuns(r)
+      })
+      .catch(() => {})
+    return () => {
+      cancelled = true
+      clearTimeout(saveTimer.current)
+    }
+  }, [slug, problem])
 
   if (!problem) {
     return (
@@ -38,12 +73,43 @@ export default function ProblemDetail({ problems }: { problems: Problem[] }) {
     )
   }
 
+  // Debounced autosave — only fires on user edits.
+  function scheduleSave(next: string) {
+    clearTimeout(saveTimer.current)
+    saveTimer.current = window.setTimeout(() => {
+      api.saveCode(slug!, next).catch(() => {})
+    }, 700)
+  }
+
+  function onCodeChange(next: string) {
+    setCode(next)
+    scheduleSave(next)
+  }
+
+  function loadCode(next: string) {
+    setCode(next)
+    scheduleSave(next)
+    setTab('impl')
+  }
+
   async function run() {
     setRunning(true)
     setError(null)
     setResults(null)
     try {
-      setResults(await runTests(code, problem!.tests))
+      const { results: res, durationMs } = await runTests(code, problem!.tests)
+      setResults(res)
+      const passed = res.filter((r) => r.status === 'pass').length
+      const failed = res.length - passed
+      clearTimeout(saveTimer.current)
+      await api.saveCode(slug!, code).catch(() => {})
+      await api.createRun(slug!, { code, passed, failed, total: res.length, durationMs })
+      const [freshRuns, state] = await Promise.all([
+        api.listRuns(slug!),
+        api.getProblem(slug!),
+      ])
+      setRuns(freshRuns)
+      setLastAllPassedAt(state.lastAllPassedAt)
     } catch (e) {
       setError(e instanceof Error ? e.message : String(e))
     } finally {
@@ -61,6 +127,11 @@ export default function ProblemDetail({ problems }: { problems: Problem[] }) {
         <span className={`badge badge-${problem.difficulty}`}>
           {problem.difficulty}
         </span>
+        {lastAllPassedAt && (
+          <span className="solved on" title="Most recent time all tests passed">
+            ✓ solved {timeAgo(lastAllPassedAt)}
+          </span>
+        )}
         <ThemeToggle />
       </header>
 
@@ -105,16 +176,22 @@ export default function ProblemDetail({ problems }: { problems: Problem[] }) {
             >
               Test
             </button>
+            <button
+              className={tab === 'history' ? 'active' : ''}
+              onClick={() => setTab('history')}
+            >
+              History{runs.length ? ` (${runs.length})` : ''}
+            </button>
           </nav>
 
           {tab === 'impl' && (
             <>
-              <CodeEditor value={code} onChange={setCode} />
+              <CodeEditor value={code} onChange={onCodeChange} />
               <div className="actions">
                 <button className="run" onClick={run} disabled={running}>
                   {running ? 'Running…' : 'Run Tests'}
                 </button>
-                <button className="reset" onClick={() => setCode(problem.starter)}>
+                <button className="reset" onClick={() => loadCode(problem.starter)}>
                   Reset
                 </button>
               </div>
@@ -123,10 +200,13 @@ export default function ProblemDetail({ problems }: { problems: Problem[] }) {
             </>
           )}
 
-          {tab === 'solution' && (
-            <CodeEditor value={problem.solution} readOnly />
-          )}
+          {tab === 'solution' && <CodeEditor value={problem.solution} readOnly />}
           {tab === 'test' && <CodeEditor value={problem.tests} readOnly />}
+          {tab === 'history' && (
+            <div className="history-wrap">
+              <History runs={runs} onLoad={loadCode} />
+            </div>
+          )}
         </section>
       </div>
     </div>

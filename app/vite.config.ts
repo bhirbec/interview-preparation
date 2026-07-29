@@ -10,5 +10,13 @@ export default defineConfig({
     watch: {
       usePolling: process.env.CHOKIDAR_USEPOLLING === '1',
     },
+    // Keep the browser same-origin: proxy /api to the backend (the api service
+    // in Docker, or a local uvicorn on the host).
+    proxy: {
+      '/api': {
+        target: process.env.VITE_API_TARGET || 'http://localhost:8000',
+        changeOrigin: true,
+      },
+    },
   },
 })
