@@ -172,6 +172,85 @@ body {
   text-align: center;
 }
 
+/* "last time all tests passed" — plain green text in the list, a chip in the
+   detail header. */
+.solved {
+  font-size: 0.78rem;
+  color: var(--pass);
+  white-space: nowrap;
+  min-width: 6rem;
+  text-align: right;
+}
+
+.app-header .solved {
+  min-width: 0;
+  background: var(--pass-bg);
+  padding: 0.15rem 0.55rem;
+  border-radius: 999px;
+  font-weight: 600;
+}
+
+/* ---- history tab ---- */
+.history-wrap {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  padding: 0.6rem 0.75rem;
+}
+
+.history-empty {
+  color: var(--muted);
+  padding: 1rem;
+  font-size: 0.9rem;
+}
+
+.history {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.history-row {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  padding: 0.5rem 0.6rem;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  margin-bottom: 0.4rem;
+  font-size: 0.85rem;
+}
+
+.history-row .score {
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-weight: 600;
+}
+.history-row.passed .score {
+  color: var(--pass);
+}
+.history-row.failed .score {
+  color: var(--fail);
+}
+.history-row .dur {
+  color: var(--muted);
+}
+.history-row .when {
+  flex: 1;
+  color: var(--muted);
+}
+.history-row .load {
+  background: transparent;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 0.2rem 0.6rem;
+  cursor: pointer;
+  color: var(--accent);
+  font-size: 0.8rem;
+}
+.history-row .load:hover {
+  border-color: var(--accent);
+}
+
 .badge {
   font-size: 0.72rem;
   font-weight: 700;

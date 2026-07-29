@@ -58,17 +58,25 @@ _suite.run(_res)
 _json.dumps([{"name": n, "status": s, "message": m} for (n, s, m) in _res.records])
 `
 
+export interface RunOutcome {
+  results: TestResult[]
+  durationMs: number
+}
+
 export async function runTests(
   userCode: string,
   testsCode: string,
-): Promise<TestResult[]> {
+): Promise<RunOutcome> {
   const pyodide = await loadPyodideOnce()
   const script = `import unittest\n\n${userCode}\n\n${testsCode}\n${HARNESS}`
   // Fresh namespace each run so classes from a previous problem never linger.
   const namespace = pyodide.toPy({})
+  // Time only the test execution, not the (one-time) Pyodide download above.
+  const start = performance.now()
   try {
     const json = await pyodide.runPythonAsync(script, { globals: namespace })
-    return JSON.parse(json) as TestResult[]
+    const durationMs = performance.now() - start
+    return { results: JSON.parse(json) as TestResult[], durationMs }
   } finally {
     namespace.destroy()
   }
