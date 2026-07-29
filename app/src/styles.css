@@ -172,6 +172,33 @@ body {
   text-align: center;
 }
 
+.pager {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 1rem;
+  margin-top: 1rem;
+}
+
+.pager button {
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 0.4rem 0.9rem;
+  cursor: pointer;
+  color: var(--text);
+}
+
+.pager button:disabled {
+  opacity: 0.45;
+  cursor: default;
+}
+
+.pager .pageinfo {
+  color: var(--muted);
+  font-size: 0.9rem;
+}
+
 /* "last time all tests passed" — plain green text in the list, a chip in the
    detail header. */
 .solved {

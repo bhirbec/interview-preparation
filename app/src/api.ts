@@ -1,4 +1,4 @@
-import type { ProblemState, RunRecord, SummaryMap } from './types'
+import type { ProblemFull, ProblemPage, RunRecord } from './types'
 
 async function asJson<T>(res: Response): Promise<T> {
   if (!res.ok) throw new Error(`API ${res.status} ${res.statusText}`)
@@ -6,6 +6,7 @@ async function asJson<T>(res: Response): Promise<T> {
 }
 
 const jsonHeaders = { 'Content-Type': 'application/json' }
+const enc = encodeURIComponent
 
 export interface NewRun {
   code: string
@@ -16,25 +17,28 @@ export interface NewRun {
 }
 
 export const api = {
-  summary: () => fetch('/api/summary').then((r) => asJson<SummaryMap>(r)),
+  listProblems: (search: string, page: number, pageSize = 20) =>
+    fetch(
+      `/api/problems?search=${enc(search)}&page=${page}&pageSize=${pageSize}`,
+    ).then((r) => asJson<ProblemPage>(r)),
 
   getProblem: (id: string) =>
-    fetch(`/api/problems/${id}`).then((r) => asJson<ProblemState>(r)),
+    fetch(`/api/problem?id=${enc(id)}`).then((r) => asJson<ProblemFull>(r)),
 
   saveCode: (id: string, code: string) =>
-    fetch(`/api/problems/${id}/code`, {
+    fetch('/api/problem/code', {
       method: 'PUT',
       headers: jsonHeaders,
-      body: JSON.stringify({ code }),
+      body: JSON.stringify({ id, code }),
     }).then((r) => asJson<{ ok: boolean; updatedAt: string }>(r)),
 
   listRuns: (id: string) =>
-    fetch(`/api/problems/${id}/runs`).then((r) => asJson<RunRecord[]>(r)),
+    fetch(`/api/problem/runs?id=${enc(id)}`).then((r) => asJson<RunRecord[]>(r)),
 
   createRun: (id: string, run: NewRun) =>
-    fetch(`/api/problems/${id}/runs`, {
+    fetch('/api/problem/runs', {
       method: 'POST',
       headers: jsonHeaders,
-      body: JSON.stringify(run),
+      body: JSON.stringify({ id, ...run }),
     }).then((r) => asJson<RunRecord>(r)),
 }

@@ -1,16 +1,3 @@
-export interface Problem {
-  slug: string
-  title: string
-  difficulty: string
-  tags: string[]
-  sources: string[]
-  description: string
-  primaryFunction: string
-  starter: string
-  solution: string
-  tests: string
-}
-
 export type TestStatus = 'pass' | 'fail' | 'error'
 
 export interface TestResult {
@@ -31,14 +18,35 @@ export interface RunRecord {
   code: string
 }
 
-export interface ProblemState {
-  code: string | null
-  updatedAt: string | null
-  runCount: number
+// Row in the paginated catalog list.
+export interface ProblemListItem {
+  id: string
+  title: string
+  difficulty: string
+  tags: string[]
   lastAllPassedAt: string | null
 }
 
-export type SummaryMap = Record<
-  string,
-  { runCount: number; lastAllPassedAt: string | null }
->
+export interface ProblemPage {
+  items: ProblemListItem[]
+  total: number
+  page: number
+  pageSize: number
+}
+
+// Full problem definition + this user's saved code and status.
+export interface ProblemFull {
+  id: string
+  title: string
+  difficulty: string
+  tags: string[]
+  sources: string[]
+  description: string
+  primaryFunction: string
+  starter: string
+  solution: string
+  tests: string
+  code: string | null
+  runCount: number
+  lastAllPassedAt: string | null
+}

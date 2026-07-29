@@ -14,6 +14,20 @@ DB_PATH = os.environ.get(
 )
 
 SCHEMA = """
+CREATE TABLE IF NOT EXISTS problem (
+  id               TEXT PRIMARY KEY,   -- path relative to coding-questions/, e.g. CTCI/1.1-is-unique
+  title            TEXT NOT NULL,
+  difficulty       TEXT,
+  tags             TEXT,               -- JSON array
+  sources          TEXT,               -- JSON array
+  description      TEXT,
+  primary_function TEXT,
+  starter          TEXT,
+  solution         TEXT,
+  tests            TEXT,
+  position         INTEGER
+);
+
 CREATE TABLE IF NOT EXISTS submission (
   problem_id TEXT PRIMARY KEY,
   code       TEXT NOT NULL,
