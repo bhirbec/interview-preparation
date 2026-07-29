@@ -184,9 +184,15 @@ button.tag:hover {
 }
 
 /* ---- detail ---- */
+/* The detail page spans the full viewport width. */
+.page.detail {
+  max-width: none;
+}
+
 .detail .columns {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) minmax(0, 1.2fr);
+  /* Cap the description column; let the workspace take the rest of the width. */
+  grid-template-columns: minmax(320px, 460px) minmax(0, 1fr);
   gap: 1.2rem;
   align-items: start;
 }
