@@ -8,7 +8,7 @@ class TestSearchInRotatedArray(unittest.TestCase):
     self.assertEqual(find(CANONICAL, 5), 8)
 
   def test_find_value_in_high_run(self):
-    # This is the case the original buggy version missed.
+    # A value in the first (rotated-off) run.
     self.assertEqual(find(CANONICAL, 15), 0)
     self.assertEqual(find(CANONICAL, 25), 4)
 
