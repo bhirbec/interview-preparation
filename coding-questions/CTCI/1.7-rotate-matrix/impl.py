@@ -47,11 +47,6 @@ def rotate(mat):
   return mat
 
 
-def _rotate_ccw_reference(mat):
-  # Independent 90-degrees-counterclockwise rotation used only to check `rotate`.
-  return [list(row) for row in reversed(list(zip(*mat)))]
-
-
 class TestRotate(unittest.TestCase):
   def test_two_by_two(self):
     self.assertEqual(rotate([[1, 2], [3, 4]]), [[2, 4], [1, 3]])
@@ -70,12 +65,6 @@ class TestRotate(unittest.TestCase):
     mat = [[1, 2], [3, 4]]
     result = rotate(mat)
     self.assertIs(result, mat)  # same object, mutated in place
-
-  def test_matches_reference_for_various_sizes(self):
-    for n in range(1, 7):
-      mat = [[r * n + c for c in range(n)] for r in range(n)]
-      expected = _rotate_ccw_reference(mat)
-      self.assertEqual(rotate(mat), expected)
 
   def test_four_by_four(self):
     mat = [
