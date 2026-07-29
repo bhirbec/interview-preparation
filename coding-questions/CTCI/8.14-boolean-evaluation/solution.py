@@ -23,9 +23,8 @@ def count_eval(expr, result):
 
       for r1, r2 in ((0, 0), (0, 1), (1, 0), (1, 1)):
         if f(r1, r2) == result:
-          # NOTE: recurse via _count_eval (not the public count_eval) so the
-          # shared memo is actually consulted; the original called count_eval,
-          # which allocated a fresh memo on every sub-call and defeated it.
+          # Recurse via _count_eval (not the public count_eval) so the shared
+          # memo is consulted rather than a fresh one being allocated per call.
           s += _count_eval(left, r1) * _count_eval(right, r2)
 
     memo[key] = s
