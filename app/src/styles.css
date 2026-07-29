@@ -400,6 +400,36 @@ button.tag:hover {
   overflow-wrap: break-word;
 }
 
+.hint {
+  margin-top: 0.5rem;
+}
+
+.hint-toggle {
+  background: transparent;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 0.35rem 0.7rem;
+  cursor: pointer;
+  color: var(--accent);
+  font-size: 0.85rem;
+}
+
+.hint-toggle:hover {
+  border-color: var(--accent);
+}
+
+.hint-body {
+  margin-top: 0.6rem;
+  padding: 0.6rem 0.85rem;
+  border-left: 3px solid var(--accent);
+  background: var(--code-bg);
+  border-radius: 0 8px 8px 0;
+}
+
+.hint-body .para:last-child {
+  margin-bottom: 0;
+}
+
 .sources {
   margin-top: 0.6rem;
 }
