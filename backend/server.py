@@ -94,19 +94,31 @@ def facets():
   return {"difficulties": difficulties, "tags": tags}
 
 
+# A problem is: solved (has an all-passing run), started (edited code that
+# differs from the starter, or at least one run), or not-started.
+STATUS_EXPR = """
+  CASE
+    WHEN r.last_all_passed_at IS NOT NULL THEN 'solved'
+    WHEN (s.code IS NOT NULL AND s.code <> p.starter) OR COALESCE(r.runs, 0) > 0
+      THEN 'started'
+    ELSE 'not-started'
+  END
+"""
+
+
 @app.get("/api/problems")
 def list_problems(
     search: str = "",
     difficulty: str = "",
     tags: str = "",
-    solved: str = "",
+    status: str = "",
     page: int = 1,
     pageSize: int = 20,
 ):
   """Paginated, filterable problem list for the catalog view.
 
   difficulty/tags are comma-separated. Multiple tags are ANDed (a problem must
-  carry all of them). solved is "solved" | "unsolved" | "" (any).
+  carry all of them). status is "not-started" | "started" | "solved" | "" (any).
   """
   page = max(1, page)
   page_size = max(1, min(100, pageSize))
@@ -132,16 +144,18 @@ def list_problems(
     params[f"tag{i}"] = f'%"{t}"%'  # tags column is a JSON array of quoted strings
     conds.append(f"p.tags LIKE :tag{i}")
 
-  if solved == "solved":
-    conds.append("r.last_all_passed_at IS NOT NULL")
-  elif solved == "unsolved":
-    conds.append("r.last_all_passed_at IS NULL")
+  if status in ("not-started", "started", "solved"):
+    conds.append(f"({STATUS_EXPR.strip()}) = :status")
+    params["status"] = status
 
   where = ("WHERE " + " AND ".join(conds)) if conds else ""
   base_from = """
     FROM problem p
+    LEFT JOIN submission s ON s.problem_id = p.id
     LEFT JOIN (
       SELECT problem_id,
+             COUNT(*) AS runs,
+             MAX(created_at) AS last_run_at,
              MAX(CASE WHEN all_passed = 1 THEN created_at END) AS last_all_passed_at
       FROM run GROUP BY problem_id
     ) r ON r.problem_id = p.id
@@ -153,7 +167,10 @@ def list_problems(
     ).fetchone()["n"]
     rows = conn.execute(
         f"""
-        SELECT p.id, p.title, p.difficulty, p.tags, r.last_all_passed_at
+        SELECT p.id, p.title, p.difficulty, p.tags,
+               r.last_all_passed_at,
+               COALESCE(s.updated_at, r.last_run_at) AS last_activity_at,
+               {STATUS_EXPR} AS status
         {base_from} {where}
         ORDER BY p.position
         LIMIT :limit OFFSET :offset
@@ -167,7 +184,9 @@ def list_problems(
           "title": r["title"],
           "difficulty": r["difficulty"],
           "tags": json.loads(r["tags"] or "[]"),
+          "status": r["status"],
           "lastAllPassedAt": r["last_all_passed_at"],
+          "lastActivityAt": r["last_activity_at"],
       }
       for r in rows
   ]

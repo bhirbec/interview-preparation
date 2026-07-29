@@ -18,13 +18,17 @@ export interface RunRecord {
   code: string
 }
 
+export type ProblemStatus = 'not-started' | 'started' | 'solved'
+
 // Row in the paginated catalog list.
 export interface ProblemListItem {
   id: string
   title: string
   difficulty: string
   tags: string[]
+  status: ProblemStatus
   lastAllPassedAt: string | null
+  lastActivityAt: string | null
 }
 
 export interface ProblemPage {
@@ -44,7 +48,7 @@ export interface Facets {
   tags: Facet[]
 }
 
-export type SolvedFilter = 'all' | 'solved' | 'unsolved'
+export type StatusFilter = 'all' | ProblemStatus
 
 // Full problem definition + this user's saved code and status.
 export interface ProblemFull {
