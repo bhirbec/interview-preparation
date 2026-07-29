@@ -184,8 +184,20 @@ body {
   display: flex;
   flex-wrap: wrap;
   gap: 0.35rem;
-  max-height: 260px;
-  overflow-y: auto;
+}
+
+.show-more {
+  margin-top: 0.5rem;
+  background: none;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  color: var(--accent);
+  font-size: 0.8rem;
+}
+
+.show-more:hover {
+  text-decoration: underline;
 }
 
 .tag-filter .fcount {
