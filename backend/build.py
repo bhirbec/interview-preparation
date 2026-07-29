@@ -96,25 +96,39 @@ def parse_metadata(comment_lines):
 
 
 def make_starter(solution_lines):
-  """Keep only the primary (first top-level) function's signature; stub its body.
-
-  Helper classes / other top-level code are intentionally dropped from the
-  starter — the user rewrites what they need (the Solution tab has the rest).
+  """Stub only the primary (first top-level) function's body, keeping everything
+  else (helper classes like Node, needed imports, and test helpers) so the tests
+  can still build their inputs.
   """
   start = next(
       (i for i, ln in enumerate(solution_lines) if ln.startswith("def ")), None
   )
   if start is None:
-    return "", "# TODO: implement\n"
-
-  sig = []
-  for ln in solution_lines[start:]:
-    sig.append(ln)
-    if ln.rstrip().endswith(":"):
-      break
+    return "", "\n".join(solution_lines) + "\n"
 
   name = re.match(r"def\s+([a-zA-Z_][a-zA-Z0-9_]*)", solution_lines[start]).group(1)
-  starter = "\n".join(sig) + "\n  # TODO: implement\n  pass\n"
+
+  # End of the (possibly multi-line) signature: the line ending with ":".
+  sig_end = next(
+      j for j in range(start, len(solution_lines))
+      if solution_lines[j].rstrip().endswith(":")
+  )
+
+  # End of the function body: the next top-level (unindented, non-blank) line.
+  body_end = len(solution_lines)
+  for j in range(sig_end + 1, len(solution_lines)):
+    ln = solution_lines[j]
+    if ln.strip() and not ln[:1].isspace():
+      body_end = j
+      break
+
+  stub = ["  # TODO: implement", "  raise NotImplementedError"]
+  new_lines = solution_lines[:sig_end + 1] + stub
+  trailing = solution_lines[body_end:]
+  if trailing:
+    new_lines += ["", ""] + trailing
+
+  starter = "\n".join(new_lines).rstrip() + "\n"
   return name, starter
 
 
