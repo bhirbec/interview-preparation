@@ -1,0 +1,27 @@
+def place_queens(n):
+  queens = [0] * n
+  return _place(n, 0, queens)
+
+
+def _place(n, r, queens):
+  if r > n - 1:
+    yield list(queens)
+    return
+
+  for c in range(n):
+    if is_valid(r, c, queens):
+      queens[r] = c
+      yield from _place(n, r + 1, queens)
+
+
+def is_valid(r, c, queens):
+  for row in range(r):
+    col_delta = abs(c - queens[row])
+    if col_delta == 0:
+      return False
+
+    row_delta = r - row
+    if col_delta == row_delta:
+      return False
+
+  return True

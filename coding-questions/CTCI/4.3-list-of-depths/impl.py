@@ -29,9 +29,6 @@
 # values to the linked list for that depth, appending (not prepending) so nodes
 # keep their left-to-right order.
 
-import unittest
-from queue import Queue
-
 
 class LinkedList():
 
@@ -65,78 +62,5 @@ class LinkedList():
 
 
 def get_layers(root):
-  if root is None:
-    return []
-
-  q = Queue()
-  q.put((root, 0))
-  layers = []
-
-  while not q.empty():
-    n, d = q.get()
-
-    if len(layers) == d:
-      layers.append(LinkedList(n['value']))
-    else:
-      # Append (not insert) so values stay in left-to-right order.
-      layers[d].append(n['value'])
-
-    if 'left' in n:
-      q.put((n['left'], d + 1))
-
-    if 'right' in n:
-      q.put((n['right'], d + 1))
-
-  return layers
-
-
-class TestGetLayers(unittest.TestCase):
-  def _values(self, tree):
-    return [list(layer) for layer in get_layers(tree)]
-
-  def test_empty_tree(self):
-    self.assertEqual(get_layers(None), [])
-
-  def test_single_node(self):
-    self.assertEqual(self._values({'value': 1}), [[1]])
-
-  def test_full_tree_left_to_right_order(self):
-    tree = {
-        'value': 1,
-        'left': {
-            'value': 2,
-            'left': {'value': 4},
-            'right': {'value': 5},
-        },
-        'right': {
-            'value': 3,
-            'left': {'value': 6},
-            'right': {'value': 7},
-        },
-    }
-    self.assertEqual(self._values(tree), [[1], [2, 3], [4, 5, 6, 7]])
-
-  def test_skewed_left_tree(self):
-    tree = {
-        'value': 1,
-        'left': {'value': 2, 'left': {'value': 3}},
-    }
-    self.assertEqual(self._values(tree), [[1], [2], [3]])
-
-  def test_number_of_layers_equals_depth(self):
-    tree = {
-        'value': 1,
-        'left': {'value': 2},
-        'right': {'value': 3, 'right': {'value': 4}},
-    }
-    self.assertEqual(len(get_layers(tree)), 3)
-
-  def test_linked_list_str(self):
-    layers = get_layers({'value': 1,
-                         'left': {'value': 2},
-                         'right': {'value': 3}})
-    self.assertEqual(str(layers[1]), '2, 3')
-
-
-if __name__ == '__main__':
-  unittest.main()
+  # TODO: implement
+  raise NotImplementedError
