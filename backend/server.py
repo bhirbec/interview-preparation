@@ -69,34 +69,96 @@ def health():
   return {"ok": True}
 
 
+@app.get("/api/facets")
+def facets():
+  """Available filter values (with counts) for the list sidebar."""
+  order = {"easy": 0, "medium": 1, "hard": 2}
+  with db.connect() as conn:
+    drows = conn.execute(
+        "SELECT difficulty, COUNT(*) AS c FROM problem GROUP BY difficulty"
+    ).fetchall()
+    trows = conn.execute("SELECT tags FROM problem").fetchall()
+
+  difficulties = sorted(
+      [{"value": r["difficulty"], "count": r["c"]} for r in drows if r["difficulty"]],
+      key=lambda d: order.get(d["value"], 99),
+  )
+  counter = {}
+  for r in trows:
+    for t in json.loads(r["tags"] or "[]"):
+      counter[t] = counter.get(t, 0) + 1
+  tags = [
+      {"value": k, "count": v}
+      for k, v in sorted(counter.items(), key=lambda kv: (-kv[1], kv[0]))
+  ]
+  return {"difficulties": difficulties, "tags": tags}
+
+
 @app.get("/api/problems")
-def list_problems(search: str = "", page: int = 1, pageSize: int = 20):
-  """Paginated, searchable problem list for the catalog view."""
+def list_problems(
+    search: str = "",
+    difficulty: str = "",
+    tags: str = "",
+    solved: str = "",
+    page: int = 1,
+    pageSize: int = 20,
+):
+  """Paginated, filterable problem list for the catalog view.
+
+  difficulty/tags are comma-separated. Multiple tags are ANDed (a problem must
+  carry all of them). solved is "solved" | "unsolved" | "" (any).
+  """
   page = max(1, page)
   page_size = max(1, min(100, pageSize))
   offset = (page - 1) * page_size
-  like = f"%{search.strip().lower()}%"
-  where = "WHERE lower(p.title) LIKE :like OR lower(p.tags) LIKE :like" if search.strip() else ""
+
+  conds = []
+  params = {}
+
+  if search.strip():
+    params["like"] = f"%{search.strip().lower()}%"
+    conds.append("(lower(p.title) LIKE :like OR lower(p.tags) LIKE :like)")
+
+  diffs = [d.strip() for d in difficulty.split(",") if d.strip()]
+  if diffs:
+    placeholders = []
+    for i, d in enumerate(diffs):
+      params[f"diff{i}"] = d
+      placeholders.append(f":diff{i}")
+    conds.append(f"p.difficulty IN ({','.join(placeholders)})")
+
+  taglist = [t.strip() for t in tags.split(",") if t.strip()]
+  for i, t in enumerate(taglist):
+    params[f"tag{i}"] = f'%"{t}"%'  # tags column is a JSON array of quoted strings
+    conds.append(f"p.tags LIKE :tag{i}")
+
+  if solved == "solved":
+    conds.append("r.last_all_passed_at IS NOT NULL")
+  elif solved == "unsolved":
+    conds.append("r.last_all_passed_at IS NULL")
+
+  where = ("WHERE " + " AND ".join(conds)) if conds else ""
+  base_from = """
+    FROM problem p
+    LEFT JOIN (
+      SELECT problem_id,
+             MAX(CASE WHEN all_passed = 1 THEN created_at END) AS last_all_passed_at
+      FROM run GROUP BY problem_id
+    ) r ON r.problem_id = p.id
+  """
 
   with db.connect() as conn:
     total = conn.execute(
-        f"SELECT COUNT(*) AS n FROM problem p {where}", {"like": like}
+        f"SELECT COUNT(*) AS n {base_from} {where}", params
     ).fetchone()["n"]
     rows = conn.execute(
         f"""
-        SELECT p.id, p.title, p.difficulty, p.tags,
-               r.last_all_passed_at
-        FROM problem p
-        LEFT JOIN (
-          SELECT problem_id,
-                 MAX(CASE WHEN all_passed = 1 THEN created_at END) AS last_all_passed_at
-          FROM run GROUP BY problem_id
-        ) r ON r.problem_id = p.id
-        {where}
+        SELECT p.id, p.title, p.difficulty, p.tags, r.last_all_passed_at
+        {base_from} {where}
         ORDER BY p.position
         LIMIT :limit OFFSET :offset
         """,
-        {"like": like, "limit": page_size, "offset": offset},
+        {**params, "limit": page_size, "offset": offset},
     ).fetchall()
 
   items = [
