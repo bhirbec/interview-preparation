@@ -13,6 +13,9 @@ export default function ProblemList() {
   const [page, setPage] = useState(1)
   const [data, setData] = useState<ProblemPage | null>(null)
   const [facets, setFacets] = useState<Facets | null>(null)
+  const [showAllTags, setShowAllTags] = useState(false)
+
+  const TAG_LIMIT = 12
 
   useEffect(() => {
     api.getFacets().then(setFacets).catch(() => setFacets({ difficulties: [], tags: [] }))
@@ -107,17 +110,31 @@ export default function ProblemList() {
           <div className="filter-group">
             <h3>Tags</h3>
             <div className="tag-filter">
-              {facets?.tags.map((t) => (
-                <button
-                  key={t.value}
-                  type="button"
-                  className={`tag ${tags.includes(t.value) ? 'active' : ''}`}
-                  onClick={() => toggle(tags, setTags, t.value)}
-                >
-                  #{t.value} <span className="fcount">{t.count}</span>
-                </button>
-              ))}
+              {(facets?.tags ?? [])
+                // Collapsed: show the first TAG_LIMIT plus any selected beyond it.
+                .filter((t, i) => showAllTags || i < TAG_LIMIT || tags.includes(t.value))
+                .map((t) => (
+                  <button
+                    key={t.value}
+                    type="button"
+                    className={`tag ${tags.includes(t.value) ? 'active' : ''}`}
+                    onClick={() => toggle(tags, setTags, t.value)}
+                  >
+                    #{t.value} <span className="fcount">{t.count}</span>
+                  </button>
+                ))}
             </div>
+            {(facets?.tags.length ?? 0) > TAG_LIMIT && (
+              <button
+                type="button"
+                className="show-more"
+                onClick={() => setShowAllTags((v) => !v)}
+              >
+                {showAllTags
+                  ? 'Show less'
+                  : `Show more (${(facets?.tags.length ?? 0) - TAG_LIMIT})`}
+              </button>
+            )}
           </div>
 
           {hasFilters && (
