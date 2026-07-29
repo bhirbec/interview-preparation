@@ -34,6 +34,18 @@ export interface ProblemPage {
   pageSize: number
 }
 
+export interface Facet {
+  value: string
+  count: number
+}
+
+export interface Facets {
+  difficulties: Facet[]
+  tags: Facet[]
+}
+
+export type SolvedFilter = 'all' | 'solved' | 'unsolved'
+
 // Full problem definition + this user's saved code and status.
 export interface ProblemFull {
   id: string

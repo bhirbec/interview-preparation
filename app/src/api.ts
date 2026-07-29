@@ -1,4 +1,10 @@
-import type { ProblemFull, ProblemPage, RunRecord } from './types'
+import type {
+  Facets,
+  ProblemFull,
+  ProblemPage,
+  RunRecord,
+  SolvedFilter,
+} from './types'
 
 async function asJson<T>(res: Response): Promise<T> {
   if (!res.ok) throw new Error(`API ${res.status} ${res.statusText}`)
@@ -16,11 +22,28 @@ export interface NewRun {
   durationMs: number
 }
 
+export interface ListParams {
+  search?: string
+  difficulty?: string[]
+  tags?: string[]
+  solved?: SolvedFilter
+  page?: number
+  pageSize?: number
+}
+
 export const api = {
-  listProblems: (search: string, page: number, pageSize = 20) =>
-    fetch(
-      `/api/problems?search=${enc(search)}&page=${page}&pageSize=${pageSize}`,
-    ).then((r) => asJson<ProblemPage>(r)),
+  getFacets: () => fetch('/api/facets').then((r) => asJson<Facets>(r)),
+
+  listProblems: (params: ListParams) => {
+    const q = new URLSearchParams()
+    if (params.search?.trim()) q.set('search', params.search.trim())
+    if (params.difficulty?.length) q.set('difficulty', params.difficulty.join(','))
+    if (params.tags?.length) q.set('tags', params.tags.join(','))
+    if (params.solved && params.solved !== 'all') q.set('solved', params.solved)
+    q.set('page', String(params.page ?? 1))
+    q.set('pageSize', String(params.pageSize ?? 20))
+    return fetch(`/api/problems?${q.toString()}`).then((r) => asJson<ProblemPage>(r))
+  },
 
   getProblem: (id: string) =>
     fetch(`/api/problem?id=${enc(id)}`).then((r) => asJson<ProblemFull>(r)),
