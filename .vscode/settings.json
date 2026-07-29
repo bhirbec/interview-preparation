@@ -1,3 +1,8 @@
 {
-  "python.REPL.enableREPLSmartSend": false
+  "python.REPL.enableREPLSmartSend": false,
+  "[python]": {
+    "editor.tabSize": 2,
+    "editor.insertSpaces": true,
+    "editor.detectIndentation": false
+  }
 }
