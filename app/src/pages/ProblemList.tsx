@@ -1,15 +1,47 @@
 import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
-import type { Facets, ProblemPage, SolvedFilter } from '../types'
+import type { Facets, ProblemListItem, ProblemPage, StatusFilter } from '../types'
 import ThemeToggle from '../components/ThemeToggle'
 import { api } from '../api'
 import { timeAgo } from '../time'
+
+const STATUS_OPTIONS: { value: StatusFilter; label: string }[] = [
+  { value: 'all', label: 'All' },
+  { value: 'not-started', label: 'Not started' },
+  { value: 'started', label: 'Started' },
+  { value: 'solved', label: 'Solved' },
+]
+
+function StatusCell({ p }: { p: ProblemListItem }) {
+  if (p.status === 'solved') {
+    return (
+      <span className="status-badge solved" title={`Solved ${timeAgo(p.lastAllPassedAt)}`}>
+        ✓ <span className="when">{timeAgo(p.lastAllPassedAt)}</span>
+      </span>
+    )
+  }
+  if (p.status === 'started') {
+    return (
+      <span
+        className="status-badge started"
+        title={p.lastActivityAt ? `In progress · ${timeAgo(p.lastActivityAt)}` : 'In progress'}
+      >
+        ◐ <span className="when">{p.lastActivityAt ? timeAgo(p.lastActivityAt) : 'started'}</span>
+      </span>
+    )
+  }
+  return (
+    <span className="status-badge none" title="Not started">
+      ○
+    </span>
+  )
+}
 
 export default function ProblemList() {
   const [search, setSearch] = useState('')
   const [difficulty, setDifficulty] = useState<string[]>([])
   const [tags, setTags] = useState<string[]>([])
-  const [solved, setSolved] = useState<SolvedFilter>('all')
+  const [status, setStatus] = useState<StatusFilter>('all')
   const [page, setPage] = useState(1)
   const [data, setData] = useState<ProblemPage | null>(null)
   const [facets, setFacets] = useState<Facets | null>(null)
@@ -26,7 +58,7 @@ export default function ProblemList() {
     let cancelled = false
     const t = setTimeout(() => {
       api
-        .listProblems({ search, difficulty, tags, solved, page })
+        .listProblems({ search, difficulty, tags, status, page })
         .then((d) => !cancelled && setData(d))
         .catch(() => !cancelled && setData({ items: [], total: 0, page, pageSize: 20 }))
     }, 250)
@@ -34,7 +66,7 @@ export default function ProblemList() {
       cancelled = true
       clearTimeout(t)
     }
-  }, [search, difficulty, tags, solved, page])
+  }, [search, difficulty, tags, status, page])
 
   function toggle(list: string[], set: (v: string[]) => void, value: string) {
     set(list.includes(value) ? list.filter((x) => x !== value) : [...list, value])
@@ -45,12 +77,12 @@ export default function ProblemList() {
     setSearch('')
     setDifficulty([])
     setTags([])
-    setSolved('all')
+    setStatus('all')
     setPage(1)
   }
 
   const hasFilters =
-    !!search || difficulty.length > 0 || tags.length > 0 || solved !== 'all'
+    !!search || difficulty.length > 0 || tags.length > 0 || status !== 'all'
   const totalPages = data ? Math.max(1, Math.ceil(data.total / data.pageSize)) : 1
 
   return (
@@ -75,18 +107,18 @@ export default function ProblemList() {
 
           <div className="filter-group">
             <h3>Status</h3>
-            {(['all', 'solved', 'unsolved'] as SolvedFilter[]).map((s) => (
-              <label key={s}>
+            {STATUS_OPTIONS.map((o) => (
+              <label key={o.value}>
                 <input
                   type="radio"
-                  name="solved"
-                  checked={solved === s}
+                  name="status"
+                  checked={status === o.value}
                   onChange={() => {
-                    setSolved(s)
+                    setStatus(o.value)
                     setPage(1)
                   }}
                 />
-                <span className="fname">{s}</span>
+                <span className="fname">{o.label}</span>
               </label>
             ))}
           </div>
@@ -110,7 +142,6 @@ export default function ProblemList() {
             <h3>Tags</h3>
             <div className="tag-filter">
               {(facets?.tags ?? [])
-                // Collapsed: show the first TAG_LIMIT plus any selected beyond it.
                 .filter((t, i) => showAllTags || i < TAG_LIMIT || tags.includes(t.value))
                 .map((t) => (
                   <button
@@ -164,12 +195,7 @@ export default function ProblemList() {
                     </button>
                   ))}
                 </span>
-                <span
-                  className={`solved ${p.lastAllPassedAt ? 'on' : 'off'}`}
-                  title={p.lastAllPassedAt ? 'Most recent time all tests passed' : 'Not solved yet'}
-                >
-                  {p.lastAllPassedAt ? `✓ ${timeAgo(p.lastAllPassedAt)}` : ''}
-                </span>
+                <StatusCell p={p} />
               </li>
             ))}
             {data && data.items.length === 0 && (

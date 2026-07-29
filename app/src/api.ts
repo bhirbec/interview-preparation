@@ -3,7 +3,7 @@ import type {
   ProblemFull,
   ProblemPage,
   RunRecord,
-  SolvedFilter,
+  StatusFilter,
 } from './types'
 
 async function asJson<T>(res: Response): Promise<T> {
@@ -26,7 +26,7 @@ export interface ListParams {
   search?: string
   difficulty?: string[]
   tags?: string[]
-  solved?: SolvedFilter
+  status?: StatusFilter
   page?: number
   pageSize?: number
 }
@@ -39,7 +39,7 @@ export const api = {
     if (params.search?.trim()) q.set('search', params.search.trim())
     if (params.difficulty?.length) q.set('difficulty', params.difficulty.join(','))
     if (params.tags?.length) q.set('tags', params.tags.join(','))
-    if (params.solved && params.solved !== 'all') q.set('solved', params.solved)
+    if (params.status && params.status !== 'all') q.set('status', params.status)
     q.set('page', String(params.page ?? 1))
     q.set('pageSize', String(params.pageSize ?? 20))
     return fetch(`/api/problems?${q.toString()}`).then((r) => asJson<ProblemPage>(r))

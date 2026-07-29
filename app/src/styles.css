@@ -8,6 +8,7 @@
   --accent: #4a9eff;
   --pass: #3fb950;
   --fail: #f85149;
+  --started: #e3b341;
   --code-bg: #1c2128;
   --pass-bg: rgba(63, 185, 80, 0.15);
   --fail-bg: rgba(248, 81, 73, 0.15);
@@ -26,6 +27,7 @@
   --accent: #2563eb;
   --pass: #16a34a;
   --fail: #dc2626;
+  --started: #b45309;
   --code-bg: #f3f4f6;
   --pass-bg: #dcfce7;
   --fail-bg: #fee2e2;
@@ -329,6 +331,33 @@ body {
   padding: 0.15rem 0.55rem;
   border-radius: 999px;
   font-weight: 600;
+}
+
+/* Per-row status icon in the list (✓ solved, ◐ started, ○ not started). */
+.status-badge {
+  min-width: 6.5rem;
+  text-align: right;
+  font-size: 0.85rem;
+  white-space: nowrap;
+}
+
+.status-badge .when {
+  color: var(--muted);
+  font-size: 0.72rem;
+  margin-left: 0.15rem;
+}
+
+.status-badge.solved {
+  color: var(--pass);
+}
+
+.status-badge.started {
+  color: var(--started);
+}
+
+.status-badge.none {
+  color: var(--muted);
+  opacity: 0.5;
 }
 
 /* ---- history tab ---- */
