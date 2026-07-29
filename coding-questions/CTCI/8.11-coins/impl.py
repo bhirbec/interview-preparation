@@ -24,12 +24,6 @@
 #   count_repr(10)  -> 4
 #   count_repr(25)  -> 13
 #   count_repr(100) -> 242
-#
-# Note: the original implementation summed `f(n - c) + 1` over every coin, which
-# both counted ordered sequences (permutations) and over-counted, so it did not
-# solve the intended combination-counting problem. It was rewritten to iterate
-# denominations in a fixed order, the standard CTCI approach; the tests assert
-# the correct combination counts.
 
 
 def count_repr(n):

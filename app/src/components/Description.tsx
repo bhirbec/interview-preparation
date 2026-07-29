@@ -47,8 +47,10 @@ export default function Description({ text }: Props) {
 
   const blocks = text.split(/\n[ \t]*\n/)
   const hintIdx = blocks.findIndex((b) => /^approach\b/i.test(b.trim()))
-  const mainBlocks = hintIdx === -1 ? blocks : blocks.slice(0, hintIdx)
-  const hintBlocks = hintIdx === -1 ? [] : blocks.slice(hintIdx)
+  // Only the "Approach" block itself is the hint; everything else (statement,
+  // constraints, examples) stays visible regardless of where Approach appears.
+  const mainBlocks = hintIdx === -1 ? blocks : blocks.filter((_, i) => i !== hintIdx)
+  const hintBlocks = hintIdx === -1 ? [] : [blocks[hintIdx]]
 
   return (
     <div className="prose">
