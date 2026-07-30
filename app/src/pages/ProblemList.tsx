@@ -3,7 +3,8 @@ import { Link } from 'react-router-dom'
 import type { Facets, ProblemListItem, ProblemPage, StatusFilter } from '../types'
 import ThemeToggle from '../components/ThemeToggle'
 import { api } from '../api'
-import { formatDuration, liveElapsed } from '../time'
+import { formatDuration } from '../time'
+import { attemptView } from '../attempt'
 import { useTicker } from '../hooks/useTicker'
 
 const STATUS_OPTIONS: { value: StatusFilter; label: string }[] = [
@@ -14,18 +15,18 @@ const STATUS_OPTIONS: { value: StatusFilter; label: string }[] = [
 ]
 
 function StatusCell({ p, now }: { p: ProblemListItem; now: number }) {
-  if (p.status === 'solved') {
+  const v = attemptView(p, now)
+  if (v.solved) {
     return (
       <span className="status-badge solved" title="Solved">
         ✓{p.elapsedMs != null && <span className="when">{formatDuration(p.elapsedMs)}</span>}
       </span>
     )
   }
-  if (p.status === 'started') {
-    const running = p.runningSince != null
+  if (v.running || v.paused) {
     return (
-      <span className="status-badge started" title={running ? 'In progress' : 'Paused'}>
-        {running ? '◐' : '⏸'} <span className="when">{formatDuration(liveElapsed(p, now))}</span>
+      <span className="status-badge started" title={v.running ? 'In progress' : 'Paused'}>
+        {v.running ? '◐' : '⏸'} <span className="when">{formatDuration(v.elapsedMs)}</span>
       </span>
     )
   }

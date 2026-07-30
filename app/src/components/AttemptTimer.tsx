@@ -1,7 +1,8 @@
 import { useEffect, useRef } from 'react'
 import type { AttemptState } from '../types'
 import { api, type AttemptAction } from '../api'
-import { formatDuration, liveElapsed } from '../time'
+import { formatDuration } from '../time'
+import { attemptView } from '../attempt'
 import { useTicker } from '../hooks/useTicker'
 
 interface Props {
@@ -64,7 +65,9 @@ export default function AttemptTimer({ id, attempt, onChange, onStart }: Props) 
     api.attempt('start', id).then(onChange)
   }
 
-  if (attempt.status === 'not-started') {
+  const view = attemptView(attempt, now)
+
+  if (view.notStarted) {
     return (
       <button type="button" className="timer-btn start" onClick={start}>
         ▶ Start
@@ -72,7 +75,7 @@ export default function AttemptTimer({ id, attempt, onChange, onStart }: Props) 
     )
   }
 
-  if (attempt.status === 'solved') {
+  if (view.solved) {
     const runs = attempt.attemptRunCount
     return (
       <span className="timer solved">
@@ -87,8 +90,8 @@ export default function AttemptTimer({ id, attempt, onChange, onStart }: Props) 
   }
 
   // started: running or paused
-  const elapsed = formatDuration(liveElapsed(attempt, now))
-  return running ? (
+  const elapsed = formatDuration(view.elapsedMs)
+  return view.running ? (
     <span className="timer running">
       ⏱ {elapsed}
       <button type="button" className="timer-btn icon" title="Pause" onClick={act('pause')}>
