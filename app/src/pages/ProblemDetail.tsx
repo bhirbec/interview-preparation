@@ -1,6 +1,6 @@
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useState } from 'react'
 import { Link, useParams } from 'react-router-dom'
-import type { ProblemFull, RunRecord, TestResult } from '../types'
+import type { TestResult } from '../types'
 import CodeEditor from '../components/CodeEditor'
 import Description from '../components/Description'
 import TestResults from '../components/TestResults'
@@ -9,77 +9,35 @@ import History from '../components/History'
 import AttemptTimer from '../components/AttemptTimer'
 import { runTests, warmUpPyodide } from '../pyodide'
 import { api } from '../api'
+import { useProblem } from '../hooks/useProblem'
+import { useDebouncedSave, SAVE_LABELS } from '../hooks/useDebouncedSave'
 
 type Tab = 'impl' | 'solution' | 'test' | 'history'
-type SaveState = 'idle' | 'unsaved' | 'saving' | 'saved' | 'error'
-
-const SAVE_LABELS: Record<SaveState, string> = {
-  idle: '',
-  unsaved: '● Unsaved',
-  saving: 'Saving…',
-  saved: 'Saved ✓',
-  error: 'Save failed',
-}
 
 export default function ProblemDetail() {
   const id = useParams()['*'] || ''
 
-  const [problem, setProblem] = useState<ProblemFull | null>(null)
-  const [notFound, setNotFound] = useState(false)
-  const [tab, setTab] = useState<Tab>('impl')
   const [code, setCode] = useState('')
+  const [tab, setTab] = useState<Tab>('impl')
   const [results, setResults] = useState<TestResult[] | null>(null)
   const [error, setError] = useState<string | null>(null)
   const [running, setRunning] = useState(false)
-  const [runs, setRuns] = useState<RunRecord[]>([])
-  const [saveState, setSaveState] = useState<SaveState>('idle')
-  const saveTimer = useRef<number | undefined>(undefined)
-  const codeRef = useRef(code)
-  codeRef.current = code
-  const saveNowRef = useRef<() => void>(() => {})
+
+  const { problem, setProblem, notFound, runs, setRuns, reload } = useProblem(
+    id,
+    (p) => setCode(p.code ?? p.starter),
+  )
+  const { saveState, scheduleSave, saveNow } = useDebouncedSave(id, code)
 
   useEffect(() => {
     warmUpPyodide()
   }, [])
 
-  // Cmd/Ctrl+S saves immediately (and suppresses the browser's Save dialog).
+  // Reset the transient workspace state when switching problems.
   useEffect(() => {
-    function onKey(e: KeyboardEvent) {
-      if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === 's') {
-        e.preventDefault()
-        saveNowRef.current()
-      }
-    }
-    window.addEventListener('keydown', onKey)
-    return () => window.removeEventListener('keydown', onKey)
-  }, [])
-
-  // Load the full problem (definition + saved code + runs) on id change.
-  useEffect(() => {
-    if (!id) return
-    let cancelled = false
-    setProblem(null)
-    setNotFound(false)
     setResults(null)
     setError(null)
-    setSaveState('idle')
     setTab('impl')
-    api
-      .getProblem(id)
-      .then((p) => {
-        if (cancelled) return
-        setProblem(p)
-        setCode(p.code ?? p.starter)
-      })
-      .catch(() => !cancelled && setNotFound(true))
-    api
-      .listRuns(id)
-      .then((r) => !cancelled && setRuns(r))
-      .catch(() => {})
-    return () => {
-      cancelled = true
-      clearTimeout(saveTimer.current)
-    }
   }, [id])
 
   if (notFound) {
@@ -95,30 +53,6 @@ export default function ProblemDetail() {
 
   if (!problem) {
     return <div className="loading">Loading…</div>
-  }
-
-  // Refetch problem (attempt status/timing) after a timer action or a run.
-  function reload() {
-    api.getProblem(id).then(setProblem).catch(() => {})
-  }
-
-  function doSave(next: string) {
-    setSaveState('saving')
-    return api
-      .saveCode(id, next)
-      .then(() => setSaveState('saved'))
-      .catch(() => setSaveState('error'))
-  }
-
-  function scheduleSave(next: string) {
-    setSaveState('unsaved')
-    clearTimeout(saveTimer.current)
-    saveTimer.current = window.setTimeout(() => doSave(next), 700)
-  }
-
-  saveNowRef.current = () => {
-    clearTimeout(saveTimer.current)
-    doSave(codeRef.current)
   }
 
   function onCodeChange(next: string) {
@@ -141,8 +75,7 @@ export default function ProblemDetail() {
       setResults(res)
       const passed = res.filter((r) => r.status === 'pass').length
       const failed = res.length - passed
-      clearTimeout(saveTimer.current)
-      await doSave(code)
+      await saveNow()
       await api.createRun(id, { code, passed, failed, total: res.length, durationMs })
       const [freshRuns, state] = await Promise.all([api.listRuns(id), api.getProblem(id)])
       setRuns(freshRuns)
