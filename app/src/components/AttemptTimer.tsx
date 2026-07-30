@@ -7,6 +7,7 @@ interface Props {
   id: string
   attempt: AttemptState
   onChange: () => void
+  onStart: () => void // clear the editor to the starter stub for a fresh attempt
 }
 
 // Live elapsed for the current (unsolved) attempt.
@@ -16,7 +17,7 @@ function liveElapsed(a: AttemptState, now: number): number {
   return ms
 }
 
-export default function AttemptTimer({ id, attempt, onChange }: Props) {
+export default function AttemptTimer({ id, attempt, onChange, onStart }: Props) {
   const [now, setNow] = useState(() => Date.now())
   const running = attempt.status === 'started' && attempt.runningSince != null
 
@@ -69,9 +70,16 @@ export default function AttemptTimer({ id, attempt, onChange }: Props) {
     fn(id).then(onChange)
   }
 
+  // Start/Retake: clear the editor to the starter stub, then begin a fresh attempt.
+  const start = () => {
+    autoPausedRef.current = false
+    onStart()
+    api.startAttempt(id).then(onChange)
+  }
+
   if (attempt.status === 'not-started') {
     return (
-      <button type="button" className="timer-btn start" onClick={act(api.startAttempt)}>
+      <button type="button" className="timer-btn start" onClick={start}>
         ▶ Start
       </button>
     )
@@ -84,7 +92,7 @@ export default function AttemptTimer({ id, attempt, onChange }: Props) {
         ✓ Solved
         {attempt.elapsedMs != null ? ` ${formatDuration(attempt.elapsedMs)}` : ''}
         {runs ? ` · ${runs} run${runs === 1 ? '' : 's'}` : ''}
-        <button type="button" className="timer-btn retake" onClick={act(api.startAttempt)}>
+        <button type="button" className="timer-btn retake" onClick={start}>
           ↻ Retake
         </button>
       </span>

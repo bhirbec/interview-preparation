@@ -170,7 +170,12 @@ export default function ProblemDetail() {
         <span className={`badge badge-${problem.difficulty}`}>
           {problem.difficulty}
         </span>
-        <AttemptTimer id={id} attempt={problem} onChange={reload} />
+        <AttemptTimer
+          id={id}
+          attempt={problem}
+          onChange={reload}
+          onStart={() => loadCode(problem.starter)}
+        />
         <ThemeToggle />
       </header>
 

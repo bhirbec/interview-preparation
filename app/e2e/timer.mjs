@@ -25,14 +25,18 @@ try {
   await page.getByRole('heading', { name: problem.title }).waitFor()
   await page.locator('.cm-content').waitFor()
 
-  // not-started: Run Tests disabled, Start present.
+  // not-started: Run Tests disabled, Start present, editor holds prior saved code.
   assert(await page.getByRole('button', { name: /Run Tests/ }).isDisabled(), 'Run Tests disabled before Start')
   assert(await page.locator('.timer-btn.start').isVisible(), '▶ Start shown in header')
+  const beforeStart = await page.locator('.cm-content').textContent()
+  assert(!/NotImplementedError/.test(beforeStart), 'editor pre-loads prior saved (non-stub) code')
 
-  // Start -> running, Run Tests enabled.
+  // Start -> running, Run Tests enabled, and the editor is cleared to the stub.
   await page.locator('.timer-btn.start').click()
   await page.locator('.timer.running').waitFor()
   assert(await page.getByRole('button', { name: /Run Tests/ }).isEnabled(), 'Run Tests enabled after Start')
+  const afterStart = await page.locator('.cm-content').textContent()
+  assert(/NotImplementedError/.test(afterStart), 'Start clears the impl tab to the starter stub')
 
   // Ticks up.
   await page.waitForTimeout(2300)
