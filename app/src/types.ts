@@ -66,7 +66,6 @@ export interface ProblemFull extends AttemptState {
   tags: string[]
   sources: string[]
   description: string
-  primaryFunction: string
   starter: string
   solution: string
   tests: string

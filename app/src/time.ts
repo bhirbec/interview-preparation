@@ -1,3 +1,13 @@
+import type { AttemptState } from './types'
+
+// Live elapsed ms for the current attempt: accumulated time plus, if the timer
+// is running, the time since it last resumed.
+export function liveElapsed(a: AttemptState, now: number): number {
+  let ms = a.accumulatedMs
+  if (a.runningSince) ms += now - Date.parse(a.runningSince)
+  return ms
+}
+
 // Compact "time ago" formatting for run timestamps and last-passed labels.
 export function timeAgo(iso: string | null | undefined): string {
   if (!iso) return ''

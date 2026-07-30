@@ -11,7 +11,7 @@ from contextlib import asynccontextmanager
 from datetime import datetime, timezone
 
 import db
-from fastapi import FastAPI
+from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 
@@ -50,6 +50,11 @@ class RunPayload(BaseModel):
   durationMs: float
 
 
+def _json_list(s) -> list:
+  """Parse a JSON-array text column (tags/sources), tolerating NULL/empty."""
+  return json.loads(s or "[]")
+
+
 def _run_dict(r) -> dict:
   return {
       "id": r["id"],
@@ -61,6 +66,25 @@ def _run_dict(r) -> dict:
       "allPassed": bool(r["all_passed"]),
       "createdAt": r["created_at"],
       "code": r["code"],
+  }
+
+
+def _problem_dict(p) -> dict:
+  """Static problem definition → JSON (snake_case columns → camelCase keys).
+
+  Timing/status (see _attempt_fields) and the saved `code` are added by callers.
+  """
+  return {
+      "id": p["id"],
+      "title": p["title"],
+      "difficulty": p["difficulty"],
+      "tags": _json_list(p["tags"]),
+      "sources": _json_list(p["sources"]),
+      "description": p["description"],
+      "primaryFunction": p["primary_function"],
+      "starter": p["starter"],
+      "solution": p["solution"],
+      "tests": p["tests"],
   }
 
 
@@ -85,7 +109,7 @@ def facets():
   )
   counter = {}
   for r in trows:
-    for t in json.loads(r["tags"] or "[]"):
+    for t in _json_list(r["tags"]):
       counter[t] = counter.get(t, 0) + 1
   tags = [
       {"value": k, "count": v}
@@ -112,7 +136,14 @@ def _latest_attempt(conn, pid):
 
 
 def _attempt_fields(a) -> dict:
-  if a is None:
+  """Status + timing from the latest attempt.
+
+  `a` is either the latest attempt row, None (no attempt), or a LEFT JOIN row
+  whose attempt columns are all NULL — the last two both mean "not-started".
+  This is the single source of truth for the derived status; STATUS_EXPR (used
+  only for SQL filtering) must mirror it.
+  """
+  if a is None or a["started_at"] is None:
     return {
         "status": "not-started",
         "startedAt": None,
@@ -131,7 +162,8 @@ def _attempt_fields(a) -> dict:
   }
 
 
-# Status derives from the latest attempt (joined as `a`).
+# SQL mirror of _attempt_fields' status derivation, for the list WHERE filter
+# (the latest attempt is joined as `a`). Keep in sync with _attempt_fields.
 STATUS_EXPR = """
   CASE
     WHEN a.solved_at IS NOT NULL THEN 'solved'
@@ -198,8 +230,7 @@ def list_problems(
         SELECT p.id, p.title, p.difficulty, p.tags,
                a.started_at, a.accumulated_ms, a.running_since,
                a.solved_at, a.elapsed_ms,
-               (SELECT COUNT(*) FROM run WHERE attempt_id = a.id) AS attempt_run_count,
-               {STATUS_EXPR} AS status
+               (SELECT COUNT(*) FROM run WHERE attempt_id = a.id) AS attempt_run_count
         {base_from} {where}
         ORDER BY p.position
         LIMIT :limit OFFSET :offset
@@ -212,14 +243,9 @@ def list_problems(
           "id": r["id"],
           "title": r["title"],
           "difficulty": r["difficulty"],
-          "tags": json.loads(r["tags"] or "[]"),
-          "status": r["status"],
-          "startedAt": r["started_at"],
-          "accumulatedMs": r["accumulated_ms"] or 0,
-          "runningSince": r["running_since"],
-          "solvedAt": r["solved_at"],
-          "elapsedMs": r["elapsed_ms"],
+          "tags": _json_list(r["tags"]),
           "attemptRunCount": r["attempt_run_count"] or 0,
+          **_attempt_fields(r),
       }
       for r in rows
   ]
@@ -232,30 +258,22 @@ def get_problem(id: str):
   with db.connect() as conn:
     p = conn.execute("SELECT * FROM problem WHERE id = ?", (id,)).fetchone()
     if p is None:
-      return {"error": "not found"}
+      raise HTTPException(status_code=404, detail="problem not found")
     sub = conn.execute(
         "SELECT code FROM submission WHERE problem_id = ?", (id,)
     ).fetchone()
-    a = _latest_attempt(conn, id)
-    attempt_run_count = 0
-    if a is not None:
-      attempt_run_count = conn.execute(
-          "SELECT COUNT(*) AS n FROM run WHERE attempt_id = ?", (a["id"],)
-      ).fetchone()["n"]
+    a = conn.execute(
+        """
+        SELECT *, (SELECT COUNT(*) FROM run WHERE attempt_id = attempt.id) AS run_count
+        FROM attempt WHERE problem_id = ? ORDER BY id DESC LIMIT 1
+        """,
+        (id,),
+    ).fetchone()
 
   return {
-      "id": p["id"],
-      "title": p["title"],
-      "difficulty": p["difficulty"],
-      "tags": json.loads(p["tags"] or "[]"),
-      "sources": json.loads(p["sources"] or "[]"),
-      "description": p["description"],
-      "primaryFunction": p["primary_function"],
-      "starter": p["starter"],
-      "solution": p["solution"],
-      "tests": p["tests"],
+      **_problem_dict(p),
       "code": sub["code"] if sub else None,
-      "attemptRunCount": attempt_run_count,
+      "attemptRunCount": a["run_count"] if a else 0,
       **_attempt_fields(a),
   }
 
