@@ -1,6 +1,7 @@
 // Smoke test of the full flow against the API-backed catalog: paginated list,
 // server-side search, opening a problem, and running tests in-browser (Pyodide).
 import { chromium } from 'playwright'
+import { resetProblem } from './fixtures.mjs'
 
 const BASE = process.env.BASE_URL || 'http://localhost:3100'
 
@@ -9,6 +10,7 @@ function assert(cond, msg) {
   console.log('  ok -', msg)
 }
 
+resetProblem('maximum-subarray') // repeatable: back to not-started
 const solution = (await (await fetch(`${BASE}/api/problem?id=maximum-subarray`)).json()).solution
 
 const browser = await chromium.launch()
