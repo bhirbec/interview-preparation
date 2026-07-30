@@ -18,11 +18,12 @@ const ready = init()
 self.onmessage = async (e) => {
   const msg = e.data
   if (msg.type !== 'run') return
-  const { id, script } = msg
+  const { id, script, userCode, testsCode } = msg
   try {
     await ready
     // Fresh namespace each run so classes from a previous problem never linger.
-    const namespace = pyodide.toPy({})
+    // The runner compiles these two sources under real filenames for tracebacks.
+    const namespace = pyodide.toPy({ _USER_SRC: userCode, _TESTS_SRC: testsCode })
     const start = performance.now()
     let json
     try {

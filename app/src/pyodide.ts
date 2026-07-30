@@ -63,8 +63,20 @@ export function warmUpPyodide(): void {
   ensureWorker()
 }
 
-const HARNESS = `
-import unittest as _ut, json as _json
+// Runs the user's code and tests, compiled as two separately-named units so
+// tracebacks reference "impl.py"/"tests.py" with real editor line numbers (and,
+// via linecache, the source line) instead of a single opaque "<exec>" blob. The
+// two sources arrive as _USER_SRC / _TESTS_SRC in the run namespace.
+const RUNNER = `
+import unittest as _ut, json as _json, linecache as _linecache
+
+def _load(_src, _name):
+    # Register the source so tracebacks show the file, the real line, and the code.
+    _linecache.cache[_name] = (len(_src), None, _src.splitlines(keepends=True), _name)
+    exec(compile(_src, _name, 'exec'), globals())
+
+_load(_USER_SRC, 'impl.py')
+_load(_TESTS_SRC, 'tests.py')
 
 class _Collector(_ut.TestResult):
     def __init__(self):
@@ -98,7 +110,6 @@ export async function runTests(
   ensureWorker()
   await ready // one-time Pyodide load is not subject to the run timeout
 
-  const script = `import unittest\n\n${userCode}\n\n${testsCode}\n${HARNESS}`
   const id = ++seq
   const w = worker!
 
@@ -118,6 +129,6 @@ export async function runTests(
       reject,
       timer,
     })
-    w.postMessage({ type: 'run', id, script })
+    w.postMessage({ type: 'run', id, script: RUNNER, userCode, testsCode })
   })
 }
