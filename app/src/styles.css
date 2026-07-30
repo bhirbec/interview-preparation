@@ -360,6 +360,70 @@ body {
   opacity: 0.5;
 }
 
+/* ---- attempt timer (detail header) ---- */
+.timer {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-size: 0.85rem;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+.timer.running {
+  color: var(--started);
+}
+
+.timer.paused {
+  color: var(--muted);
+}
+
+.timer.solved {
+  color: var(--pass);
+}
+
+.timer-btn {
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  font: inherit;
+  color: inherit;
+  padding: 0;
+  line-height: 1;
+}
+
+.timer-btn.start {
+  background: var(--accent);
+  color: white;
+  border-radius: 999px;
+  padding: 0.2rem 0.7rem;
+  font-weight: 600;
+}
+
+.timer-btn.icon {
+  font-size: 0.9rem;
+  padding: 0.1rem 0.25rem;
+  border-radius: 6px;
+}
+
+.timer-btn.icon:hover {
+  background: var(--border);
+}
+
+.timer-btn.retake {
+  margin-left: 0.35rem;
+  color: var(--muted);
+  text-decoration: underline;
+  font-weight: 500;
+}
+
+.run-hint {
+  align-self: center;
+  font-size: 0.8rem;
+  color: var(--muted);
+}
+
 /* ---- history tab ---- */
 .history-wrap {
   flex: 1;

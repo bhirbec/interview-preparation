@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom'
 import type { Facets, ProblemListItem, ProblemPage, StatusFilter } from '../types'
 import ThemeToggle from '../components/ThemeToggle'
 import { api } from '../api'
-import { timeAgo } from '../time'
+import { formatDuration } from '../time'
 
 const STATUS_OPTIONS: { value: StatusFilter; label: string }[] = [
   { value: 'all', label: 'All' },
@@ -12,21 +12,25 @@ const STATUS_OPTIONS: { value: StatusFilter; label: string }[] = [
   { value: 'solved', label: 'Solved' },
 ]
 
-function StatusCell({ p }: { p: ProblemListItem }) {
+function liveElapsed(p: ProblemListItem, now: number): number {
+  let ms = p.accumulatedMs
+  if (p.runningSince) ms += now - Date.parse(p.runningSince)
+  return ms
+}
+
+function StatusCell({ p, now }: { p: ProblemListItem; now: number }) {
   if (p.status === 'solved') {
     return (
-      <span className="status-badge solved" title={`Solved ${timeAgo(p.lastAllPassedAt)}`}>
-        ✓ <span className="when">{timeAgo(p.lastAllPassedAt)}</span>
+      <span className="status-badge solved" title="Solved">
+        ✓{p.elapsedMs != null && <span className="when">{formatDuration(p.elapsedMs)}</span>}
       </span>
     )
   }
   if (p.status === 'started') {
+    const running = p.runningSince != null
     return (
-      <span
-        className="status-badge started"
-        title={p.lastActivityAt ? `In progress · ${timeAgo(p.lastActivityAt)}` : 'In progress'}
-      >
-        ◐ <span className="when">{p.lastActivityAt ? timeAgo(p.lastActivityAt) : 'started'}</span>
+      <span className="status-badge started" title={running ? 'In progress' : 'Paused'}>
+        {running ? '◐' : '⏸'} <span className="when">{formatDuration(liveElapsed(p, now))}</span>
       </span>
     )
   }
@@ -46,8 +50,17 @@ export default function ProblemList() {
   const [data, setData] = useState<ProblemPage | null>(null)
   const [facets, setFacets] = useState<Facets | null>(null)
   const [showAllTags, setShowAllTags] = useState(false)
+  const [now, setNow] = useState(() => Date.now())
 
   const TAG_LIMIT = 12
+
+  // Tick once a second only while a visible row's timer is running.
+  const anyRunning = !!data?.items.some((p) => p.status === 'started' && p.runningSince)
+  useEffect(() => {
+    if (!anyRunning) return
+    const t = window.setInterval(() => setNow(Date.now()), 1000)
+    return () => clearInterval(t)
+  }, [anyRunning])
 
   useEffect(() => {
     api.getFacets().then(setFacets).catch(() => setFacets({ difficulties: [], tags: [] }))
@@ -195,7 +208,7 @@ export default function ProblemList() {
                     </button>
                   ))}
                 </span>
-                <StatusCell p={p} />
+                <StatusCell p={p} now={now} />
               </li>
             ))}
             {data && data.items.length === 0 && (

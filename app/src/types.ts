@@ -20,15 +20,23 @@ export interface RunRecord {
 
 export type ProblemStatus = 'not-started' | 'started' | 'solved'
 
+// Status + timing from the latest attempt (returned by both list and detail).
+export interface AttemptState {
+  status: ProblemStatus
+  startedAt: string | null
+  accumulatedMs: number
+  runningSince: string | null // ISO while the timer runs; null while paused/solved
+  solvedAt: string | null
+  elapsedMs: number | null // final solve time (ms)
+  attemptRunCount: number // Run-Tests clicks in the latest attempt
+}
+
 // Row in the paginated catalog list.
-export interface ProblemListItem {
+export interface ProblemListItem extends AttemptState {
   id: string
   title: string
   difficulty: string
   tags: string[]
-  status: ProblemStatus
-  lastAllPassedAt: string | null
-  lastActivityAt: string | null
 }
 
 export interface ProblemPage {
@@ -50,8 +58,8 @@ export interface Facets {
 
 export type StatusFilter = 'all' | ProblemStatus
 
-// Full problem definition + this user's saved code and status.
-export interface ProblemFull {
+// Full problem definition + this user's saved code + latest-attempt state.
+export interface ProblemFull extends AttemptState {
   id: string
   title: string
   difficulty: string
@@ -63,6 +71,4 @@ export interface ProblemFull {
   solution: string
   tests: string
   code: string | null
-  runCount: number
-  lastAllPassedAt: string | null
 }

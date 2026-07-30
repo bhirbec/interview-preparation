@@ -6,9 +6,9 @@ import Description from '../components/Description'
 import TestResults from '../components/TestResults'
 import ThemeToggle from '../components/ThemeToggle'
 import History from '../components/History'
+import AttemptTimer from '../components/AttemptTimer'
 import { runTests, warmUpPyodide } from '../pyodide'
 import { api } from '../api'
-import { timeAgo } from '../time'
 
 type Tab = 'impl' | 'solution' | 'test' | 'history'
 type SaveState = 'idle' | 'unsaved' | 'saving' | 'saved' | 'error'
@@ -32,7 +32,6 @@ export default function ProblemDetail() {
   const [error, setError] = useState<string | null>(null)
   const [running, setRunning] = useState(false)
   const [runs, setRuns] = useState<RunRecord[]>([])
-  const [lastAllPassedAt, setLastAllPassedAt] = useState<string | null>(null)
   const [saveState, setSaveState] = useState<SaveState>('idle')
   const saveTimer = useRef<number | undefined>(undefined)
   const codeRef = useRef(code)
@@ -75,7 +74,6 @@ export default function ProblemDetail() {
         }
         setProblem(p)
         setCode(p.code ?? p.starter)
-        setLastAllPassedAt(p.lastAllPassedAt)
       })
       .catch(() => !cancelled && setNotFound(true))
     api
@@ -101,6 +99,13 @@ export default function ProblemDetail() {
 
   if (!problem) {
     return <div className="loading">Loading…</div>
+  }
+
+  // Refetch problem (attempt status/timing) after a timer action or a run.
+  function reload() {
+    api.getProblem(id).then((p) => {
+      if (p && 'id' in p) setProblem(p)
+    })
   }
 
   function doSave(next: string) {
@@ -147,7 +152,7 @@ export default function ProblemDetail() {
       await api.createRun(id, { code, passed, failed, total: res.length, durationMs })
       const [freshRuns, state] = await Promise.all([api.listRuns(id), api.getProblem(id)])
       setRuns(freshRuns)
-      setLastAllPassedAt(state.lastAllPassedAt)
+      if (state && 'id' in state) setProblem(state)
     } catch (e) {
       setError(e instanceof Error ? e.message : String(e))
     } finally {
@@ -165,11 +170,12 @@ export default function ProblemDetail() {
         <span className={`badge badge-${problem.difficulty}`}>
           {problem.difficulty}
         </span>
-        {lastAllPassedAt && (
-          <span className="solved on" title="Most recent time all tests passed">
-            ✓ solved {timeAgo(lastAllPassedAt)}
-          </span>
-        )}
+        <AttemptTimer
+          id={id}
+          attempt={problem}
+          onChange={reload}
+          onStart={() => loadCode(problem.starter)}
+        />
         <ThemeToggle />
       </header>
 
@@ -214,12 +220,20 @@ export default function ProblemDetail() {
             <>
               <CodeEditor value={code} onChange={onCodeChange} />
               <div className="actions">
-                <button className="run" onClick={run} disabled={running}>
+                <button
+                  className="run"
+                  onClick={run}
+                  disabled={running || problem.status !== 'started'}
+                  title={problem.status !== 'started' ? 'Press Start to begin' : ''}
+                >
                   {running ? 'Running…' : 'Run Tests'}
                 </button>
                 <button className="reset" onClick={() => loadCode(problem.starter)}>
                   Reset
                 </button>
+                {problem.status !== 'started' && (
+                  <span className="run-hint">Press Start to begin</span>
+                )}
                 <span className={`save-status ${saveState}`} title="Cmd/Ctrl+S to save now">
                   {SAVE_LABELS[saveState]}
                 </span>

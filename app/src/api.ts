@@ -64,4 +64,12 @@ export const api = {
       headers: jsonHeaders,
       body: JSON.stringify({ id, ...run }),
     }).then((r) => asJson<RunRecord>(r)),
+
+  // Attempt timer (id in the query so a sendBeacon pause on tab-close works).
+  startAttempt: (id: string) =>
+    fetch(`/api/problem/attempt/start?id=${enc(id)}`, { method: 'POST' }),
+  pauseAttempt: (id: string) =>
+    fetch(`/api/problem/attempt/pause?id=${enc(id)}`, { method: 'POST' }),
+  resumeAttempt: (id: string) =>
+    fetch(`/api/problem/attempt/resume?id=${enc(id)}`, { method: 'POST' }),
 }

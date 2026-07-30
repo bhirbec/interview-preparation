@@ -94,13 +94,48 @@ def facets():
   return {"difficulties": difficulties, "tags": tags}
 
 
-# A problem is: solved (has an all-passing run), started (edited code that
-# differs from the starter, or at least one run), or not-started.
+# --- attempts / timing ---
+
+
+def _now_dt() -> datetime:
+  return datetime.now(timezone.utc)
+
+
+def _delta_ms(iso: str, now: datetime) -> float:
+  return (now - datetime.fromisoformat(iso)).total_seconds() * 1000
+
+
+def _latest_attempt(conn, pid):
+  return conn.execute(
+      "SELECT * FROM attempt WHERE problem_id = ? ORDER BY id DESC LIMIT 1", (pid,)
+  ).fetchone()
+
+
+def _attempt_fields(a) -> dict:
+  if a is None:
+    return {
+        "status": "not-started",
+        "startedAt": None,
+        "accumulatedMs": 0,
+        "runningSince": None,
+        "solvedAt": None,
+        "elapsedMs": None,
+    }
+  return {
+      "status": "solved" if a["solved_at"] else "started",
+      "startedAt": a["started_at"],
+      "accumulatedMs": a["accumulated_ms"],
+      "runningSince": a["running_since"],
+      "solvedAt": a["solved_at"],
+      "elapsedMs": a["elapsed_ms"],
+  }
+
+
+# Status derives from the latest attempt (joined as `a`).
 STATUS_EXPR = """
   CASE
-    WHEN r.last_all_passed_at IS NOT NULL THEN 'solved'
-    WHEN (s.code IS NOT NULL AND s.code <> p.starter) OR COALESCE(r.runs, 0) > 0
-      THEN 'started'
+    WHEN a.solved_at IS NOT NULL THEN 'solved'
+    WHEN a.id IS NOT NULL THEN 'started'
     ELSE 'not-started'
   END
 """
@@ -151,14 +186,7 @@ def list_problems(
   where = ("WHERE " + " AND ".join(conds)) if conds else ""
   base_from = """
     FROM problem p
-    LEFT JOIN submission s ON s.problem_id = p.id
-    LEFT JOIN (
-      SELECT problem_id,
-             COUNT(*) AS runs,
-             MAX(created_at) AS last_run_at,
-             MAX(CASE WHEN all_passed = 1 THEN created_at END) AS last_all_passed_at
-      FROM run GROUP BY problem_id
-    ) r ON r.problem_id = p.id
+    LEFT JOIN attempt a ON a.id = (SELECT MAX(id) FROM attempt WHERE problem_id = p.id)
   """
 
   with db.connect() as conn:
@@ -168,8 +196,9 @@ def list_problems(
     rows = conn.execute(
         f"""
         SELECT p.id, p.title, p.difficulty, p.tags,
-               r.last_all_passed_at,
-               COALESCE(s.updated_at, r.last_run_at) AS last_activity_at,
+               a.started_at, a.accumulated_ms, a.running_since,
+               a.solved_at, a.elapsed_ms,
+               (SELECT COUNT(*) FROM run WHERE attempt_id = a.id) AS attempt_run_count,
                {STATUS_EXPR} AS status
         {base_from} {where}
         ORDER BY p.position
@@ -185,8 +214,12 @@ def list_problems(
           "difficulty": r["difficulty"],
           "tags": json.loads(r["tags"] or "[]"),
           "status": r["status"],
-          "lastAllPassedAt": r["last_all_passed_at"],
-          "lastActivityAt": r["last_activity_at"],
+          "startedAt": r["started_at"],
+          "accumulatedMs": r["accumulated_ms"] or 0,
+          "runningSince": r["running_since"],
+          "solvedAt": r["solved_at"],
+          "elapsedMs": r["elapsed_ms"],
+          "attemptRunCount": r["attempt_run_count"] or 0,
       }
       for r in rows
   ]
@@ -195,7 +228,7 @@ def list_problems(
 
 @app.get("/api/problem")
 def get_problem(id: str):
-  """Full problem definition + saved code + status."""
+  """Full problem definition + saved code + latest-attempt status/timing."""
   with db.connect() as conn:
     p = conn.execute("SELECT * FROM problem WHERE id = ?", (id,)).fetchone()
     if p is None:
@@ -203,14 +236,12 @@ def get_problem(id: str):
     sub = conn.execute(
         "SELECT code FROM submission WHERE problem_id = ?", (id,)
     ).fetchone()
-    agg = conn.execute(
-        """
-        SELECT COUNT(*) AS runs,
-               MAX(CASE WHEN all_passed = 1 THEN created_at END) AS last
-        FROM run WHERE problem_id = ?
-        """,
-        (id,),
-    ).fetchone()
+    a = _latest_attempt(conn, id)
+    attempt_run_count = 0
+    if a is not None:
+      attempt_run_count = conn.execute(
+          "SELECT COUNT(*) AS n FROM run WHERE attempt_id = ?", (a["id"],)
+      ).fetchone()["n"]
 
   return {
       "id": p["id"],
@@ -224,9 +255,47 @@ def get_problem(id: str):
       "solution": p["solution"],
       "tests": p["tests"],
       "code": sub["code"] if sub else None,
-      "runCount": agg["runs"] or 0,
-      "lastAllPassedAt": agg["last"],
+      "attemptRunCount": attempt_run_count,
+      **_attempt_fields(a),
   }
+
+
+@app.post("/api/problem/attempt/start")
+def start_attempt(id: str):
+  """Start (or Retake) — insert a fresh running attempt."""
+  ts = now_iso()
+  with db.connect() as conn:
+    conn.execute(
+        "INSERT INTO attempt (problem_id, started_at, accumulated_ms, running_since) "
+        "VALUES (?, ?, 0, ?)",
+        (id, ts, ts),
+    )
+  return {"ok": True}
+
+
+@app.post("/api/problem/attempt/pause")
+def pause_attempt(id: str):
+  with db.connect() as conn:
+    a = _latest_attempt(conn, id)
+    if a and a["running_since"] and a["solved_at"] is None:
+      add = round(_delta_ms(a["running_since"], _now_dt()))
+      conn.execute(
+          "UPDATE attempt SET accumulated_ms = accumulated_ms + ?, running_since = NULL "
+          "WHERE id = ?",
+          (add, a["id"]),
+      )
+  return {"ok": True}
+
+
+@app.post("/api/problem/attempt/resume")
+def resume_attempt(id: str):
+  with db.connect() as conn:
+    a = _latest_attempt(conn, id)
+    if a and a["running_since"] is None and a["solved_at"] is None:
+      conn.execute(
+          "UPDATE attempt SET running_since = ? WHERE id = ?", (now_iso(), a["id"])
+      )
+  return {"ok": True}
 
 
 @app.put("/api/problem/code")
@@ -265,14 +334,25 @@ def create_run(payload: RunPayload):
   all_passed = 1 if payload.failed == 0 and payload.total > 0 else 0
   ts = now_iso()
   with db.connect() as conn:
+    a = _latest_attempt(conn, payload.id)
+    attempt_id = a["id"] if a else None
     cur = conn.execute(
         """
         INSERT INTO run
-          (problem_id, code, passed, failed, total, duration_ms, all_passed, created_at)
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+          (problem_id, code, passed, failed, total, duration_ms, all_passed,
+           created_at, attempt_id)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
         """,
         (payload.id, payload.code, payload.passed, payload.failed, payload.total,
-         payload.durationMs, all_passed, ts),
+         payload.durationMs, all_passed, ts, attempt_id),
     )
+    # Finalize the solve time on the active attempt.
+    if all_passed and a and a["solved_at"] is None:
+      extra = round(_delta_ms(a["running_since"], _now_dt())) if a["running_since"] else 0
+      conn.execute(
+          "UPDATE attempt SET solved_at = ?, elapsed_ms = ?, running_since = NULL "
+          "WHERE id = ?",
+          (ts, a["accumulated_ms"] + extra, a["id"]),
+      )
     row = conn.execute("SELECT * FROM run WHERE id = ?", (cur.lastrowid,)).fetchone()
   return _run_dict(row)
