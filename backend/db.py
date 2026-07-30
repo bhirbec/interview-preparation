@@ -47,6 +47,20 @@ CREATE TABLE IF NOT EXISTS run (
 );
 
 CREATE INDEX IF NOT EXISTS idx_run_problem ON run (problem_id, created_at DESC);
+
+-- A log of timed attempts (one row per Start/Retake). Status is derived from
+-- the latest attempt per problem; the log also feeds daily stats later.
+CREATE TABLE IF NOT EXISTS attempt (
+  id             INTEGER PRIMARY KEY AUTOINCREMENT,
+  problem_id     TEXT NOT NULL,
+  started_at     TEXT NOT NULL,
+  accumulated_ms INTEGER NOT NULL DEFAULT 0,   -- active time from finished (paused) segments
+  running_since  TEXT,                          -- ISO while running; NULL while paused or solved
+  solved_at      TEXT,
+  elapsed_ms     INTEGER
+);
+
+CREATE INDEX IF NOT EXISTS idx_attempt_problem ON attempt (problem_id, id DESC);
 """
 
 
@@ -61,6 +75,34 @@ def connect():
     conn.close()
 
 
+def _add_run_attempt_id(conn):
+  """Link runs to attempts (SQLite has no ADD COLUMN IF NOT EXISTS)."""
+  cols = [r["name"] for r in conn.execute("PRAGMA table_info(run)").fetchall()]
+  if "attempt_id" not in cols:
+    conn.execute("ALTER TABLE run ADD COLUMN attempt_id INTEGER")
+
+
+def _backfill_solved_attempts(conn):
+  """One-time: seed a solved attempt for problems already solved (no duration)."""
+  if conn.execute("SELECT COUNT(*) AS n FROM attempt").fetchone()["n"]:
+    return
+  rows = conn.execute(
+      """
+      SELECT problem_id, MAX(created_at) AS solved_at
+      FROM run WHERE all_passed = 1
+      GROUP BY problem_id
+      """
+  ).fetchall()
+  for r in rows:
+    conn.execute(
+        "INSERT INTO attempt (problem_id, started_at, solved_at, elapsed_ms) "
+        "VALUES (?, ?, ?, NULL)",
+        (r["problem_id"], r["solved_at"], r["solved_at"]),
+    )
+
+
 def init_db():
   with connect() as conn:
     conn.executescript(SCHEMA)
+    _add_run_attempt_id(conn)
+    _backfill_solved_attempts(conn)

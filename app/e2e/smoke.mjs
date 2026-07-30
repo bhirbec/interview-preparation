@@ -20,7 +20,7 @@ try {
   await page.locator('.problem-row').first().waitFor()
   const rows = await page.locator('.problem-row').count()
   assert(rows === 20, `list shows a page of 20 problems (got ${rows})`)
-  assert(/\d+ problems/.test(await page.locator('.count').textContent()), 'header shows a total count')
+  assert(/\d+ problems/.test(await page.locator('.list-total').textContent()), 'footer shows a total count')
 
   // Server-side search.
   await page.locator('.search').fill('graph')
@@ -35,6 +35,12 @@ try {
   await page.getByRole('heading', { name: 'Maximum Subarray' }).waitFor()
   await page.locator('.cm-content').waitFor()
   assert(true, 'problem detail opened from a searched result')
+
+  // Run Tests is gated behind a timed attempt: Start (or Retake, if this problem
+  // was already solved) before running.
+  await page.locator('.timer-btn.start, .timer-btn.retake').first().click()
+  await page.locator('.timer.running').waitFor()
+  assert(true, 'started a timed attempt (Run Tests now enabled)')
 
   // Reset to the starter stub (this problem may have autosaved code from a
   // previous run), then run -> Pyodide loads and tests fail.

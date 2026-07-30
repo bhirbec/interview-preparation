@@ -16,3 +16,13 @@ export function timeAgo(iso: string | null | undefined): string {
 export function formatDateTime(iso: string): string {
   return new Date(iso).toLocaleString()
 }
+
+// Elapsed duration as m:ss (or h:mm:ss past an hour).
+export function formatDuration(ms: number): string {
+  const total = Math.max(0, Math.floor(ms / 1000))
+  const s = total % 60
+  const m = Math.floor(total / 60) % 60
+  const h = Math.floor(total / 3600)
+  const pad = (n: number) => String(n).padStart(2, '0')
+  return h > 0 ? `${h}:${pad(m)}:${pad(s)}` : `${m}:${pad(s)}`
+}
