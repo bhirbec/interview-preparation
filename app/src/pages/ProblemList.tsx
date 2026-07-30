@@ -1,11 +1,11 @@
-import { useEffect, useState } from 'react'
+import { useState } from 'react'
 import { Link } from 'react-router-dom'
-import type { Facets, ProblemListItem, ProblemPage, StatusFilter } from '../types'
+import type { ProblemListItem, StatusFilter } from '../types'
 import ThemeToggle from '../components/ThemeToggle'
-import { api } from '../api'
 import { formatDuration } from '../time'
 import { attemptView } from '../attempt'
 import { useTicker } from '../hooks/useTicker'
+import { useCatalog } from '../hooks/useCatalog'
 
 const STATUS_OPTIONS: { value: StatusFilter; label: string }[] = [
   { value: 'all', label: 'All' },
@@ -38,13 +38,23 @@ function StatusCell({ p, now }: { p: ProblemListItem; now: number }) {
 }
 
 export default function ProblemList() {
-  const [search, setSearch] = useState('')
-  const [difficulty, setDifficulty] = useState<string[]>([])
-  const [tags, setTags] = useState<string[]>([])
-  const [status, setStatus] = useState<StatusFilter>('all')
-  const [page, setPage] = useState(1)
-  const [data, setData] = useState<ProblemPage | null>(null)
-  const [facets, setFacets] = useState<Facets | null>(null)
+  const {
+    search,
+    difficulty,
+    tags,
+    status,
+    page,
+    data,
+    facets,
+    hasFilters,
+    totalPages,
+    setSearch,
+    setStatus,
+    toggleDifficulty,
+    toggleTag,
+    setPage,
+    clearAll,
+  } = useCatalog()
   const [showAllTags, setShowAllTags] = useState(false)
 
   const TAG_LIMIT = 12
@@ -52,42 +62,6 @@ export default function ProblemList() {
   // Tick once a second only while a visible row's timer is running.
   const anyRunning = !!data?.items.some((p) => p.status === 'started' && p.runningSince)
   const now = useTicker(anyRunning)
-
-  useEffect(() => {
-    api.getFacets().then(setFacets).catch(() => setFacets({ difficulties: [], tags: [] }))
-  }, [])
-
-  // Debounced fetch whenever any filter or the page changes (server-side).
-  useEffect(() => {
-    let cancelled = false
-    const t = setTimeout(() => {
-      api
-        .listProblems({ search, difficulty, tags, status, page })
-        .then((d) => !cancelled && setData(d))
-        .catch(() => !cancelled && setData({ items: [], total: 0, page, pageSize: 20 }))
-    }, 250)
-    return () => {
-      cancelled = true
-      clearTimeout(t)
-    }
-  }, [search, difficulty, tags, status, page])
-
-  function toggle(list: string[], set: (v: string[]) => void, value: string) {
-    set(list.includes(value) ? list.filter((x) => x !== value) : [...list, value])
-    setPage(1)
-  }
-
-  function clearAll() {
-    setSearch('')
-    setDifficulty([])
-    setTags([])
-    setStatus('all')
-    setPage(1)
-  }
-
-  const hasFilters =
-    !!search || difficulty.length > 0 || tags.length > 0 || status !== 'all'
-  const totalPages = data ? Math.max(1, Math.ceil(data.total / data.pageSize)) : 1
 
   return (
     <div className="page list-page">
@@ -102,10 +76,7 @@ export default function ProblemList() {
             className="search"
             placeholder="Search title or tag…"
             value={search}
-            onChange={(e) => {
-              setSearch(e.target.value)
-              setPage(1)
-            }}
+            onChange={(e) => setSearch(e.target.value)}
             autoFocus
           />
 
@@ -117,10 +88,7 @@ export default function ProblemList() {
                   type="radio"
                   name="status"
                   checked={status === o.value}
-                  onChange={() => {
-                    setStatus(o.value)
-                    setPage(1)
-                  }}
+                  onChange={() => setStatus(o.value)}
                 />
                 <span className="fname">{o.label}</span>
               </label>
@@ -134,7 +102,7 @@ export default function ProblemList() {
                 <input
                   type="checkbox"
                   checked={difficulty.includes(d.value)}
-                  onChange={() => toggle(difficulty, setDifficulty, d.value)}
+                  onChange={() => toggleDifficulty(d.value)}
                 />
                 <span className="fname">{d.value}</span>
                 <span className="fcount">{d.count}</span>
@@ -152,7 +120,7 @@ export default function ProblemList() {
                     key={t.value}
                     type="button"
                     className={`tag ${tags.includes(t.value) ? 'active' : ''}`}
-                    onClick={() => toggle(tags, setTags, t.value)}
+                    onClick={() => toggleTag(t.value)}
                   >
                     #{t.value} <span className="fcount">{t.count}</span>
                   </button>
@@ -192,7 +160,7 @@ export default function ProblemList() {
                       key={t}
                       type="button"
                       className={`tag ${tags.includes(t) ? 'active' : ''}`}
-                      onClick={() => toggle(tags, setTags, t)}
+                      onClick={() => toggleTag(t)}
                       title={`Filter by #${t}`}
                     >
                       #{t}
