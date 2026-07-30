@@ -1,7 +1,8 @@
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useRef } from 'react'
 import type { AttemptState } from '../types'
-import { api } from '../api'
-import { formatDuration } from '../time'
+import { api, type AttemptAction } from '../api'
+import { formatDuration, liveElapsed } from '../time'
+import { useTicker } from '../hooks/useTicker'
 
 interface Props {
   id: string
@@ -10,23 +11,9 @@ interface Props {
   onStart: () => void // clear the editor to the starter stub for a fresh attempt
 }
 
-// Live elapsed for the current (unsolved) attempt.
-function liveElapsed(a: AttemptState, now: number): number {
-  let ms = a.accumulatedMs
-  if (a.runningSince) ms += now - Date.parse(a.runningSince)
-  return ms
-}
-
 export default function AttemptTimer({ id, attempt, onChange, onStart }: Props) {
-  const [now, setNow] = useState(() => Date.now())
   const running = attempt.status === 'started' && attempt.runningSince != null
-
-  // Tick once a second while running.
-  useEffect(() => {
-    if (!running) return
-    const t = window.setInterval(() => setNow(Date.now()), 1000)
-    return () => clearInterval(t)
-  }, [running, attempt.runningSince])
+  const now = useTicker(running)
 
   // Auto-pause when the tab is hidden/closed; auto-resume on return (only if we
   // auto-paused). Refs keep the handlers from going stale.
@@ -44,11 +31,11 @@ export default function AttemptTimer({ id, attempt, onChange, onStart }: Props) 
       if (document.hidden) {
         if (isRunning) {
           autoPausedRef.current = true
-          api.pauseAttempt(id).then(() => onChangeRef.current())
+          api.attempt('pause', id).then(() => onChangeRef.current())
         }
       } else if (isPaused && autoPausedRef.current) {
         autoPausedRef.current = false
-        api.resumeAttempt(id).then(() => onChangeRef.current())
+        api.attempt('resume', id).then(() => onChangeRef.current())
       }
     }
     function onPageHide() {
@@ -65,16 +52,16 @@ export default function AttemptTimer({ id, attempt, onChange, onStart }: Props) 
     }
   }, [id])
 
-  const act = (fn: (id: string) => Promise<unknown>) => () => {
+  const act = (action: AttemptAction) => () => {
     autoPausedRef.current = false
-    fn(id).then(onChange)
+    api.attempt(action, id).then(onChange)
   }
 
   // Start/Retake: clear the editor to the starter stub, then begin a fresh attempt.
   const start = () => {
     autoPausedRef.current = false
     onStart()
-    api.startAttempt(id).then(onChange)
+    api.attempt('start', id).then(onChange)
   }
 
   if (attempt.status === 'not-started') {
@@ -104,14 +91,14 @@ export default function AttemptTimer({ id, attempt, onChange, onStart }: Props) 
   return running ? (
     <span className="timer running">
       ⏱ {elapsed}
-      <button type="button" className="timer-btn icon" title="Pause" onClick={act(api.pauseAttempt)}>
+      <button type="button" className="timer-btn icon" title="Pause" onClick={act('pause')}>
         ⏸
       </button>
     </span>
   ) : (
     <span className="timer paused">
       ⏸ {elapsed}
-      <button type="button" className="timer-btn icon" title="Resume" onClick={act(api.resumeAttempt)}>
+      <button type="button" className="timer-btn icon" title="Resume" onClick={act('resume')}>
         ▶
       </button>
     </span>

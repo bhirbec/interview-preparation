@@ -14,6 +14,22 @@ async function asJson<T>(res: Response): Promise<T> {
 const jsonHeaders = { 'Content-Type': 'application/json' }
 const enc = encodeURIComponent
 
+function get<T>(url: string): Promise<T> {
+  return fetch(url).then((r) => asJson<T>(r))
+}
+
+// POST/PUT with an optional JSON body (omit the body for query-param endpoints).
+function send<T>(method: string, url: string, body?: unknown): Promise<T> {
+  const init: RequestInit = { method }
+  if (body !== undefined) {
+    init.headers = jsonHeaders
+    init.body = JSON.stringify(body)
+  }
+  return fetch(url, init).then((r) => asJson<T>(r))
+}
+
+export type AttemptAction = 'start' | 'pause' | 'resume'
+
 export interface NewRun {
   code: string
   passed: number
@@ -32,7 +48,7 @@ export interface ListParams {
 }
 
 export const api = {
-  getFacets: () => fetch('/api/facets').then((r) => asJson<Facets>(r)),
+  getFacets: () => get<Facets>('/api/facets'),
 
   listProblems: (params: ListParams) => {
     const q = new URLSearchParams()
@@ -42,34 +58,20 @@ export const api = {
     if (params.status && params.status !== 'all') q.set('status', params.status)
     q.set('page', String(params.page ?? 1))
     q.set('pageSize', String(params.pageSize ?? 20))
-    return fetch(`/api/problems?${q.toString()}`).then((r) => asJson<ProblemPage>(r))
+    return get<ProblemPage>(`/api/problems?${q.toString()}`)
   },
 
-  getProblem: (id: string) =>
-    fetch(`/api/problem?id=${enc(id)}`).then((r) => asJson<ProblemFull>(r)),
+  getProblem: (id: string) => get<ProblemFull>(`/api/problem?id=${enc(id)}`),
 
   saveCode: (id: string, code: string) =>
-    fetch('/api/problem/code', {
-      method: 'PUT',
-      headers: jsonHeaders,
-      body: JSON.stringify({ id, code }),
-    }).then((r) => asJson<{ ok: boolean; updatedAt: string }>(r)),
+    send<{ ok: boolean; updatedAt: string }>('PUT', '/api/problem/code', { id, code }),
 
-  listRuns: (id: string) =>
-    fetch(`/api/problem/runs?id=${enc(id)}`).then((r) => asJson<RunRecord[]>(r)),
+  listRuns: (id: string) => get<RunRecord[]>(`/api/problem/runs?id=${enc(id)}`),
 
   createRun: (id: string, run: NewRun) =>
-    fetch('/api/problem/runs', {
-      method: 'POST',
-      headers: jsonHeaders,
-      body: JSON.stringify({ id, ...run }),
-    }).then((r) => asJson<RunRecord>(r)),
+    send<RunRecord>('POST', '/api/problem/runs', { id, ...run }),
 
   // Attempt timer (id in the query so a sendBeacon pause on tab-close works).
-  startAttempt: (id: string) =>
-    fetch(`/api/problem/attempt/start?id=${enc(id)}`, { method: 'POST' }),
-  pauseAttempt: (id: string) =>
-    fetch(`/api/problem/attempt/pause?id=${enc(id)}`, { method: 'POST' }),
-  resumeAttempt: (id: string) =>
-    fetch(`/api/problem/attempt/resume?id=${enc(id)}`, { method: 'POST' }),
+  attempt: (action: AttemptAction, id: string) =>
+    send<{ ok: boolean }>('POST', `/api/problem/attempt/${action}?id=${enc(id)}`),
 }

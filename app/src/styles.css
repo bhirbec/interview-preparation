@@ -98,11 +98,6 @@ body {
   margin: 0;
 }
 
-.app-header .count {
-  color: var(--muted);
-  font-size: 0.85rem;
-}
-
 .theme-toggle {
   margin-left: auto;
   background: var(--panel);
@@ -315,24 +310,6 @@ body {
   margin: 0.75rem 0 0;
 }
 
-/* "last time all tests passed" — plain green text in the list, a chip in the
-   detail header. */
-.solved {
-  font-size: 0.78rem;
-  color: var(--pass);
-  white-space: nowrap;
-  min-width: 6rem;
-  text-align: right;
-}
-
-.app-header .solved {
-  min-width: 0;
-  background: var(--pass-bg);
-  padding: 0.15rem 0.55rem;
-  border-radius: 999px;
-  font-weight: 600;
-}
-
 /* Per-row status icon in the list (✓ solved, ◐ started, ○ not started). */
 .status-badge {
   min-width: 6.5rem;
@@ -381,6 +358,9 @@ body {
 
 .timer.solved {
   color: var(--pass);
+  background: var(--pass-bg);
+  padding: 0.15rem 0.55rem;
+  border-radius: 999px;
 }
 
 .timer-btn {

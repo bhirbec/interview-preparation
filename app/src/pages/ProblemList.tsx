@@ -3,7 +3,8 @@ import { Link } from 'react-router-dom'
 import type { Facets, ProblemListItem, ProblemPage, StatusFilter } from '../types'
 import ThemeToggle from '../components/ThemeToggle'
 import { api } from '../api'
-import { formatDuration } from '../time'
+import { formatDuration, liveElapsed } from '../time'
+import { useTicker } from '../hooks/useTicker'
 
 const STATUS_OPTIONS: { value: StatusFilter; label: string }[] = [
   { value: 'all', label: 'All' },
@@ -11,12 +12,6 @@ const STATUS_OPTIONS: { value: StatusFilter; label: string }[] = [
   { value: 'started', label: 'Started' },
   { value: 'solved', label: 'Solved' },
 ]
-
-function liveElapsed(p: ProblemListItem, now: number): number {
-  let ms = p.accumulatedMs
-  if (p.runningSince) ms += now - Date.parse(p.runningSince)
-  return ms
-}
 
 function StatusCell({ p, now }: { p: ProblemListItem; now: number }) {
   if (p.status === 'solved') {
@@ -50,17 +45,12 @@ export default function ProblemList() {
   const [data, setData] = useState<ProblemPage | null>(null)
   const [facets, setFacets] = useState<Facets | null>(null)
   const [showAllTags, setShowAllTags] = useState(false)
-  const [now, setNow] = useState(() => Date.now())
 
   const TAG_LIMIT = 12
 
   // Tick once a second only while a visible row's timer is running.
   const anyRunning = !!data?.items.some((p) => p.status === 'started' && p.runningSince)
-  useEffect(() => {
-    if (!anyRunning) return
-    const t = window.setInterval(() => setNow(Date.now()), 1000)
-    return () => clearInterval(t)
-  }, [anyRunning])
+  const now = useTicker(anyRunning)
 
   useEffect(() => {
     api.getFacets().then(setFacets).catch(() => setFacets({ difficulties: [], tags: [] }))

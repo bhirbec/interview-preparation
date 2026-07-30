@@ -1,8 +1,10 @@
 """SQLite storage for the coding-trainer API.
 
-Two tables, keyed by the problem slug (a stable id, so build.py never changes):
+Four tables, keyed by the problem slug (a stable id, so build.py never changes):
+  - problem:    the imported catalog (definition + starter/solution/tests).
   - submission: the latest autosaved implementation per problem.
   - run:        one row per test run (result + the code that produced it).
+  - attempt:    a log of timed attempts; the latest one drives a problem's status.
 """
 
 import os
@@ -43,10 +45,12 @@ CREATE TABLE IF NOT EXISTS run (
   total       INTEGER NOT NULL,
   duration_ms REAL NOT NULL,
   all_passed  INTEGER NOT NULL,
-  created_at  TEXT NOT NULL
+  created_at  TEXT NOT NULL,
+  attempt_id  INTEGER              -- FK to attempt.id; _add_run_attempt_id backfills older DBs
 );
 
 CREATE INDEX IF NOT EXISTS idx_run_problem ON run (problem_id, created_at DESC);
+CREATE INDEX IF NOT EXISTS idx_run_attempt ON run (attempt_id);
 
 -- A log of timed attempts (one row per Start/Retake). Status is derived from
 -- the latest attempt per problem; the log also feeds daily stats later.

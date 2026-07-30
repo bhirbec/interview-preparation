@@ -68,10 +68,6 @@ export default function ProblemDetail() {
       .getProblem(id)
       .then((p) => {
         if (cancelled) return
-        if (!p || !('id' in p)) {
-          setNotFound(true)
-          return
-        }
         setProblem(p)
         setCode(p.code ?? p.starter)
       })
@@ -103,9 +99,7 @@ export default function ProblemDetail() {
 
   // Refetch problem (attempt status/timing) after a timer action or a run.
   function reload() {
-    api.getProblem(id).then((p) => {
-      if (p && 'id' in p) setProblem(p)
-    })
+    api.getProblem(id).then(setProblem).catch(() => {})
   }
 
   function doSave(next: string) {
@@ -152,7 +146,7 @@ export default function ProblemDetail() {
       await api.createRun(id, { code, passed, failed, total: res.length, durationMs })
       const [freshRuns, state] = await Promise.all([api.listRuns(id), api.getProblem(id)])
       setRuns(freshRuns)
-      if (state && 'id' in state) setProblem(state)
+      setProblem(state)
     } catch (e) {
       setError(e instanceof Error ? e.message : String(e))
     } finally {
