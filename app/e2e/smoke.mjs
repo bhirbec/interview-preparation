@@ -49,6 +49,9 @@ try {
   await page.getByRole('button', { name: /Run Tests/ }).click()
   await page.locator('.summary').waitFor({ timeout: 120000 })
   assert(/^0\//.test((await page.locator('.summary').textContent()).trim()), 'stub run fails')
+  // Tracebacks reference the editor file (impl.py), not an opaque <exec> blob.
+  const stubMsgs = (await page.locator('.msg').allTextContents()).join('\n')
+  assert(/impl\.py/.test(stubMsgs) && !/<exec>/.test(stubMsgs), 'stub traceback names impl.py, not <exec>')
 
   // Paste the real solution -> all pass.
   const editor = page.locator('.cm-content')
