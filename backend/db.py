@@ -110,3 +110,170 @@ def init_db():
     conn.executescript(SCHEMA)
     _add_run_attempt_id(conn)
     _backfill_solved_attempts(conn)
+
+
+# --- data access -----------------------------------------------------------
+# Each function takes an open connection so the caller controls the transaction
+# boundary (commit happens when its `with connect()` block exits). Rows are
+# returned raw; server.py owns the snake_case→camelCase serialization.
+
+# SQL mirror of server._attempt_fields' status derivation, for the list status
+# filter (the latest attempt is joined as `a`). Keep the two in sync.
+STATUS_EXPR = """
+  CASE
+    WHEN a.solved_at IS NOT NULL THEN 'solved'
+    WHEN a.id IS NOT NULL THEN 'started'
+    ELSE 'not-started'
+  END
+"""
+
+
+def get_problem_row(conn, pid):
+  return conn.execute("SELECT * FROM problem WHERE id = ?", (pid,)).fetchone()
+
+
+def get_submission_code(conn, pid):
+  r = conn.execute(
+      "SELECT code FROM submission WHERE problem_id = ?", (pid,)
+  ).fetchone()
+  return r["code"] if r else None
+
+
+def upsert_submission(conn, pid, code, ts):
+  conn.execute(
+      """
+      INSERT INTO submission (problem_id, code, updated_at)
+      VALUES (?, ?, ?)
+      ON CONFLICT(problem_id)
+      DO UPDATE SET code = excluded.code, updated_at = excluded.updated_at
+      """,
+      (pid, code, ts),
+  )
+
+
+def difficulty_counts(conn):
+  return conn.execute(
+      "SELECT difficulty, COUNT(*) AS c FROM problem GROUP BY difficulty"
+  ).fetchall()
+
+
+def all_tag_json(conn):
+  return conn.execute("SELECT tags FROM problem").fetchall()
+
+
+def latest_attempt(conn, pid):
+  return conn.execute(
+      "SELECT * FROM attempt WHERE problem_id = ? ORDER BY id DESC LIMIT 1", (pid,)
+  ).fetchone()
+
+
+def latest_attempt_with_run_count(conn, pid):
+  return conn.execute(
+      """
+      SELECT *, (SELECT COUNT(*) FROM run WHERE attempt_id = attempt.id) AS run_count
+      FROM attempt WHERE problem_id = ? ORDER BY id DESC LIMIT 1
+      """,
+      (pid,),
+  ).fetchone()
+
+
+def insert_attempt(conn, pid, ts):
+  conn.execute(
+      "INSERT INTO attempt (problem_id, started_at, accumulated_ms, running_since) "
+      "VALUES (?, ?, 0, ?)",
+      (pid, ts, ts),
+  )
+
+
+def pause_attempt(conn, attempt_id, add_ms):
+  conn.execute(
+      "UPDATE attempt SET accumulated_ms = accumulated_ms + ?, running_since = NULL "
+      "WHERE id = ?",
+      (add_ms, attempt_id),
+  )
+
+
+def resume_attempt(conn, attempt_id, ts):
+  conn.execute("UPDATE attempt SET running_since = ? WHERE id = ?", (ts, attempt_id))
+
+
+def finalize_solve(conn, attempt_id, ts, elapsed_ms):
+  conn.execute(
+      "UPDATE attempt SET solved_at = ?, elapsed_ms = ?, running_since = NULL "
+      "WHERE id = ?",
+      (ts, elapsed_ms, attempt_id),
+  )
+
+
+def insert_run(conn, pid, code, passed, failed, total, duration_ms, all_passed,
+               ts, attempt_id):
+  cur = conn.execute(
+      """
+      INSERT INTO run
+        (problem_id, code, passed, failed, total, duration_ms, all_passed,
+         created_at, attempt_id)
+      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+      """,
+      (pid, code, passed, failed, total, duration_ms, all_passed, ts, attempt_id),
+  )
+  return cur.lastrowid
+
+
+def get_run(conn, run_id):
+  return conn.execute("SELECT * FROM run WHERE id = ?", (run_id,)).fetchone()
+
+
+def list_run_rows(conn, pid, limit):
+  return conn.execute(
+      "SELECT * FROM run WHERE problem_id = ? ORDER BY created_at DESC, id DESC LIMIT ?",
+      (pid, limit),
+  ).fetchall()
+
+
+def query_problem_page(conn, *, search, difficulties, taglist, status, limit, offset):
+  """(total, rows) for a filtered catalog page. difficulties/taglist are lists;
+  multiple tags are ANDed. status is one of the three states or "" (any)."""
+  conds = []
+  params = {}
+
+  if search.strip():
+    params["like"] = f"%{search.strip().lower()}%"
+    conds.append("(lower(p.title) LIKE :like OR lower(p.tags) LIKE :like)")
+
+  if difficulties:
+    placeholders = []
+    for i, d in enumerate(difficulties):
+      params[f"diff{i}"] = d
+      placeholders.append(f":diff{i}")
+    conds.append(f"p.difficulty IN ({','.join(placeholders)})")
+
+  for i, t in enumerate(taglist):
+    params[f"tag{i}"] = f'%"{t}"%'  # tags column is a JSON array of quoted strings
+    conds.append(f"p.tags LIKE :tag{i}")
+
+  if status in ("not-started", "started", "solved"):
+    conds.append(f"({STATUS_EXPR.strip()}) = :status")
+    params["status"] = status
+
+  where = ("WHERE " + " AND ".join(conds)) if conds else ""
+  base_from = """
+    FROM problem p
+    LEFT JOIN attempt a ON a.id = (SELECT MAX(id) FROM attempt WHERE problem_id = p.id)
+  """
+
+  total = conn.execute(
+      f"SELECT COUNT(*) AS n {base_from} {where}", params
+  ).fetchone()["n"]
+  rows = conn.execute(
+      f"""
+      SELECT p.id, p.title, p.difficulty, p.tags,
+             a.started_at, a.accumulated_ms, a.running_since,
+             a.solved_at, a.elapsed_ms,
+             (SELECT COUNT(*) FROM run WHERE attempt_id = a.id) AS attempt_run_count
+      {base_from} {where}
+      ORDER BY p.position
+      LIMIT :limit OFFSET :offset
+      """,
+      {**params, "limit": limit, "offset": offset},
+  ).fetchall()
+  return total, rows
