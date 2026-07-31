@@ -27,8 +27,8 @@ services:
       - "${API_PORT:-8000}:8000"
     volumes:
       - ./backend:/app
-      - ./coding-questions:/coding-questions:ro
-      - ./lessons:/lessons:ro
+      - ./knowledge/coding-questions:/coding-questions:ro
+      - ./knowledge/lessons:/lessons:ro
       - api_data:/data
       - ./logs:/logs
     environment:

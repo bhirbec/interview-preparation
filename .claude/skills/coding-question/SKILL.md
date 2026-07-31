@@ -1,6 +1,6 @@
 ---
 name: coding-question
-description: Turn a YouTube coding-challenge video OR an existing local implementation into a coding question under ./coding-questions, authored as three files (impl.py skeleton, solution.py full solution, tests.py). Use when the user gives a YouTube URL (e.g. a CodeSignal/LeetCode explainer) or a local path to an existing solution file. Invoke with the video URL or local path as the argument.
+description: Turn a YouTube coding-challenge video OR an existing local implementation into a coding question under ./knowledge/coding-questions, authored as three files (impl.py skeleton, solution.py full solution, tests.py). Use when the user gives a YouTube URL (e.g. a CodeSignal/LeetCode explainer) or a local path to an existing solution file. Invoke with the video URL or local path as the argument.
 argument-hint: <youtube-url-or-local-path>
 ---
 
@@ -8,7 +8,7 @@ argument-hint: <youtube-url-or-local-path>
 
 Given either a **YouTube URL** for a coding-challenge video or a **local path**
 to an existing implementation already in this repo, create a new folder under
-`./coding-questions/<name>/` containing three files:
+`./knowledge/coding-questions/<name>/` containing three files:
 
 - **`impl.py`** — the skeleton the user starts with in the editor: the
   problem-description comment block, any input data-structure classes (e.g.
@@ -21,7 +21,7 @@ to an existing implementation already in this repo, create a new folder under
 
 The app runs the user's edited `impl.py` **concatenated with `tests.py`**, so
 the tests must build their inputs from the classes in `impl.py`. The reference
-exemplar to mirror is `coding-questions/CTCI/2.5-sum-lists/`.
+exemplar to mirror is `knowledge/coding-questions/CTCI/2.5-sum-lists/`.
 
 The catalog is stored in a database (not a JSON file); after creating or editing
 a problem you re-import it — see step 9.
@@ -72,7 +72,7 @@ move-and-cleanup step for local sources (step 7).
        - `# Tags: #tag1 #tag2 ...` — techniques/data-structures/topics. **Reuse
          existing tags — don't invent near-duplicates.** First list what's used:
          ```
-         grep -rhoE '#[a-z0-9-]+' coding-questions/ | sort | uniq -c | sort -rn
+         grep -rhoE '#[a-z0-9-]+' knowledge/coding-questions/ | sort | uniq -c | sort -rn
          ```
          Normalize: lowercase, kebab-case for multi-word (`#two-pointers`,
          `#dynamic-programming`); name the technique/structure/topic; every tag
@@ -161,9 +161,9 @@ move-and-cleanup step for local sources (step 7).
 
 8. **Verify by concatenation** (this is exactly how the app runs it — the user's
    `impl.py` plus `tests.py`):
-   - `cat coding-questions/<name>/solution.py coding-questions/<name>/tests.py | python3`
+   - `cat knowledge/coding-questions/<name>/solution.py knowledge/coding-questions/<name>/tests.py | python3`
      → must report `OK`. Fix until green.
-   - `cat coding-questions/<name>/impl.py coding-questions/<name>/tests.py | python3`
+   - `cat knowledge/coding-questions/<name>/impl.py knowledge/coding-questions/<name>/tests.py | python3`
      → must report `FAILED` with `NotImplementedError` and **no `NameError`**. A
      `NameError` means the tests reference a symbol not in `impl.py` — either the
      tests are grading an alternate/helper (fix the tests to grade only the
