@@ -8,7 +8,7 @@ id as a query parameter or request-body field rather than a path segment.
 
 import json
 from contextlib import asynccontextmanager
-from datetime import datetime, timezone
+from datetime import date, datetime, timedelta, timezone
 
 import db
 from fastapi import FastAPI, HTTPException
@@ -169,6 +169,131 @@ def get_lesson(id: str):
       "topic": lesson["topic"],
       "body": lesson["body"],
       "exercises": items,
+  }
+
+
+_DIFF_ORDER = {"easy": 0, "medium": 1, "hard": 2}
+
+
+def _time_stats(values: list) -> dict:
+  return {
+      "avgMs": round(sum(values) / len(values)) if values else None,
+      "bestMs": min(values) if values else None,
+      "count": len(values),
+  }
+
+
+def _streaks(day_set) -> dict:
+  """Longest run of consecutive days, and the run ending on the latest solve day."""
+  if not day_set:
+    return {"current": 0, "longest": 0}
+  days = sorted(day_set)
+  longest = run = 1
+  for i in range(1, len(days)):
+    run = run + 1 if days[i] - days[i - 1] == timedelta(days=1) else 1
+    longest = max(longest, run)
+  current = 1
+  for i in range(len(days) - 1, 0, -1):
+    if days[i] - days[i - 1] == timedelta(days=1):
+      current += 1
+    else:
+      break
+  return {"current": current, "longest": longest}
+
+
+@app.get("/api/stats")
+def stats():
+  """Training metrics aggregated from problem + attempt + run (no new tracking)."""
+  with db.connect() as conn:
+    problems = db.all_problem_meta(conn)
+    solved_rows = db.solved_attempts(conn)
+    total_runs = db.count_runs(conn)
+    started = db.started_problem_ids(conn)
+    started_briefs = db.problems_brief(conn, started)
+
+  # problem metadata + totals
+  meta = {}
+  diff_total, tag_total = {}, {}
+  for p in problems:
+    tags = _json_list(p["tags"])
+    meta[p["id"]] = {"title": p["title"], "difficulty": p["difficulty"], "tags": tags}
+    diff_total[p["difficulty"]] = diff_total.get(p["difficulty"], 0) + 1
+    for t in tags:
+      tag_total[t] = tag_total.get(t, 0) + 1
+
+  # fold the solved attempts
+  best_elapsed = {}     # problem -> min timed elapsed_ms
+  latest_solved = {}    # problem -> (solved_at, elapsed_ms) at max solved_at
+  day_problems = {}     # 'YYYY-MM-DD' -> set(problem)
+  for r in solved_rows:
+    pid = r["problem_id"]
+    if pid not in meta:
+      continue  # solved a problem no longer in the catalog
+    e, sa = r["elapsed_ms"], r["solved_at"]
+    if e is not None and e < best_elapsed.get(pid, float("inf")):
+      best_elapsed[pid] = e
+    if pid not in latest_solved or sa > latest_solved[pid][0]:
+      latest_solved[pid] = (sa, e)
+    day_problems.setdefault(sa[:10], set()).add(pid)
+
+  solved_ids = set(latest_solved)
+
+  def diff_key(d):
+    return _DIFF_ORDER.get(d, 99)
+
+  diff_solved = {}
+  tag_solved = {}
+  for pid in solved_ids:
+    diff_solved[meta[pid]["difficulty"]] = diff_solved.get(meta[pid]["difficulty"], 0) + 1
+    for t in meta[pid]["tags"]:
+      tag_solved[t] = tag_solved.get(t, 0) + 1
+
+  by_difficulty = [
+      {"difficulty": d, "solved": diff_solved.get(d, 0), "total": diff_total[d]}
+      for d in sorted(diff_total, key=diff_key)
+  ]
+  top_tags = sorted(tag_total.items(), key=lambda kv: (-kv[1], kv[0]))[:12]
+  by_tag = [{"tag": t, "solved": tag_solved.get(t, 0), "total": n} for t, n in top_tags]
+
+  diff_vals = {}
+  for pid, e in best_elapsed.items():
+    diff_vals.setdefault(meta[pid]["difficulty"], []).append(e)
+  solve_time = {
+      "overall": _time_stats(list(best_elapsed.values())),
+      "byDifficulty": [
+          {"difficulty": d, **_time_stats(diff_vals.get(d, []))}
+          for d in sorted(diff_vals, key=diff_key)
+      ],
+  }
+
+  fastest = [
+      {"id": pid, "title": meta[pid]["title"],
+       "difficulty": meta[pid]["difficulty"], "elapsedMs": e}
+      for pid, e in sorted(best_elapsed.items(), key=lambda kv: kv[1])[:5]
+  ]
+  recent = [
+      {"id": pid, "title": meta[pid]["title"], "difficulty": meta[pid]["difficulty"],
+       "solvedAt": sa, "elapsedMs": e}
+      for pid, (sa, e) in sorted(latest_solved.items(), key=lambda kv: kv[1][0], reverse=True)[:6]
+  ]
+  in_progress = [
+      {"id": pid, "title": b["title"], "difficulty": b["difficulty"]}
+      for pid, b in sorted(started_briefs.items())
+  ]
+
+  return {
+      "solvedCount": len(solved_ids),
+      "totalProblems": len(problems),
+      "totalRuns": total_runs,
+      "totalTimeMs": sum(best_elapsed.values()),
+      "streak": _streaks({date.fromisoformat(d) for d in day_problems}),
+      "byDifficulty": by_difficulty,
+      "byTag": by_tag,
+      "solveTime": solve_time,
+      "fastest": fastest,
+      "daily": [{"date": d, "count": len(s)} for d, s in sorted(day_problems.items())],
+      "recent": recent,
+      "inProgress": in_progress,
   }
 
 

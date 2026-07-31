@@ -3,6 +3,7 @@ import ProblemList from './pages/ProblemList'
 import ProblemDetail from './pages/ProblemDetail'
 import Program from './pages/Program'
 import Lesson from './pages/Lesson'
+import Stats from './pages/Stats'
 
 export default function App() {
   return (
@@ -12,6 +13,7 @@ export default function App() {
       <Route path="/problem/*" element={<ProblemDetail />} />
       <Route path="/program" element={<Program />} />
       <Route path="/lesson/*" element={<Lesson />} />
+      <Route path="/stats" element={<Stats />} />
     </Routes>
   )
 }

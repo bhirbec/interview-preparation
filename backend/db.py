@@ -360,3 +360,26 @@ def problems_brief(conn, ids):
       list(ids),
   ).fetchall()
   return {r["id"]: {"title": r["title"], "difficulty": r["difficulty"]} for r in rows}
+
+
+# --- stats ---
+
+
+def all_problem_meta(conn):
+  """id, title, difficulty, tags for every problem (for stats totals)."""
+  return conn.execute(
+      "SELECT id, title, difficulty, tags FROM problem"
+  ).fetchall()
+
+
+def solved_attempts(conn):
+  """Every solved attempt: problem_id, solved_at, elapsed_ms (may be NULL for
+  backfilled solves)."""
+  return conn.execute(
+      "SELECT problem_id, solved_at, elapsed_ms FROM attempt "
+      "WHERE solved_at IS NOT NULL"
+  ).fetchall()
+
+
+def count_runs(conn):
+  return conn.execute("SELECT COUNT(*) AS n FROM run").fetchone()["n"]

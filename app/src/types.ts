@@ -51,6 +51,66 @@ export interface LessonDetail {
   exercises: LessonExercise[]
 }
 
+// --- stats ---
+
+export interface DifficultyStat {
+  difficulty: string
+  solved: number
+  total: number
+}
+
+export interface TagStat {
+  tag: string
+  solved: number
+  total: number
+}
+
+export interface TimeStat {
+  avgMs: number | null
+  bestMs: number | null
+  count: number
+}
+
+export interface DifficultyTimeStat extends TimeStat {
+  difficulty: string
+}
+
+export interface FastestSolve {
+  id: string
+  title: string
+  difficulty: string
+  elapsedMs: number
+}
+
+export interface RecentSolve {
+  id: string
+  title: string
+  difficulty: string
+  solvedAt: string
+  elapsedMs: number | null
+}
+
+export interface ProblemRef {
+  id: string
+  title: string
+  difficulty: string
+}
+
+export interface StatsResponse {
+  solvedCount: number
+  totalProblems: number
+  totalRuns: number
+  totalTimeMs: number
+  streak: { current: number; longest: number }
+  byDifficulty: DifficultyStat[]
+  byTag: TagStat[]
+  solveTime: { overall: TimeStat; byDifficulty: DifficultyTimeStat[] }
+  fastest: FastestSolve[]
+  daily: { date: string; count: number }[]
+  recent: RecentSolve[]
+  inProgress: ProblemRef[]
+}
+
 // Status + timing from the latest attempt (returned by both list and detail).
 export interface AttemptState {
   status: ProblemStatus
