@@ -1,0 +1,9 @@
+{
+  "title": "Grids & Matrices",
+  "topic": "Arrays & Strings",
+  "exercises": [
+    "CTCI/1.7-rotate-matrix",
+    "spiral-matrix",
+    "matrix-elements-sum"
+  ]
+}

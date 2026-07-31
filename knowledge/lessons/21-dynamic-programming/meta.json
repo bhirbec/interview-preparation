@@ -1,0 +1,13 @@
+{
+  "title": "Dynamic Programming",
+  "topic": "Dynamic Programming & Greedy",
+  "exercises": [
+    "maximum-subarray",
+    "longest-increasing-subsequence",
+    "CTCI/8.11-coins",
+    "CTCI/8.2-robot-in-a-grid",
+    "collect-coins-in-matrix",
+    "count-abc-strings",
+    "CTCI/8.14-boolean-evaluation"
+  ]
+}

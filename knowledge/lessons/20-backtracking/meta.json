@@ -1,0 +1,13 @@
+{
+  "title": "Backtracking",
+  "topic": "Recursion & Backtracking",
+  "exercises": [
+    "CTCI/8.4-power-set",
+    "CTCI/8.7-permutations-without-dups",
+    "CTCI/8.9-parens",
+    "word-search-grid",
+    "CTCI/8.12-eight-queens",
+    "binary-wildcard-combinations",
+    "target-expression"
+  ]
+}

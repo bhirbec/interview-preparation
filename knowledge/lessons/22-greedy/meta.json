@@ -1,0 +1,8 @@
+{
+  "title": "Greedy",
+  "topic": "Dynamic Programming & Greedy",
+  "exercises": [
+    "word-wrap",
+    "matrix-best-path"
+  ]
+}

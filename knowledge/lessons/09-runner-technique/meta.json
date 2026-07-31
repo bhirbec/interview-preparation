@@ -1,0 +1,9 @@
+{
+  "title": "The Runner Technique",
+  "topic": "Linked Lists",
+  "exercises": [
+    "CTCI/2.2-return-kth-to-last",
+    "CTCI/2.7-intersection",
+    "CTCI/2.4-partition"
+  ]
+}

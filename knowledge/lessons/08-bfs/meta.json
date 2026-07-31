@@ -1,9 +1,0 @@
-{
-  "title": "Breadth-First Search (BFS)",
-  "topic": "Graphs",
-  "exercises": [
-    "word-ladder",
-    "museum-guard-distances",
-    "flooded-world"
-  ]
-}

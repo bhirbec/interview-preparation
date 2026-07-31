@@ -1,0 +1,7 @@
+{
+  "title": "Shortest Paths (Dijkstra)",
+  "topic": "Graphs",
+  "exercises": [
+    "flooded-world"
+  ]
+}

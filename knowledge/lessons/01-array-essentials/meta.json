@@ -1,0 +1,11 @@
+{
+  "title": "Array Essentials",
+  "topic": "Arrays & Strings",
+  "exercises": [
+    "adjacent-elements-product",
+    "make-array-consecutive",
+    "biggest-loss",
+    "product-of-array-except-self",
+    "all-longest-strings"
+  ]
+}

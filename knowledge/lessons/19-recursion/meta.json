@@ -1,0 +1,10 @@
+{
+  "title": "Recursion Fundamentals",
+  "topic": "Recursion & Backtracking",
+  "exercises": [
+    "CTCI/8.6-towers-of-hanoi",
+    "CTCI/8.5-recursive-multiply",
+    "CTCI/17.2-shuffle",
+    "json-path-lookup"
+  ]
+}
