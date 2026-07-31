@@ -29,26 +29,6 @@ func (n *Node) Print() {
 	fmt.Print("\n")
 }
 
-func main() {
-	list := makeList()
-	list.Print()
-	partition(list, 4)
-	list.Print()
-}
-
-func makeList() *Node {
-	list := &Node{1, nil}
-	list.Append(2)
-	list.Append(3)
-	list.Append(4)
-	list.Append(5)
-	list.Append(3)
-	list.Append(7)
-	list.Append(8)
-	list.Append(10)
-	return list
-}
-
 func partition(n *Node, x int) *Node {
 	var l1, l2, n1, n2, next *Node
 
