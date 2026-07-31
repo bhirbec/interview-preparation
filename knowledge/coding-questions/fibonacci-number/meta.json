@@ -1,0 +1,9 @@
+{
+  "difficulty": "easy",
+  "tags": [
+    "dynamic-programming",
+    "recursion",
+    "math"
+  ],
+  "hint": "The naive recursion recomputes the same terms exponentially many times. Either memoize the recursion, or build bottom-up keeping only the last two values."
+}

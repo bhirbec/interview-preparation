@@ -2,12 +2,19 @@
   "title": "Dynamic Programming",
   "topic": "Dynamic Programming & Greedy",
   "exercises": [
+    "fibonacci-number",
+    "max-non-adjacent-sum",
     "maximum-subarray",
     "longest-increasing-subsequence",
     "CTCI/8.11-coins",
     "CTCI/8.2-robot-in-a-grid",
+    "rod-cutting",
+    "knapsack",
+    "longest-common-subsequence",
+    "edit-distance",
     "collect-coins-in-matrix",
     "count-abc-strings",
-    "CTCI/8.14-boolean-evaluation"
+    "CTCI/8.14-boolean-evaluation",
+    "text-justification"
   ]
 }

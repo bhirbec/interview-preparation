@@ -1,0 +1,9 @@
+{
+  "difficulty": "medium",
+  "tags": [
+    "dynamic-programming",
+    "string",
+    "subsequence"
+  ],
+  "hint": "Build a table where dp[i][j] is the LCS length of the first i chars of s1 and first j of s2: 1 + diagonal on a character match, else max(left, up). Walk the table backwards from the corner to reconstruct the subsequence itself."
+}
