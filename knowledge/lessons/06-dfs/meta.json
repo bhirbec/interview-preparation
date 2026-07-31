@@ -1,0 +1,9 @@
+{
+  "title": "Depth-First Search (DFS)",
+  "topic": "Graphs",
+  "exercises": [
+    "number-of-provinces",
+    "biggest-island",
+    "CTCI/4.1-route-between-nodes"
+  ]
+}
