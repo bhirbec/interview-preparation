@@ -1,0 +1,10 @@
+{
+  "title": "Hashing",
+  "topic": "Arrays & Strings",
+  "exercises": [
+    "three-array-target-sum",
+    "find-anagrams",
+    "longest-palindrome",
+    "remove-common-phrases"
+  ]
+}

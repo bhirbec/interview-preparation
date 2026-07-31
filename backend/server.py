@@ -116,6 +116,61 @@ def facets():
   return {"difficulties": difficulties, "tags": tags}
 
 
+@app.get("/api/lessons")
+def lessons():
+  """Curriculum lessons with derived progress (done once any exercise solved)."""
+  with db.connect() as conn:
+    rows = db.list_lessons(conn)
+    solved = db.ever_solved_problem_ids(conn)
+  items = []
+  for r in rows:
+    exercises = _json_list(r["exercises"])
+    solved_count = sum(1 for e in exercises if e in solved)
+    items.append({
+        "id": r["id"],
+        "title": r["title"],
+        "topic": r["topic"],
+        "position": r["position"],
+        "exerciseCount": len(exercises),
+        "solvedCount": solved_count,
+        "done": solved_count >= 1,
+    })
+  return {"lessons": items}
+
+
+@app.get("/api/lesson")
+def get_lesson(id: str):
+  """A lesson's markdown body + its exercises with per-exercise status."""
+  with db.connect() as conn:
+    lesson = db.get_lesson_row(conn, id)
+    if lesson is None:
+      raise HTTPException(status_code=404, detail="lesson not found")
+    exercises = _json_list(lesson["exercises"])
+    briefs = db.problems_brief(conn, exercises)
+    solved = db.ever_solved_problem_ids(conn)
+    started = db.started_problem_ids(conn)
+
+  items = []
+  for e in exercises:
+    b = briefs.get(e)
+    if b is None:
+      continue  # exercise id no longer in the catalog
+    status = "solved" if e in solved else "started" if e in started else "not-started"
+    items.append({
+        "id": e,
+        "title": b["title"],
+        "difficulty": b["difficulty"],
+        "status": status,
+    })
+  return {
+      "id": lesson["id"],
+      "title": lesson["title"],
+      "topic": lesson["topic"],
+      "body": lesson["body"],
+      "exercises": items,
+  }
+
+
 # --- attempts / timing ---
 
 

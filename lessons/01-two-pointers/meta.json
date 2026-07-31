@@ -1,0 +1,11 @@
+{
+  "title": "Two Pointers",
+  "topic": "Arrays & Strings",
+  "exercises": [
+    "three-sum",
+    "trapping-rain-water",
+    "subarray-sum-to-target",
+    "check-palindrome",
+    "CTCI/2.7-intersection"
+  ]
+}

@@ -15,6 +15,22 @@ function runPython(src) {
   })
 }
 
+// Force a problem to "solved" by inserting a completed attempt — used to make
+// curriculum progress deterministic without driving the whole solve UI.
+export function markSolved(id) {
+  const src = [
+    'import db',
+    `pid = ${JSON.stringify(id)}`,
+    'with db.connect() as c:',
+    '    c.execute("DELETE FROM attempt WHERE problem_id=?", (pid,))',
+    '    c.execute("INSERT INTO attempt (problem_id, started_at, accumulated_ms,'
+      + " running_since, solved_at, elapsed_ms) VALUES"
+      + " (?, '2026-01-01T00:00:00+00:00', 60000, NULL,"
+      + " '2026-01-01T00:01:00+00:00', 60000)\", (pid,))",
+  ].join('\n')
+  runPython(src)
+}
+
 // Delete a problem's runs + attempts (→ status "not-started"). With
 // { seedSolution: true }, also save its reference solution as the current code
 // so "Start clears the editor" style checks have non-stub code to clear.

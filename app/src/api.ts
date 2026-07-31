@@ -1,5 +1,7 @@
 import type {
   Facets,
+  LessonDetail,
+  LessonsResponse,
   ProblemFull,
   ProblemPage,
   RunRecord,
@@ -62,6 +64,9 @@ export const api = {
   },
 
   getProblem: (id: string) => get<ProblemFull>(`/api/problem?id=${enc(id)}`),
+
+  getLessons: () => get<LessonsResponse>('/api/lessons'),
+  getLesson: (id: string) => get<LessonDetail>(`/api/lesson?id=${enc(id)}`),
 
   saveCode: (id: string, code: string) =>
     send<{ ok: boolean; updatedAt: string }>('PUT', '/api/problem/code', { id, code }),

@@ -65,6 +65,19 @@ CREATE TABLE IF NOT EXISTS attempt (
 );
 
 CREATE INDEX IF NOT EXISTS idx_attempt_problem ON attempt (problem_id, id DESC);
+
+-- Curriculum lessons (populated from lessons/ by build.py). A lesson groups
+-- markdown content with an explicit list of exercise problem ids; progress is
+-- derived from the attempt table (a lesson is "done" once any exercise has ever
+-- been solved).
+CREATE TABLE IF NOT EXISTS lesson (
+  id        TEXT PRIMARY KEY,
+  title     TEXT NOT NULL,
+  topic     TEXT,
+  body      TEXT,               -- markdown lesson content
+  exercises TEXT,               -- JSON array of problem ids
+  position  INTEGER
+);
 """
 
 
@@ -110,6 +123,7 @@ def init_db():
     conn.executescript(SCHEMA)
     _add_run_attempt_id(conn)
     _backfill_solved_attempts(conn)
+    conn.execute("DROP TABLE IF EXISTS chapter")  # renamed to lesson
 
 
 # --- data access -----------------------------------------------------------
@@ -277,3 +291,64 @@ def query_problem_page(conn, *, search, difficulties, taglist, status, limit, of
       {**params, "limit": limit, "offset": offset},
   ).fetchall()
   return total, rows
+
+
+# --- curriculum / progress ---
+
+
+def upsert_lesson(conn, id, title, topic, body, exercises_json, position):
+  conn.execute(
+      """
+      INSERT INTO lesson (id, title, topic, body, exercises, position)
+      VALUES (?, ?, ?, ?, ?, ?)
+      ON CONFLICT(id) DO UPDATE SET
+        title = excluded.title, topic = excluded.topic, body = excluded.body,
+        exercises = excluded.exercises, position = excluded.position
+      """,
+      (id, title, topic, body, exercises_json, position),
+  )
+
+
+def list_lessons(conn):
+  return conn.execute("SELECT * FROM lesson ORDER BY position").fetchall()
+
+
+def get_lesson_row(conn, id):
+  return conn.execute("SELECT * FROM lesson WHERE id = ?", (id,)).fetchone()
+
+
+def ever_solved_problem_ids(conn):
+  """Problems solved at least once (a chapter is 'done' once any exercise is
+  solved, and a later Retake must not un-complete it)."""
+  return {
+      r["problem_id"]
+      for r in conn.execute(
+          "SELECT DISTINCT problem_id FROM attempt WHERE solved_at IS NOT NULL"
+      ).fetchall()
+  }
+
+
+def started_problem_ids(conn):
+  """Problems whose latest attempt exists but is unsolved (in progress)."""
+  return {
+      r["problem_id"]
+      for r in conn.execute(
+          """
+          SELECT a.problem_id FROM attempt a
+          WHERE a.id = (SELECT MAX(id) FROM attempt WHERE problem_id = a.problem_id)
+            AND a.solved_at IS NULL
+          """
+      ).fetchall()
+  }
+
+
+def problems_brief(conn, ids):
+  """id → {title, difficulty} for the given problem ids (missing ids omitted)."""
+  if not ids:
+    return {}
+  placeholders = ",".join("?" for _ in ids)
+  rows = conn.execute(
+      f"SELECT id, title, difficulty FROM problem WHERE id IN ({placeholders})",
+      list(ids),
+  ).fetchall()
+  return {r["id"]: {"title": r["title"], "difficulty": r["difficulty"]} for r in rows}
