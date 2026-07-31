@@ -1,6 +1,6 @@
 """SQLite storage for the coding-trainer API.
 
-Four tables, keyed by the problem slug (a stable id, so build.py never changes):
+Four tables, keyed by the problem slug (a stable id, so etl.py never changes):
   - problem:    the imported catalog (definition + starter/solution/tests).
   - submission: the latest autosaved implementation per problem.
   - run:        one row per test run (result + the code that produced it).
@@ -67,7 +67,7 @@ CREATE TABLE IF NOT EXISTS attempt (
 
 CREATE INDEX IF NOT EXISTS idx_attempt_problem ON attempt (problem_id, id DESC);
 
--- Curriculum lessons (populated from lessons/ by build.py). A lesson groups
+-- Curriculum lessons (populated from lessons/ by etl.py). A lesson groups
 -- markdown content with an explicit list of exercise problem ids; progress is
 -- derived from the attempt table (a lesson is "done" once any exercise has ever
 -- been solved).
