@@ -91,6 +91,8 @@ body {
   align-items: center;
   gap: 0.75rem;
   margin-bottom: 1rem;
+  /* Leave room for the fixed top-left 3-dot menu button so it never overlaps. */
+  padding-left: 2rem;
 }
 
 .app-header h1 {
@@ -115,6 +117,10 @@ body {
 
 /* ---- left drawer menu (3-dot) ---- */
 .menu-btn {
+  position: fixed;
+  top: 0.9rem;
+  left: 0.9rem;
+  z-index: 30;
   background: var(--panel);
   border: 1px solid var(--border);
   border-radius: 8px;
