@@ -1,0 +1,11 @@
+{
+  "title": "Trees & BSTs",
+  "topic": "Trees",
+  "exercises": [
+    "CTCI/4.2-minimal-tree",
+    "CTCI/4.3-list-of-depths",
+    "CTCI/4.5-validate-bst",
+    "sum-root-to-leaf-numbers",
+    "CTCI/4.10-check-subtree"
+  ]
+}

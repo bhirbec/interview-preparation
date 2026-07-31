@@ -20,6 +20,37 @@ export interface RunRecord {
 
 export type ProblemStatus = 'not-started' | 'started' | 'solved'
 
+// --- curriculum / program ---
+
+export interface ChapterSummary {
+  id: string
+  title: string
+  topic: string
+  position: number
+  exerciseCount: number
+  solvedCount: number
+  done: boolean
+}
+
+export interface ProgramResponse {
+  chapters: ChapterSummary[]
+}
+
+export interface ChapterExercise {
+  id: string
+  title: string
+  difficulty: string
+  status: ProblemStatus
+}
+
+export interface ChapterDetail {
+  id: string
+  title: string
+  topic: string
+  lesson: string
+  exercises: ChapterExercise[]
+}
+
 // Status + timing from the latest attempt (returned by both list and detail).
 export interface AttemptState {
   status: ProblemStatus

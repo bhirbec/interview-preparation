@@ -1,7 +1,9 @@
 import type {
+  ChapterDetail,
   Facets,
   ProblemFull,
   ProblemPage,
+  ProgramResponse,
   RunRecord,
   StatusFilter,
 } from './types'
@@ -62,6 +64,9 @@ export const api = {
   },
 
   getProblem: (id: string) => get<ProblemFull>(`/api/problem?id=${enc(id)}`),
+
+  getProgram: () => get<ProgramResponse>('/api/program'),
+  getChapter: (id: string) => get<ChapterDetail>(`/api/chapter?id=${enc(id)}`),
 
   saveCode: (id: string, code: string) =>
     send<{ ok: boolean; updatedAt: string }>('PUT', '/api/problem/code', { id, code }),
