@@ -5,6 +5,7 @@ import type {
   ProblemFull,
   ProblemPage,
   RunRecord,
+  StatsResponse,
   StatusFilter,
 } from './types'
 
@@ -67,6 +68,8 @@ export const api = {
 
   getLessons: () => get<LessonsResponse>('/api/lessons'),
   getLesson: (id: string) => get<LessonDetail>(`/api/lesson?id=${enc(id)}`),
+
+  getStats: () => get<StatsResponse>('/api/stats'),
 
   saveCode: (id: string, code: string) =>
     send<{ ok: boolean; updatedAt: string }>('PUT', '/api/problem/code', { id, code }),

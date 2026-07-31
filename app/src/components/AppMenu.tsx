@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
-import { MdMoreVert, MdClose, MdListAlt, MdSchool } from 'react-icons/md'
+import { MdMoreVert, MdClose, MdListAlt, MdSchool, MdQueryStats } from 'react-icons/md'
 import ThemeToggle from './ThemeToggle'
 
 // Top-left 3-dot button that opens a left-hand drawer. Holds app-wide nav and
@@ -51,6 +51,10 @@ export default function AppMenu() {
           <Link to="/program" className="drawer-item" onClick={() => setOpen(false)}>
             <MdSchool />
             <span>Program</span>
+          </Link>
+          <Link to="/stats" className="drawer-item" onClick={() => setOpen(false)}>
+            <MdQueryStats />
+            <span>Stats</span>
           </Link>
           <ThemeToggle />
         </nav>

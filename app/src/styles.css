@@ -1115,3 +1115,159 @@ button.tag:hover {
 .exercise-title {
   flex: 1;
 }
+
+/* ---- stats page ---- */
+.stat-cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+  gap: 0.75rem;
+  margin-bottom: 1.75rem;
+}
+
+.stat-card {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  padding: 0.9rem 1rem;
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+}
+
+.stat-value {
+  font-size: 1.5rem;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}
+
+.stat-of {
+  font-size: 1rem;
+  font-weight: 400;
+  color: var(--muted);
+}
+
+.stat-label {
+  font-size: 0.8rem;
+  color: var(--muted);
+}
+
+.stat-section {
+  margin-bottom: 1.75rem;
+}
+
+.stat-section h3 {
+  margin: 0 0 0.7rem;
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--muted);
+}
+
+.stat-section h4 {
+  margin: 1.1rem 0 0.5rem;
+  font-size: 0.8rem;
+  color: var(--muted);
+}
+
+.bar-row {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.3rem 0;
+}
+
+.bar-label {
+  flex: 0 0 9rem;
+  text-transform: capitalize;
+}
+
+.bar-count {
+  flex: 0 0 3rem;
+  text-align: right;
+  color: var(--muted);
+  font-size: 0.85rem;
+  font-variant-numeric: tabular-nums;
+}
+
+.bar-row .progress-bar {
+  flex: 1;
+  width: auto;
+}
+
+/* activity heatmap */
+.heatmap {
+  display: grid;
+  grid-auto-flow: column;
+  grid-template-rows: repeat(7, 1fr);
+  gap: 3px;
+  max-width: 100%;
+  overflow-x: auto;
+}
+
+.heat-cell {
+  width: 13px;
+  height: 13px;
+  border-radius: 3px;
+}
+
+.solvetime-overall {
+  margin: 0 0 0.6rem;
+}
+
+.solvetime-row {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  padding: 0.2rem 0;
+  color: var(--muted);
+  font-size: 0.9rem;
+}
+
+.stat-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+}
+
+.stat-list li {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.stat-link {
+  flex: 1;
+  color: var(--text);
+  text-decoration: none;
+}
+
+.stat-link:hover {
+  color: var(--accent);
+}
+
+.stat-time {
+  color: var(--muted);
+  font-size: 0.85rem;
+  font-variant-numeric: tabular-nums;
+}
+
+.stat-empty {
+  margin: 0;
+  color: var(--muted);
+  font-size: 0.9rem;
+}
+
+.stat-cols {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1.5rem;
+}
+
+@media (max-width: 700px) {
+  .stat-cols {
+    grid-template-columns: 1fr;
+  }
+}
