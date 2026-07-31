@@ -1,0 +1,8 @@
+{
+  "title": "Binary Search Trees",
+  "topic": "Trees",
+  "exercises": [
+    "CTCI/4.2-minimal-tree",
+    "CTCI/4.5-validate-bst"
+  ]
+}

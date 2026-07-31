@@ -1,11 +1,12 @@
 {
-  "title": "Trees & BSTs",
+  "title": "Binary Trees",
   "topic": "Trees",
   "exercises": [
-    "CTCI/4.2-minimal-tree",
     "CTCI/4.3-list-of-depths",
-    "CTCI/4.5-validate-bst",
+    "CTCI/4.4-check-balanced",
     "sum-root-to-leaf-numbers",
-    "CTCI/4.10-check-subtree"
+    "CTCI/4.10-check-subtree",
+    "count-unival-subtrees",
+    "isomorphic-trees"
   ]
 }
