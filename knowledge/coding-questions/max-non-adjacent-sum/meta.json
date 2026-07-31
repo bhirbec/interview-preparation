@@ -1,0 +1,8 @@
+{
+  "difficulty": "easy",
+  "tags": [
+    "dynamic-programming",
+    "array"
+  ],
+  "hint": "For each position either skip it (best of the prefix one shorter) or take it (weight + best of the prefix two shorter): dp[i] = max(dp[i-1], dp[i-2] + w[i]). Two rolling variables suffice."
+}

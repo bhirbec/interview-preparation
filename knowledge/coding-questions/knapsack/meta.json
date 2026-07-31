@@ -1,0 +1,7 @@
+{
+  "difficulty": "medium",
+  "tags": [
+    "dynamic-programming"
+  ],
+  "hint": "dp[x] = best value achievable with capacity x. For each item, sweep capacities from high to low (so the item is used at most once) and relax dp[x] = max(dp[x], dp[x - weight] + value)."
+}
