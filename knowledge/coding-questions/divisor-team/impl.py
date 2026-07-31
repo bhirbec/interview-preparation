@@ -1,8 +1,6 @@
 # Divisor-Free Team Size
 #
-# Difficulty: medium
 # Source: https://careercup.com/question?id=5673924747591680
-# Tags: #math #twitter
 #
 # You are given an integer `n`. Players are numbered 1, 2, ..., n. Two players
 # conflict when one player's number divides the other's (for example 3 and 9, or
@@ -20,10 +18,6 @@
 #   n = 1  -> 2   (largest clean team is {1}, size 1)
 #   n = 2  -> 2   (1 divides 2, so the largest clean team is size 1)
 #   n = 4  -> 3   (largest clean team is {3,4}, size 2)
-#
-# Approach: the integers in the half-open range (n/2, n] form the largest possible
-# clean team (none divides another, since doubling any of them exceeds n), and its
-# size is n - n//2; add one to force a conflict.
 
 
 def divisor_free_team_size(n):

@@ -1,0 +1,10 @@
+{
+  "difficulty": "medium",
+  "tags": [
+    "bfs",
+    "matrix",
+    "graph",
+    "facebook"
+  ],
+  "hint": "multi-source BFS seeded with every guard at distance 0, expanding to the 8 neighbours and skipping walls; the first time a cell is reached is its shortest distance."
+}

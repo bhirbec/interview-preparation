@@ -1,0 +1,8 @@
+{
+  "difficulty": "medium",
+  "tags": [
+    "math",
+    "google"
+  ],
+  "hint": "for every pair 1 <= a <= b with a^3 + b^3 <= n, tally the sum in a counts array; every index counted at least twice is good."
+}

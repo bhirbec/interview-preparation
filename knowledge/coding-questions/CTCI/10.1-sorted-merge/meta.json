@@ -1,0 +1,9 @@
+{
+  "difficulty": "easy",
+  "tags": [
+    "array",
+    "sorting",
+    "two-pointers"
+  ],
+  "hint": "fill arr1 from the back. Two read pointers walk the real portion of arr1 and arr2 from their high ends; the larger element is written to the next open slot at the tail. Working backwards means the buffer is always ahead of the read pointer, so no unread value is overwritten."
+}

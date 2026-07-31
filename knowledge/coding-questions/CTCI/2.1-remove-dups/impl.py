@@ -1,6 +1,4 @@
 # Remove Dups
-# Difficulty: easy
-# Tags: #linked-list #hashtable #runner
 #
 # You are given the head node of a singly linked list. Remove all nodes that
 # hold a duplicate value so that each value appears at most once. The relative
@@ -16,9 +14,6 @@
 #   1 -> 1 -> 1 -> 1      =>  1
 #   4 -> 3 -> 2 -> 1      =>  4 -> 3 -> 2 -> 1  (already unique)
 #   5                     =>  5  (single node)
-#
-# Approach: keep a hash set of values already seen; walk the list with a
-# `previous` pointer and splice out any node whose value is already in the set.
 
 
 class Node(object):

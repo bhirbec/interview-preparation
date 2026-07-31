@@ -1,0 +1,10 @@
+{
+  "difficulty": "medium",
+  "tags": [
+    "matrix",
+    "dynamic-programming",
+    "dfs",
+    "recursion"
+  ],
+  "hint": "DFS from (0, 0) trying right then down, memoizing failed cells so each cell is explored at most once (O(r*c)). Build the path on the way back up."
+}

@@ -1,0 +1,9 @@
+{
+  "difficulty": "medium",
+  "tags": [
+    "array",
+    "hashtable",
+    "twitter"
+  ],
+  "hint": "sweep time forward, tracking each task's last run time; run the head task when the gap exceeds k, otherwise burn an idle unit."
+}

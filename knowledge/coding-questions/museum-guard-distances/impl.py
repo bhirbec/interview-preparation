@@ -1,8 +1,6 @@
 # Museum Guard Distances
 #
-# Difficulty: medium
 # Source: https://www.careercup.com/question?id=5722862468988928
-# Tags: #bfs #matrix #graph #facebook
 #
 # A museum is represented by a square matrix whose cells are one of:
 #   'O' - open space
@@ -29,10 +27,6 @@
 #   [['G', 'O', 'O', 'G']] ->  [['G', 1, 1, 'G']]  (nearest of two guards wins)
 #
 #   [['O', 'O']]          ->   [['O', 'O']]        (no guard anywhere)
-#
-# Approach: multi-source BFS seeded with every guard at distance 0, expanding to
-# the 8 neighbours and skipping walls; the first time a cell is reached is its
-# shortest distance.
 
 
 def museum_distances(matrix):

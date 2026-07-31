@@ -1,6 +1,4 @@
 # Sparse Search
-# Difficulty: easy
-# Tags: #binary-search #array #string
 #
 # You are given a sorted array of strings interspersed with empty strings
 # (`''`), and a target non-empty string `value`. Return an index at which

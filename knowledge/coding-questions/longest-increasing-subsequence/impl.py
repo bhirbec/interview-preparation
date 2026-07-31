@@ -1,8 +1,5 @@
 # Longest Increasing Subsequence
 #
-# Difficulty: medium
-# Tags: #dynamic-programming #subsequence #array
-#
 # You are given an integer array `nums`. Return the length of the longest
 # strictly increasing subsequence.
 #
@@ -21,10 +18,6 @@
 #   [0, 1, 0, 3, 2, 3]           -> 4   (0, 1, 2, 3)
 #   [7, 7, 7, 7, 7]              -> 1   (equal values can't extend each other)
 #   []                           -> 0
-#
-# Approach: O(n^2) dynamic programming. dp[i] = length of the longest strictly
-# increasing subsequence ending at index i; dp[i] = 1 + max(dp[j]) over all
-# j < i with nums[j] < nums[i], or 1 if none. The answer is max(dp).
 
 
 def length_of_lis(nums):

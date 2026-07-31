@@ -1,0 +1,7 @@
+{
+  "difficulty": "easy",
+  "tags": [
+    "string"
+  ],
+  "hint": "walk the string tracking the current character and its run length; when the character changes, flush \"<char><count>\" and reset the count."
+}

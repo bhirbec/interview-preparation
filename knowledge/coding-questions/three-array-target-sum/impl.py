@@ -1,8 +1,6 @@
 # Three Array Target Sum
 #
-# Difficulty: medium
 # Source: https://careercup.com/question?id=6287187793412096
-# Tags: #array #hashtable #uber
 #
 # You are given three integer arrays `a`, `b`, `c` and an integer `target`.
 # Taking exactly one element from each array, find every triple (x, y, z) with
@@ -23,9 +21,6 @@
 #   a = [1], b = [1], c = [1], target = 3  -> [[1, 1, 1]]
 #   a = [1], b = [1], c = [1], target = 4  -> []
 #   a = [],  b = [1], c = [1], target = 2  -> []
-#
-# Approach: precompute a hash map from every a+b pair-sum to the list of (x, y)
-# pairs producing it; then for each z scan the pairs stored under target - z.
 
 
 def target_sum(a, b, c, target):

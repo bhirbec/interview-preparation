@@ -1,8 +1,5 @@
 # Rotate Matrix
 #
-# Difficulty: medium
-# Tags: #matrix #array
-#
 # You are given an N x N matrix of integers. Rotate it 90 degrees
 # counterclockwise IN PLACE, moving values layer by layer with four-way swaps
 # and without allocating a second matrix. Return the same matrix object.
@@ -20,10 +17,6 @@
 #
 #   [[1]]           -> [[1]]
 #   []              -> []
-#
-# Approach: process concentric layers from the outside in. For each layer, walk
-# its elements and rotate them with a four-way swap (top <- right <- bottom <-
-# left <- saved top), so no extra matrix is needed.
 
 
 def rotate(mat):

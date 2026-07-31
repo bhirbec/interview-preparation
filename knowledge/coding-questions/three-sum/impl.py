@@ -1,9 +1,7 @@
 # Three Sum
 #
-# Difficulty: medium
 # Source: https://www.glassdoor.com/Interview/3-sum-problem-that-can-be-found-on-leetcode-QTN_1202200.htm
 # Source: https://en.wikipedia.org/wiki/3SUM
-# Tags: #array #two-pointers #sorting #google
 #
 # You are given an array of integers `nums` and an integer `target`. Return all
 # unique triplets (a, b, c) drawn from three DISTINCT positions of `nums` whose
@@ -26,9 +24,6 @@
 #     -> []                         # no triplet reaches the target
 #   nums = [-2, 0, 1, 1, 2], target = 0
 #     -> [(-2, 0, 2), (-2, 1, 1)]
-#
-# Approach: sort the array, then for each index i sweep the remainder with two
-# pointers, skipping equal neighbors to avoid duplicate triplets. O(n^2).
 
 
 def three_sum(nums, target):

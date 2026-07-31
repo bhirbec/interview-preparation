@@ -1,0 +1,10 @@
+{
+  "difficulty": "easy",
+  "tags": [
+    "string",
+    "hashtable",
+    "sorting",
+    "twitter"
+  ],
+  "hint": "bucket words by their sorted-character key, then emit every word whose bucket holds more than one word."
+}

@@ -1,6 +1,4 @@
 # Check Subtree
-# Difficulty: medium
-# Tags: #tree #recursion #dfs
 #
 # You are given two binary trees, T1 (large) and T2 (smaller). Determine
 # whether T2 is a subtree of T1. T2 is a subtree of T1 if there exists a node n
@@ -18,10 +16,6 @@
 #   T1 = 10(5,15), T2 = 5(1) -> False (5 in T1 is a leaf, not 5 with child 1)
 #   T1 = any, T2 = None -> True
 #   T1 = None, T2 = 15(12,41) -> False
-#
-# Approach: an identical subtree must have the same depth as T2. Walk T1 while
-# computing each node's subtree depth; only when a node's depth equals T2's
-# depth do we run a full structural comparison against T2.
 
 
 class Node:

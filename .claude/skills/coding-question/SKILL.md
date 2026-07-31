@@ -1,6 +1,6 @@
 ---
 name: coding-question
-description: Turn a YouTube coding-challenge video OR an existing local implementation into a coding question under ./knowledge/coding-questions, authored as three files (impl.py skeleton, solution.py full solution, tests.py). Use when the user gives a YouTube URL (e.g. a CodeSignal/LeetCode explainer) or a local path to an existing solution file. Invoke with the video URL or local path as the argument.
+description: Turn a YouTube coding-challenge video OR an existing local implementation into a coding question under ./knowledge/coding-questions, authored as four files (impl.py skeleton, meta.json difficulty/tags/hint, solution.py full solution, tests.py). Use when the user gives a YouTube URL (e.g. a CodeSignal/LeetCode explainer) or a local path to an existing solution file. Invoke with the video URL or local path as the argument.
 argument-hint: <youtube-url-or-local-path>
 ---
 
@@ -8,11 +8,15 @@ argument-hint: <youtube-url-or-local-path>
 
 Given either a **YouTube URL** for a coding-challenge video or a **local path**
 to an existing implementation already in this repo, create a new folder under
-`./knowledge/coding-questions/<name>/` containing three files:
+`./knowledge/coding-questions/<name>/` containing four files:
 
 - **`impl.py`** — the skeleton the user starts with in the editor: the
-  problem-description comment block, any input data-structure classes (e.g.
-  `Node`), and the primary function **stubbed** with `raise NotImplementedError`.
+  problem-description comment block (title, optional `# Source:`, statement,
+  examples — **no** Difficulty/Tags/Approach), any input data-structure classes
+  (e.g. `Node`), and the primary function **stubbed** with `raise NotImplementedError`.
+- **`meta.json`** — `{ "difficulty": "<easy|medium|hard>", "tags": ["tag1", ...],
+  "hint": "<one-line approach>" }`. Difficulty, tags, and the solution hint live
+  here (not in the impl.py comment); `hint` is `""` when there's no useful nudge.
 - **`solution.py`** — the full working solution: the same input classes + the
   implemented primary function (+ any private helpers or alternate variants).
 - **`tests.py`** — `import unittest`, any test-only helper functions (e.g.
@@ -57,35 +61,38 @@ move-and-cleanup step for local sources (step 7).
    problem, not the source filename. If a folder for the same problem already
    exists, tell the user and ask before overwriting.
 
-3. **Write `impl.py`** — the skeleton, in this order:
+3. **Write `impl.py` and `meta.json`** — the skeleton plus metadata:
 
-   - **Problem-description comment block** at the top:
+   - **Problem-description comment block** at the top of `impl.py`:
      - **Title** on line 1 — just the title (`# Century From Year`, not
        `# Century From Year (CodeSignal)`).
-     - **Metadata** lines:
-       - `# Difficulty: <easy|medium|hard>`
-       - `# Source: <url>` — **only if the input carries a reference link**;
-         omit otherwise. Preserve every genuine reference URL (the YouTube URL in
-         video mode; any Coursera/YouTube/GeeksforGeeks/LeetCode link in a local
-         source's comments/README). One `# Source:` line per URL. Keep them out
-         of the title.
-       - `# Tags: #tag1 #tag2 ...` — techniques/data-structures/topics. **Reuse
-         existing tags — don't invent near-duplicates.** First list what's used:
-         ```
-         grep -rhoE '#[a-z0-9-]+' knowledge/coding-questions/ | sort | uniq -c | sort -rn
-         ```
-         Normalize: lowercase, kebab-case for multi-word (`#two-pointers`,
-         `#dynamic-programming`); name the technique/structure/topic; every tag
-         must carry real signal (avoid vague catch-alls like `#implementation`,
-         `#simulation`, `#logic`). Do NOT tag the language (`#python` is
-         pointless — everything here is Python).
+     - `# Source: <url>` — **only if the input carries a reference link**; omit
+       otherwise. Preserve every genuine reference URL (the YouTube URL in video
+       mode; any Coursera/YouTube/GeeksforGeeks/LeetCode link in a local source's
+       comments/README). One `# Source:` line per URL. Keep them out of the title.
      - A **faithful problem statement** the way a clean interview/LeetCode prompt
        reads: address the reader ("You are given...", "Return..."), state input
        and required output precisely, list constraints (size bounds, value
        ranges, guarantees). Strip cutesy narrative (mascots, character names,
        gift-giving framings) — state the underlying task plainly. Then 2-4
-       concrete examples (include the tricky boundary cases) and a one-line
-       **approach** note (shown as a collapsible hint in the app).
+       concrete examples (include the tricky boundary cases).
+     - **Do NOT put difficulty, tags, or the approach/hint in this comment** —
+       they go in `meta.json`.
+
+   - **`meta.json`** in the same folder:
+     `{ "difficulty": "<easy|medium|hard>", "tags": ["tag1", ...], "hint": "..." }`
+     - `hint`: a one-line **approach** nudge (shown as a collapsible hint in the
+       app), or `""` when there's no useful nudge.
+     - `tags`: techniques/data-structures/topics. **Reuse existing tags — don't
+       invent near-duplicates.** First list what's used:
+       ```
+       python3 -c "import json,glob,collections as c; print(c.Counter(t for f in glob.glob('knowledge/coding-questions/**/meta.json',recursive=True) for t in json.load(open(f)).get('tags',[])).most_common())"
+       ```
+       Normalize: lowercase, kebab-case for multi-word (`two-pointers`,
+       `dynamic-programming`); name the technique/structure/topic; every tag must
+       carry real signal (avoid vague catch-alls like `implementation`,
+       `simulation`, `logic`). Do NOT tag the language. Store tags **without** the
+       leading `#`.
 
    - **Input classes.** If the inputs are a data structure (linked list, tree,
      grid wrapper, …), define the class(es) the tests need to construct inputs
@@ -177,7 +184,7 @@ move-and-cleanup step for local sources (step 7).
    If the containers aren't running, say so and tell the user to run it once
    they're up.
 
-10. **Report** the folder and the three files created, the one-line problem
+10. **Report** the folder and the four files created, the one-line problem
     summary, both verification results, whether the catalog was re-imported, and
     — in local-path mode — exactly which original files you removed. Do not
     commit or open a PR unless the user asks.

@@ -1,0 +1,9 @@
+{
+  "difficulty": "medium",
+  "tags": [
+    "string",
+    "hashtable",
+    "imo"
+  ],
+  "hint": "hash every 3+ word window to the set of sentences containing it; the common windows are those seen in 2+ sentences, then blank out every word position each covers."
+}

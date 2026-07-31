@@ -1,0 +1,8 @@
+{
+  "difficulty": "medium",
+  "tags": [
+    "recursion",
+    "backtracking"
+  ],
+  "hint": "keep a buffer of n slots. Placing character i, try every free slot, recurse to place the next character, then undo the placement (backtracking). When all characters are placed, emit the buffer as a string. Examples: perms('') -> [''] perms('a') -> ['a'] perms('ab') -> ['ab', 'ba'] perms('abc') -> 6 permutations"
+}

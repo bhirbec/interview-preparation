@@ -1,0 +1,9 @@
+{
+  "difficulty": "medium",
+  "tags": [
+    "recursion",
+    "backtracking",
+    "string"
+  ],
+  "hint": "build the string slot by slot. At each position we may add an opening paren if we have not used all n, and a closing paren if there is an unmatched opening paren still available. Recording tracks the counts of opened and closed parens to keep every prefix valid. Examples: gen_parens(0) -> [''] gen_parens(1) -> ['()'] gen_parens(2) -> ['(())', '()()'] gen_parens(3) -> 5 combinations"
+}

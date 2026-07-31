@@ -1,8 +1,6 @@
 # Bit Strings By Popcount
 #
-# Difficulty: easy
 # Source: https://www.careercup.com/question?id=5726391455711232
-# Tags: #bit-manipulation #sorting #google
 #
 # Given an integer k (the number of bits), return every length-k binary string,
 # ordered first by the number of set bits (ascending) and, within the same number
@@ -19,9 +17,6 @@
 #   k = 2 -> ['00', '01', '10', '11']
 #   k = 3 -> ['000', '001', '010', '100', '011', '101', '110', '111']
 #            (0 bits, then 1 bit, then 2 bits, then 3 bits set)
-#
-# Approach: sort all integers 0..2**k-1 by (population count, value) and format
-# each as a zero-padded k-bit binary string.
 
 
 def bit_strings_by_popcount(k):

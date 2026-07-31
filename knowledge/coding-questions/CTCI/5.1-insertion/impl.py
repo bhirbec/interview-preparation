@@ -1,6 +1,4 @@
 # Insertion
-# Difficulty: medium
-# Tags: #bit-manipulation #math
 #
 # You are given two 32-bit numbers, n and m, and two bit positions i and j
 # (with i <= j). Insert m into n so that m occupies bits j through i of n. You
@@ -14,9 +12,6 @@
 #   insert_bits(n=161, m=5, i=2, j=4)                 -> 181
 #   insert_bits(n=0, m=0b111, i=0, j=2)               -> 7
 #   insert_bits(n=0b11111111, m=0, i=2, j=4)          -> 0b11100011 (227)
-#
-# Approach: build a mask that clears bits j..i of n (all ones except that
-# window), apply it, then shift m left by i and OR it in.
 
 
 def insert_bits(n, m, i, j):

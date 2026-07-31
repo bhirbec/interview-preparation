@@ -1,0 +1,9 @@
+{
+  "difficulty": "medium",
+  "tags": [
+    "linked-list",
+    "math",
+    "recursion"
+  ],
+  "hint": "recurse over both lists together, summing digit values plus the incoming carry, emitting `sum % 10` and propagating `sum // 10` as the carry into the next recursive call; stop only when both lists and the carry are exhausted."
+}

@@ -1,8 +1,6 @@
 # Find Anagrams
 #
-# Difficulty: easy
 # Source: https://careercup.com/question?id=5687065971785728
-# Tags: #string #hashtable #sorting #twitter
 #
 # You are given a list of strings `words`. Two words are anagrams of each other
 # when one can be rearranged into the other (same multiset of characters).
@@ -22,9 +20,6 @@
 #   ["abc", "def"]        -> []            (no two words share an anagram group)
 #   []                    -> []
 #   ["ab", "ba", "ab"]    -> ["ab", "ba", "ab"]
-#
-# Approach: bucket words by their sorted-character key, then emit every word whose
-# bucket holds more than one word.
 
 
 def find_anagrams(words):

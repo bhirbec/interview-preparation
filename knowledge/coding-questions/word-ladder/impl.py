@@ -1,8 +1,6 @@
 # Word Ladder
 #
-# Difficulty: medium
 # Source: https://www.careercup.com/question?id=14947965
-# Tags: #bfs #graph #string #google
 #
 # Given a start word, a target word, and a dictionary of words (all of the same
 # length), find a shortest transformation sequence from start to target such that
@@ -24,10 +22,6 @@
 #   begin="hit", end="hot", words=["hot"]     -> ["hit","hot"]
 #   begin="cat", end="dog", words=["cat","dog"] -> []   (no single-letter bridge)
 #   begin="cat", end="dog", words=["cat","dat","dit"] -> []  (target not present)
-#
-# Approach: breadth-first search over words, where two words are adjacent when
-# they differ in exactly one letter; the first path to reach the target is a
-# shortest ladder.
 
 
 def find_ladder(begin, end, word_list):

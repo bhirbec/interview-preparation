@@ -1,6 +1,4 @@
 # Sum Lists
-# Difficulty: medium
-# Tags: #linked-list #math #recursion
 #
 # You are given two numbers represented as singly linked lists, where each node
 # holds a single digit and the digits are stored in reverse order (the 1's
@@ -18,11 +16,6 @@
 #   (0) + (0)                       =>  0
 #   (9 -> 9) + (1)                  =>  0 -> 0 -> 1   (99 + 1 = 100)
 #   (5) + (5 -> 8)                  =>  0 -> 9        (5 + 85 = 90)
-#
-# Approach: recurse over both lists together, summing digit values plus the
-# incoming carry, emitting `sum % 10` and propagating `sum // 10` as the carry
-# into the next recursive call; stop only when both lists and the carry are
-# exhausted.
 
 
 class Node:

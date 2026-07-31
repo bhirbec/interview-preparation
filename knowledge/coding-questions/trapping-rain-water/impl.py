@@ -1,8 +1,5 @@
 # Trapping Rain Water
 #
-# Difficulty: hard
-# Tags: #array #two-pointers #twitter
-#
 # You are given a list of non-negative integers `heights` where each value is the
 # height of a bar of unit width, laid out side by side. After it rains, water is
 # trapped between the bars.
@@ -18,9 +15,6 @@
 #   [4,2,0,3,2,5]             -> 9
 #   [3,3,3]                   -> 0    (flat, nothing trapped)
 #   [5,4,3,2,1]               -> 0    (monotonic, no basin)
-#
-# Approach: walk inward from both ends; the shorter side bounds the water there,
-# so advance whichever side is lower, banking (running max - height) as you go.
 
 
 def trap_water(heights):

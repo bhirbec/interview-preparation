@@ -1,0 +1,7 @@
+{
+  "difficulty": "medium",
+  "tags": [
+    "recursion"
+  ],
+  "hint": "to move n disks from origin to destination, recursively move the top n-1 disks to the buffer, move the largest disk to the destination, then move the n-1 disks from the buffer onto the destination. This yields exactly 2^n - 1 moves. Examples: solve_hanoi(0) -> [] solve_hanoi(1) -> [('A', 'C')] solve_hanoi(2) -> [('A', 'B'), ('A', 'C'), ('B', 'C')] solve_hanoi(3) -> 7 moves"
+}

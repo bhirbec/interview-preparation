@@ -1,8 +1,5 @@
 # Matrix Elements Sum
 #
-# Difficulty: easy
-# Tags: #matrix #array
-#
 # You are given a matrix of integers `matrix` where matrix[i][j] is the price of
 # the room on floor i, column j of a hotel (row 0 is the top floor). A price of 0
 # means that room is unavailable, and — because guests are superstitious — every
@@ -28,9 +25,6 @@
 #
 #   [[0]]                col sums: 0                  -> 0
 #   [[1, 5], [3, 2]]     col sums: 1+3 | 5+2          -> 11
-#
-# Approach: walk each column top-to-bottom, accumulating prices until a 0 breaks
-# the column.
 
 
 def matrix_elements_sum(matrix):

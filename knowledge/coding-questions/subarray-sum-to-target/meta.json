@@ -1,0 +1,9 @@
+{
+  "difficulty": "easy",
+  "tags": [
+    "two-pointers",
+    "array",
+    "facebook"
+  ],
+  "hint": "a sliding window works because all values are positive \u2014 grow the window while the running sum is below target, shrink from the left when it overshoots."
+}

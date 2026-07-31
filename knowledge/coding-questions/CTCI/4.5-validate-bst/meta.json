@@ -1,0 +1,10 @@
+{
+  "difficulty": "medium",
+  "tags": [
+    "tree",
+    "binary-search-tree",
+    "dfs",
+    "recursion"
+  ],
+  "hint": "recurse carrying an open (min, max) bound for each node; a node is valid only if min < value < max, then tighten the bound for each child. This catches violations that a naive parent-only comparison would miss."
+}

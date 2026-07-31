@@ -1,8 +1,6 @@
 # Count ABC Strings
 #
-# Difficulty: medium
 # Source: https://www.careercup.com/question?id=5717453712654336
-# Tags: #dynamic-programming #recursion #google
 #
 # Given a length n, return how many strings of length n can be formed from the
 # letters 'a', 'b' and 'c' subject to two rules:
@@ -17,9 +15,6 @@
 #   n = 2 -> 8     # all 9 pairs except "bb"
 #   n = 3 -> 19    # e.g. aaa, aab, aba, abc, cca, ccb, ... (excludes bb*, ccc)
 #   n = 4 -> 43
-#
-# Approach: count with a memoized recursion over (position, number of 'b' used,
-# current run of consecutive 'c'), branching on placing 'a', 'b' or 'c'.
 
 
 def count_abc_strings(n):

@@ -1,0 +1,7 @@
+{
+  "difficulty": "easy",
+  "tags": [
+    "array"
+  ],
+  "hint": "scan each adjacent pair once, tracking the running maximum product."
+}

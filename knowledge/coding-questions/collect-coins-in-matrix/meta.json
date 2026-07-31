@@ -1,0 +1,10 @@
+{
+  "difficulty": "medium",
+  "tags": [
+    "dynamic-programming",
+    "subsequence",
+    "array",
+    "facebook"
+  ],
+  "hint": "sort by x, then run an O(n^2) LIS keeping only pairs where both coordinates strictly increase."
+}

@@ -1,0 +1,8 @@
+{
+  "difficulty": "hard",
+  "tags": [
+    "math",
+    "recursion"
+  ],
+  "hint": "count the 2s contributed at each digit position independently. For a position with place value `i` (1, 10, 100, ...), split n into the digits above the position (`high`), the digit at the position (`cur`), and the digits below (`low`): - cur < 2 -> high * i twos at this position - cur == 2 -> high * i + low + 1 twos - cur > 2 -> (high + 1) * i twos Summing over all positions gives the answer in O(number of digits)."
+}

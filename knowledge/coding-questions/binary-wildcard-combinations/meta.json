@@ -1,0 +1,10 @@
+{
+  "difficulty": "easy",
+  "tags": [
+    "recursion",
+    "backtracking",
+    "string",
+    "google-interview"
+  ],
+  "hint": "backtracking. Walk the string; at a fixed character recurse to the next position; at a '?' set it to '0' then '1', recursing after each, and restore it to '?' on the way back. Record the string when the end is reached."
+}

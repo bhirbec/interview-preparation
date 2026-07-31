@@ -1,0 +1,8 @@
+{
+  "difficulty": "medium",
+  "tags": [
+    "binary-search",
+    "array"
+  ],
+  "hint": "first find a right bound by doubling an index until element_at either overshoots the end (returns -1) or exceeds the target, then run a binary search within the located range. Examples: Listy([1, 4, 6, 17, 21, 34]).find(6) -> 2 Listy([1, 4, 6, 17, 21, 34]).find(34) -> 5 Listy([1, 4, 6, 17, 21, 34]).find(37) -> None Listy([]).find(6) -> None"
+}

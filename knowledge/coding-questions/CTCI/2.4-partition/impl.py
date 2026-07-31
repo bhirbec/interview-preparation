@@ -1,6 +1,4 @@
 # Partition
-# Difficulty: medium
-# Tags: #linked-list #two-pointers
 #
 # You are given the head of a singly linked list and a partition value k.
 # Rearrange the list so that every node with a value less than k comes before
@@ -19,9 +17,6 @@
 #        The order within each group is arbitrary, e.g. 9 -> 1 -> 3 -> 10 -> 134 -> 70.
 #   1 -> 2 -> 3, k=5  =>  all nodes are < 5, so they all stay on the "less" side
 #   6 -> 7 -> 8, k=5  =>  all nodes are >= 5, so they all stay on the ">=" side
-#
-# Approach: walk the list once, prepending each node to a `left` list when its
-# value < k and to a `right` list otherwise, then splice left in front of right.
 
 
 class Node:

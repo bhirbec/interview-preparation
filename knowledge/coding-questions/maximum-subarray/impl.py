@@ -1,8 +1,5 @@
 # Maximum Subarray
 #
-# Difficulty: medium
-# Tags: #array #dynamic-programming
-#
 # You are given an array of integers (which may be positive or negative). Find
 # the contiguous subarray with the largest sum and return that sum together
 # with the start and end indices of the subarray, as a tuple
@@ -22,11 +19,6 @@
 #   [5]                             -> (5, 0, 0)
 #   [-1, -2, -3]                    -> max sum 0     (empty subarray wins)
 #   []                             -> (0, 0, 0)
-#
-# Approach: Kadane's algorithm. Sweep the array keeping a running sum; reset it
-# to 0 (and advance the candidate start index) whenever it drops below 0, and
-# record a new maximum with its end index whenever the running sum exceeds the
-# best seen so far.
 
 
 def max_subarray(array):

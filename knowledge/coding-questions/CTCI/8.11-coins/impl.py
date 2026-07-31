@@ -1,6 +1,4 @@
 # Coins
-# Difficulty: hard
-# Tags: #recursion #dynamic-programming
 #
 # Given an infinite number of quarters (25 cents), dimes (10 cents), nickels
 # (5 cents), and pennies (1 cent), write code to calculate the number of ways
@@ -11,19 +9,6 @@
 #         representations that use the same multiset of coins count once,
 #         regardless of order (so 5 = one nickel = five pennies gives 2 ways,
 #         not more).
-#
-# Approach: consider the coin denominations in a fixed order and, for each
-# denomination, try every possible count of that coin before recursing on the
-# remaining denominations. Fixing the order prevents counting the same multiset
-# of coins as several ordered sequences. Results are memoized on
-# (amount, denomination index).
-#
-# Examples:
-#   count_repr(0)   -> 1   (the empty selection)
-#   count_repr(5)   -> 2
-#   count_repr(10)  -> 4
-#   count_repr(25)  -> 13
-#   count_repr(100) -> 242
 
 
 def count_repr(n):

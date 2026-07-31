@@ -1,0 +1,9 @@
+{
+  "difficulty": "medium",
+  "tags": [
+    "tree",
+    "recursion",
+    "dfs"
+  ],
+  "hint": "an identical subtree must have the same depth as T2. Walk T1 while computing each node's subtree depth; only when a node's depth equals T2's depth do we run a full structural comparison against T2."
+}

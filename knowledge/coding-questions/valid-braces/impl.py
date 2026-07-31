@@ -1,8 +1,5 @@
 # Valid Braces
 #
-# Difficulty: easy
-# Tags: #string #stack
-#
 # You are given a string `s` containing only the bracket characters
 # '(', ')', '[', ']', '{' and '}'. Return True if the brackets are balanced:
 # every opening bracket is closed by a matching bracket of the same type, and
@@ -21,10 +18,6 @@
 #   "([)]"               -> False   (wrong nesting order)
 #   "((("                -> False   (unclosed openers)
 #   ")("                 -> False   (closer before any opener)
-#
-# Approach: scan left to right using a stack. Push every opening bracket. On a
-# closing bracket, the stack top must be its matching opener (fail if the stack
-# is empty or the top does not match). After the scan the stack must be empty.
 
 
 def valid_braces(s):

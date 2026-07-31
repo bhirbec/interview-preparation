@@ -1,0 +1,8 @@
+{
+  "difficulty": "medium",
+  "tags": [
+    "linked-list",
+    "two-pointers"
+  ],
+  "hint": "walk the list once, prepending each node to a `left` list when its value < k and to a `right` list otherwise, then splice left in front of right."
+}

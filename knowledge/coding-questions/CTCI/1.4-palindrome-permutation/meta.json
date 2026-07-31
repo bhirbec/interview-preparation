@@ -1,0 +1,8 @@
+{
+  "difficulty": "easy",
+  "tags": [
+    "string",
+    "hashtable"
+  ],
+  "hint": "count occurrences of each character (after lowercasing and dropping spaces), then verify that no more than one character has an odd count."
+}

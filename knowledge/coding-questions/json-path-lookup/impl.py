@@ -1,8 +1,5 @@
 # JSON Path Lookup
 #
-# Difficulty: medium
-# Tags: #recursion #dfs #hashtable #google
-#
 # You are given a nested JSON-like structure `root` (composed of dicts and lists)
 # and a dot-separated `path` string. Return a list of every value reached by
 # following the path from the root. A path segment names a dict key, or — when the
@@ -24,10 +21,6 @@
 #   "books.novels"           -> [ the whole novels list ]
 #   "books.novels.*.author"  -> ["Tolkien", "Tolkien"]
 #   "books.novels.2.author"  -> []           (index out of range)
-#
-# Approach: recursive DFS; at each segment expand the set of next keys/indices to
-# visit ("*" expands to all children), recurse, and collect leaves at the last
-# segment.
 
 
 def find(root, path):

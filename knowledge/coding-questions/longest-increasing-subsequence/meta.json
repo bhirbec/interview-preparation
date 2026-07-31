@@ -1,0 +1,9 @@
+{
+  "difficulty": "medium",
+  "tags": [
+    "dynamic-programming",
+    "subsequence",
+    "array"
+  ],
+  "hint": "O(n^2) dynamic programming. dp[i] = length of the longest strictly increasing subsequence ending at index i; dp[i] = 1 + max(dp[j]) over all j < i with nums[j] < nums[i], or 1 if none. The answer is max(dp)."
+}

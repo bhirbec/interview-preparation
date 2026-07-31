@@ -1,0 +1,8 @@
+{
+  "difficulty": "easy",
+  "tags": [
+    "array",
+    "math"
+  ],
+  "hint": "answer = (max - min + 1) - len(statues), using exact integer math."
+}

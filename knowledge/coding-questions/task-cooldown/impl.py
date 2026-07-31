@@ -1,8 +1,6 @@
 # Task Cooldown Time
 #
-# Difficulty: medium
 # Source: https://careercup.com/question?id=5723093194506240
-# Tags: #array #hashtable #twitter
 #
 # You are given a list of tasks `tasks` that must be executed in the given order,
 # and a cooldown `k`. Each time unit the CPU either runs the next pending task or
@@ -22,9 +20,6 @@
 #   tasks=[A, B, A, D],             k=3 -> 6    (A B . . A D)
 #   tasks=[A, A, A, A],             k=3 -> 13   (A . . . A . . . A . . . A)
 #   tasks=[A, B, C, A, C, B, D, A], k=4 -> 11   (A B C . . A . C B D A)
-#
-# Approach: sweep time forward, tracking each task's last run time; run the head
-# task when the gap exceeds k, otherwise burn an idle unit.
 
 
 def task_cooldown_time(tasks, k):

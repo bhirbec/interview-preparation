@@ -1,0 +1,10 @@
+{
+  "difficulty": "easy",
+  "tags": [
+    "tree",
+    "binary-search-tree",
+    "recursion",
+    "array"
+  ],
+  "hint": "recursively pick the middle element of the current range as the subtree root so the two halves are balanced, giving minimal height."
+}

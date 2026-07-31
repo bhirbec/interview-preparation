@@ -1,0 +1,9 @@
+{
+  "difficulty": "medium",
+  "tags": [
+    "hashtable",
+    "linked-list",
+    "uber"
+  ],
+  "hint": "a hash map from key to a node in a doubly linked list ordered by recency (most recent at the head). get/put move the touched node to the head; an over-capacity put removes the tail node and drops it from the map."
+}

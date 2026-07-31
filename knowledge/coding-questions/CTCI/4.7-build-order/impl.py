@@ -1,6 +1,4 @@
 # Build Order
-# Difficulty: hard
-# Tags: #graph #topological-sort #dfs #recursion
 #
 # You are given a list of projects and a list of dependencies. Each dependency
 # is a pair (a, b) meaning project a must be built BEFORE project b. Find a
@@ -28,10 +26,6 @@
 #   -> 'ERROR' (cycle)
 #
 #   projects = ['a'], dependencies = [] -> ['a']
-#
-# Approach: DFS-based topological sort. Track nodes currently on the recursion
-# stack to detect cycles; emit each node after all of its successors (reverse
-# post-order) to obtain a valid build order.
 
 
 def build_order(projects, dependencies):

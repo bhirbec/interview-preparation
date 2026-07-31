@@ -1,8 +1,5 @@
 # Count Unival Subtrees
 #
-# Difficulty: medium
-# Tags: #tree #dfs #recursion #box
-#
 # You are given the root of a tree in which every node holds a value and a list
 # of children (a node may have any number of children; a node with no children is
 # a leaf). A subtree is "unival" (universal-value) if every node in that subtree
@@ -24,9 +21,6 @@
 #     is a leaf of value 1                   -> 2  (the value-2 leaf and B; A and
 #                                                   the root are not unival)
 #   an empty tree                            -> 0
-#
-# Approach: post-order DFS returning whether each subtree is unival; a node is
-# unival iff every child subtree is unival and shares the node's value.
 
 
 class Node:

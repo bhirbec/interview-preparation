@@ -1,0 +1,8 @@
+{
+  "difficulty": "hard",
+  "tags": [
+    "array",
+    "binary-search"
+  ],
+  "hint": "divide and conquer. Compare the medians of the two current windows. The overall median cannot lie in the lower half of the array with the smaller median nor in the upper half of the array with the larger median, so discard those halves and recurse on windows half the size each round -> O(log n)."
+}

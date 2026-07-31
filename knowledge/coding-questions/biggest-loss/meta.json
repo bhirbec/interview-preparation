@@ -1,0 +1,8 @@
+{
+  "difficulty": "easy",
+  "tags": [
+    "array",
+    "google"
+  ],
+  "hint": "single pass tracking the highest price seen so far; for each later price the candidate loss is (max_so_far - price). Keep the maximum, floored at 0."
+}

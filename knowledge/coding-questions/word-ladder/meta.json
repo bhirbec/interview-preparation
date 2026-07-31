@@ -1,0 +1,10 @@
+{
+  "difficulty": "medium",
+  "tags": [
+    "bfs",
+    "graph",
+    "string",
+    "google"
+  ],
+  "hint": "breadth-first search over words, where two words are adjacent when they differ in exactly one letter; the first path to reach the target is a shortest ladder."
+}

@@ -1,0 +1,9 @@
+{
+  "difficulty": "easy",
+  "tags": [
+    "tree",
+    "dfs",
+    "recursion"
+  ],
+  "hint": "a single post-order DFS returns each subtree's height, or -1 as a sentinel once any subtree is found unbalanced, so it short-circuits in O(n)."
+}

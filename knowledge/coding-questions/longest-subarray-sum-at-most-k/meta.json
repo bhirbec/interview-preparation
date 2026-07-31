@@ -1,0 +1,9 @@
+{
+  "difficulty": "medium",
+  "tags": [
+    "array",
+    "two-pointers",
+    "sharethis"
+  ],
+  "hint": "sliding window. Grow the window by advancing the right edge; whenever the running sum exceeds k, shrink from the left until it fits again. Because all values are positive, the window sum is monotonic, so each index enters and leaves the window at most once (O(n)). Track the largest valid window seen."
+}

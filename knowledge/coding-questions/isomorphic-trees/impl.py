@@ -1,8 +1,6 @@
 # Isomorphic Trees
 #
-# Difficulty: medium
 # Source: http://www.geeksforgeeks.org/tree-isomorphism-problem
-# Tags: #tree #recursion #dfs
 #
 # Two binary trees are isomorphic if one can be obtained from the other by
 # swapping the left and right children of any number of nodes (any nodes, at any
@@ -21,11 +19,6 @@
 #   root(12; L=15, R=17) and root(12; L=15, R=16) -> False  (value mismatch)
 #   both empty (None, None)                       -> True
 #   one empty, one non-empty                      -> False
-#
-# Approach: recurse in parallel. At each pair of nodes, both must be None
-# (isomorphic) or both non-None with equal data; then the trees are isomorphic
-# if either the children line up directly (left-left and right-right) OR the
-# children line up after a swap (left-right and right-left).
 
 
 class Node:

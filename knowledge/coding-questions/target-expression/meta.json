@@ -1,0 +1,10 @@
+{
+  "difficulty": "medium",
+  "tags": [
+    "backtracking",
+    "recursion",
+    "string",
+    "vmware"
+  ],
+  "hint": "backtracking over where each number ends; extend the running total with the next number added or subtracted until all digits are consumed."
+}

@@ -114,7 +114,11 @@ def parse_metadata(comment_lines):
 def build_problem(pid, folder):
   impl = _read(os.path.join(folder, "impl.py"))
   comment, code = split_comment(impl)
-  meta = parse_metadata(comment)
+  meta = parse_metadata(comment)  # title, sources, description (from impl.py)
+
+  # difficulty / tags / hint live in meta.json (fall back to impl.py if absent).
+  meta_path = os.path.join(folder, "meta.json")
+  mj = json.loads(_read(meta_path)) if os.path.exists(meta_path) else {}
 
   solution = _read(os.path.join(folder, "solution.py"))
   tests = strip_guard(_read(os.path.join(folder, "tests.py")))
@@ -127,10 +131,11 @@ def build_problem(pid, folder):
   return {
       "id": pid,
       "title": meta["title"],
-      "difficulty": meta["difficulty"],
-      "tags": meta["tags"],
+      "difficulty": mj.get("difficulty", meta["difficulty"]),
+      "tags": mj.get("tags", meta["tags"]),
       "sources": meta["sources"],
       "description": meta["description"],
+      "hint": mj.get("hint", ""),
       "primary_function": primary,
       "starter": _strip(code),
       "solution": _strip(solution),
@@ -193,20 +198,21 @@ def main():
       conn.execute(
           """
           INSERT INTO problem
-            (id, title, difficulty, tags, sources, description,
+            (id, title, difficulty, tags, sources, description, hint,
              primary_function, starter, solution, tests, position)
-          VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+          VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
           ON CONFLICT(id) DO UPDATE SET
             title=excluded.title, difficulty=excluded.difficulty,
             tags=excluded.tags, sources=excluded.sources,
-            description=excluded.description,
+            description=excluded.description, hint=excluded.hint,
             primary_function=excluded.primary_function,
             starter=excluded.starter, solution=excluded.solution,
             tests=excluded.tests, position=excluded.position
           """,
           (p["id"], p["title"], p["difficulty"], json.dumps(p["tags"]),
-           json.dumps(p["sources"]), p["description"], p["primary_function"],
-           p["starter"], p["solution"], p["tests"], position),
+           json.dumps(p["sources"]), p["description"], p["hint"],
+           p["primary_function"], p["starter"], p["solution"], p["tests"],
+           position),
       )
     if ids:
       placeholders = ",".join("?" * len(ids))

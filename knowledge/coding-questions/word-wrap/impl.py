@@ -1,8 +1,6 @@
 # Word Wrap
 #
-# Difficulty: easy
 # Source: https://www.glassdoor.com/Interview/Given-a-message-one-two-three-four-five-six-seven-eight-nine-chop-it-in-chunks-no-exceed-the-give-buffer-size-and-print-QTN_1438219.htm
-# Tags: #string #greedy #uber
 #
 # You are given a message `text` made of words separated by single spaces, and a
 # positive integer `width`. Break the message into lines using greedy word wrap:
@@ -24,10 +22,6 @@
 #   text = "aaa bbb ccc", width = 3 -> ["aaa", "bbb", "ccc"]
 #   text = "the quick brown fox", width = 9 -> ["the quick", "brown fox"]
 #   text = "hello", width = 10   -> ["hello"]
-#
-# Approach: walk the words in order, tracking the current line's length; append a
-# word if it still fits (accounting for the separating space), otherwise flush
-# the current line and start a new one with that word.
 
 
 def word_wrap(text, width):
