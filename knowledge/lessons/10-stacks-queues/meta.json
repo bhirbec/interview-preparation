@@ -3,6 +3,7 @@
   "topic": "Stacks, Queues & Heaps",
   "exercises": [
     "valid-braces",
-    "task-cooldown"
+    "task-cooldown",
+    "queue-from-stacks"
   ]
 }

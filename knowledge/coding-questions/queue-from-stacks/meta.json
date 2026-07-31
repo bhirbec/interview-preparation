@@ -1,0 +1,8 @@
+{
+  "difficulty": "easy",
+  "tags": [
+    "stack",
+    "google"
+  ],
+  "hint": "Push arrivals onto an inbox stack. To dequeue, pop everything from the inbox onto an outbox stack \u2014 which reverses the order \u2014 but only when the outbox is empty; then pop from the outbox. Each element crosses over once, so operations are amortized O(1)."
+}

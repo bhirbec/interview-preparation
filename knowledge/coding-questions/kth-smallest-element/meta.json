@@ -1,0 +1,8 @@
+{
+  "difficulty": "medium",
+  "tags": [
+    "array",
+    "sorting"
+  ],
+  "hint": "Quickselect: partition around a pivot as in quicksort, but recurse only into the side that contains rank k \u2014 average O(n). (Plain sorting also passes; mention the trade-off.)"
+}

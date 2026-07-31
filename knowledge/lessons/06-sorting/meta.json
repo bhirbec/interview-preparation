@@ -4,6 +4,8 @@
   "exercises": [
     "CTCI/10.1-sorted-merge",
     "CTCI/10.2-group-anagrams",
-    "highlight-chemical-symbols"
+    "highlight-chemical-symbols",
+    "kth-smallest-element",
+    "peak-traffic-time"
   ]
 }
