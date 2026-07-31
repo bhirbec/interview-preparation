@@ -1,0 +1,9 @@
+{
+  "difficulty": "easy",
+  "tags": [
+    "bit-manipulation",
+    "sorting",
+    "google"
+  ],
+  "hint": "sort all integers 0..2**k-1 by (population count, value) and format each as a zero-padded k-bit binary string."
+}

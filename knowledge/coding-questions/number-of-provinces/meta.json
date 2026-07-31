@@ -1,0 +1,9 @@
+{
+  "difficulty": "medium",
+  "tags": [
+    "graph",
+    "connected-components",
+    "dfs"
+  ],
+  "hint": "treat each row index as a graph node and each '1' as an edge. Scan nodes; from each unvisited node run an iterative DFS over its row to mark the whole component visited, incrementing the group count once per component."
+}

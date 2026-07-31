@@ -1,8 +1,6 @@
 # Collect Coins In Matrix
 #
-# Difficulty: medium
 # Source: https://www.careercup.com/question?id=5722807649435648
-# Tags: #dynamic-programming #subsequence #array #facebook
 #
 # There are N coins placed on a grid, each at an integer coordinate (x, y) with
 # x >= 1 and y >= 1. You start at (0, 0). From your current position (a, b) you
@@ -28,9 +26,6 @@
 #   [(1, 3), (2, 2), (3, 1)]           -> 1   (any two conflict on x or y)
 #   [(1, 1), (1, 2), (2, 3)]           -> 2   (the two x=1 coins conflict)
 #   []                                 -> 0
-#
-# Approach: sort by x, then run an O(n^2) LIS keeping only pairs where both
-# coordinates strictly increase.
 
 
 def max_coins_collected(coins):

@@ -81,6 +81,7 @@ def _problem_dict(p) -> dict:
       "tags": _json_list(p["tags"]),
       "sources": _json_list(p["sources"]),
       "description": p["description"],
+      "hint": p["hint"],
       "primaryFunction": p["primary_function"],
       "starter": p["starter"],
       "solution": p["solution"],

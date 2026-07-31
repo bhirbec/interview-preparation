@@ -1,0 +1,8 @@
+{
+  "difficulty": "hard",
+  "tags": [
+    "backtracking",
+    "recursion"
+  ],
+  "hint": "classic backtracking. Place one queen per row, and for each candidate column check it does not collide with any already-placed queen (same column or same diagonal). Recurse row by row, yielding a copy of the board once all rows are filled."
+}

@@ -1,0 +1,8 @@
+{
+  "difficulty": "easy",
+  "tags": [
+    "string",
+    "two-pointers"
+  ],
+  "hint": "walk two pointers inward from both ends, comparing characters; mismatch means not a palindrome. This is O(n) time and O(1) extra space."
+}

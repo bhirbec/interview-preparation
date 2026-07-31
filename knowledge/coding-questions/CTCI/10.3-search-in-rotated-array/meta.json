@@ -1,0 +1,8 @@
+{
+  "difficulty": "medium",
+  "tags": [
+    "array",
+    "binary-search"
+  ],
+  "hint": "first locate the rotation point (the index of the minimum element) with a binary search. That splits the array into two individually sorted runs: a high run arr[0 .. r-1] and a low run arr[r .. n-1]. Decide which run can contain the value by comparing against the endpoints, then binary-search that run."
+}

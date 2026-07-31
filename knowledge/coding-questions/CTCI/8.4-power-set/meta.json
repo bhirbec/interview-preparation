@@ -1,0 +1,8 @@
+{
+  "difficulty": "medium",
+  "tags": [
+    "recursion",
+    "backtracking"
+  ],
+  "hint": "recursive enumeration. At each step append the current partial subset to the result, then extend it with each remaining element in turn (choosing elements only from positions after the current one avoids duplicates)."
+}

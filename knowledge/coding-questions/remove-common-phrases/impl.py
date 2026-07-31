@@ -1,8 +1,6 @@
 # Remove Common Phrases
 #
-# Difficulty: medium
 # Source: https://www.glassdoor.com/Interview/Given-a-set-of-Sentences-containing-lower-case-letters-only-remove-common-phrases-from-each-sentence-Here-a-phrase-is-def-QTN_171719.htm
-# Tags: #string #hashtable #imo
 #
 # You are given a list of sentences; each sentence is a string of lower-case
 # words separated by single spaces. A "phrase" is any run of 3 or more
@@ -26,10 +24,6 @@
 #   ["one two three", "four five six"]
 #     no run is shared             -> ["one two three", "four five six"]
 #   ["a b"]  (fewer than 3 words, single sentence) -> ["a b"]
-#
-# Approach: hash every 3+ word window to the set of sentences containing it; the
-# common windows are those seen in 2+ sentences, then blank out every word
-# position each covers.
 
 
 def remove_common_phrases(sentences):

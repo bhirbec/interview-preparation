@@ -1,0 +1,8 @@
+{
+  "difficulty": "easy",
+  "tags": [
+    "linked-list",
+    "recursion"
+  ],
+  "hint": "recurse to the end of the list to obtain the new head, then on the way back up flip each pair of pointers so the successor points to its predecessor."
+}

@@ -1,8 +1,5 @@
 # Longest Subarray With Sum At Most K
 #
-# Difficulty: medium
-# Tags: #array #two-pointers #sharethis
-#
 # You are given an array of positive integers `a` and a non-negative integer
 # `k`. Consider all contiguous subarrays of `a` whose elements sum to at most
 # `k`. Return the length of the longest such subarray, or 0 if no subarray
@@ -20,11 +17,6 @@
 #   a = [1, 2, 3],       k = 100 -> 3   (the whole array fits)
 #   a = [2],             k = 2   -> 1   (single element exactly equal to k)
 #   a = [],              k = 5   -> 0   (empty array)
-#
-# Approach: sliding window. Grow the window by advancing the right edge; whenever
-# the running sum exceeds k, shrink from the left until it fits again. Because
-# all values are positive, the window sum is monotonic, so each index enters and
-# leaves the window at most once (O(n)). Track the largest valid window seen.
 
 
 def longest_subarray_at_most_k(a, k):

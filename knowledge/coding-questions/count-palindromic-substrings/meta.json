@@ -1,0 +1,9 @@
+{
+  "difficulty": "medium",
+  "tags": [
+    "string",
+    "two-pointers",
+    "sharethis"
+  ],
+  "hint": "expand around each center. There are 2*n - 1 possible centers (each character and each gap between two characters). From each center, expand outward while the two ends match, counting one palindrome per successful expansion. Runs in O(n^2) time and O(1) space."
+}

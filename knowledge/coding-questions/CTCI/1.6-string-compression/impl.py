@@ -1,8 +1,5 @@
 # String Compression
 #
-# Difficulty: easy
-# Tags: #string
-#
 # You are given a string. Return a run-length encoding of it: each maximal run
 # of a repeated character `c` of length `k` is written as `c` followed by `k`.
 # Every run is emitted, including runs of length 1.
@@ -21,9 +18,6 @@
 # Note: the canonical CTCI variant returns the original string when the encoded
 # form would not be shorter (e.g. "abc" -> "abc"); this variant always returns
 # the encoded form.
-#
-# Approach: walk the string tracking the current character and its run length;
-# when the character changes, flush "<char><count>" and reset the count.
 
 
 def compress(s):

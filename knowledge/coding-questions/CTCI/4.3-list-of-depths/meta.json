@@ -1,0 +1,9 @@
+{
+  "difficulty": "medium",
+  "tags": [
+    "tree",
+    "bfs",
+    "linked-list"
+  ],
+  "hint": "breadth-first traversal tagging each node with its depth; append values to the linked list for that depth, appending (not prepending) so nodes keep their left-to-right order."
+}

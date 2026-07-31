@@ -1,8 +1,5 @@
 # Points In Triangle
 #
-# Difficulty: medium
-# Tags: #geometry #math #ascend
-#
 # You are given a triangle in the plane, described by its three vertices
 # (x1, y1), (x2, y2) and (x3, y3), and two query points P = (p1, q1) and
 # Q = (p2, q2). Determine which of the two query points lie strictly inside the
@@ -31,9 +28,6 @@
 #     P=(5,5) outside, Q=(9,9) outside          -> 4
 #     P=(2,2) on the hypotenuse (edge)          -> not inside
 #   triangle (0,0),(1,1),(2,2)  (collinear)     -> 0
-#
-# Approach: reject degenerate triangles via the vertex cross product, then a
-# point is inside iff it lies on the same (strict) side of all three edges.
 
 
 def points_belong_to_triangle(x1, y1, x2, y2, x3, y3, p1, q1, p2, q2):

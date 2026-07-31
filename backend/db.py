@@ -23,6 +23,7 @@ CREATE TABLE IF NOT EXISTS problem (
   tags             TEXT,               -- JSON array
   sources          TEXT,               -- JSON array
   description      TEXT,
+  hint             TEXT,               -- solution hint (the former "Approach")
   primary_function TEXT,
   starter          TEXT,
   solution         TEXT,
@@ -99,6 +100,12 @@ def _add_run_attempt_id(conn):
     conn.execute("ALTER TABLE run ADD COLUMN attempt_id INTEGER")
 
 
+def _add_problem_hint(conn):
+  cols = [r["name"] for r in conn.execute("PRAGMA table_info(problem)").fetchall()]
+  if "hint" not in cols:
+    conn.execute("ALTER TABLE problem ADD COLUMN hint TEXT")
+
+
 def _backfill_solved_attempts(conn):
   """One-time: seed a solved attempt for problems already solved (no duration)."""
   if conn.execute("SELECT COUNT(*) AS n FROM attempt").fetchone()["n"]:
@@ -122,6 +129,7 @@ def init_db():
   with connect() as conn:
     conn.executescript(SCHEMA)
     _add_run_attempt_id(conn)
+    _add_problem_hint(conn)
     _backfill_solved_attempts(conn)
     conn.execute("DROP TABLE IF EXISTS chapter")  # renamed to lesson
 

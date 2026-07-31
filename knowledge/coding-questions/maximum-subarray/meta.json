@@ -1,0 +1,8 @@
+{
+  "difficulty": "medium",
+  "tags": [
+    "array",
+    "dynamic-programming"
+  ],
+  "hint": "Kadane's algorithm. Sweep the array keeping a running sum; reset it to 0 (and advance the candidate start index) whenever it drops below 0, and record a new maximum with its end index whenever the running sum exceeds the best seen so far."
+}

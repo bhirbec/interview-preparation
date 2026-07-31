@@ -1,0 +1,10 @@
+{
+  "difficulty": "medium",
+  "tags": [
+    "tree",
+    "bfs",
+    "hashtable",
+    "facebook"
+  ],
+  "hint": "BFS carrying each node's column index, bucket values by column in a hash map while tracking min/max column, then emit columns in index order."
+}

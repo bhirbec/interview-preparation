@@ -108,7 +108,7 @@ export default function ProblemDetail() {
 
       <div className="columns">
         <section className="description">
-          <Description text={problem.description} />
+          <Description text={problem.description} hint={problem.hint} />
           <div className="tags">
             {problem.tags.map((t) => (
               <span key={t} className="tag">

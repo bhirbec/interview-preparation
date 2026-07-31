@@ -1,8 +1,5 @@
 # Adjacent Elements Product
 #
-# Difficulty: easy
-# Tags: #array
-#
 # Given an array of integers, find the pair of adjacent elements that has the
 # largest product and return that product.
 #
@@ -16,8 +13,6 @@
 #   [-1, -2]              -> 2     (-1 * -2)
 #   [9, 5, 10, 2, 24, -1, -48]  -> 50  (5 * 10)
 #   [1, 0, 1, 0, 1000]   -> 0     (best adjacent pair still multiplies to 0)
-#
-# Approach: scan each adjacent pair once, tracking the running maximum product.
 
 
 def adjacent_elements_product(arr):

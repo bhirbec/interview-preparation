@@ -1,8 +1,5 @@
 # Highlight Chemical Symbols
 #
-# Difficulty: easy
-# Tags: #string #sorting #uber
-#
 # You are given a list of names `names` and a list of `symbols`. For each name,
 # find a symbol that occurs in it as a contiguous substring and wrap the first
 # occurrence of that symbol in square brackets. If several symbols occur in the
@@ -26,10 +23,6 @@
 #   names = ["aaa"],   symbols = ["a", "aa"]   -> ["[aa]a"]   (longest wins)
 #   names = ["abab"],  symbols = ["ab", "ba"]  -> ["[ab]ab"]  (tie length,
 #                                                              earliest index)
-#
-# Approach: for each name, scan every symbol, keep the one with the greatest
-# length (earliest occurrence on ties), then splice square brackets around its
-# first occurrence.
 
 
 def highlight_symbols(names, symbols):

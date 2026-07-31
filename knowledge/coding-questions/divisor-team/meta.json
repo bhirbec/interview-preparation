@@ -1,0 +1,8 @@
+{
+  "difficulty": "medium",
+  "tags": [
+    "math",
+    "twitter"
+  ],
+  "hint": "the integers in the half-open range (n/2, n] form the largest possible clean team (none divides another, since doubling any of them exceeds n), and its size is n - n//2; add one to force a conflict."
+}

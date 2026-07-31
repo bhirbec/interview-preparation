@@ -1,0 +1,8 @@
+{
+  "difficulty": "medium",
+  "tags": [
+    "matrix",
+    "array"
+  ],
+  "hint": "process concentric layers from the outside in. For each layer, walk its elements and rotate them with a four-way swap (top <- right <- bottom <- left <- saved top), so no extra matrix is needed."
+}

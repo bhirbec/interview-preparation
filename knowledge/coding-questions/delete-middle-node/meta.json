@@ -1,0 +1,7 @@
+{
+  "difficulty": "easy",
+  "tags": [
+    "linked-list"
+  ],
+  "hint": "with no access to the predecessor, copy the successor's value into the target node and unlink the successor (node.value, node.next = node.next.value, node.next.next) \u2014 effectively overwriting the node with the one after it."
+}

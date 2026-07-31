@@ -1,7 +1,5 @@
 # Binary Wildcard Combinations
 #
-# Difficulty: easy
-# Tags: #recursion #backtracking #string #google-interview
 # Source: https://www.careercup.com/question?id=20308668
 #
 # You are given a string `s` consisting only of the characters '0', '1', and
@@ -24,10 +22,6 @@
 #   "101"   -> ["101"]          (no wildcards: the string itself)
 #   "?"     -> ["0", "1"]
 #   ""      -> [""]             (one empty combination)
-#
-# Approach: backtracking. Walk the string; at a fixed character recurse to the
-# next position; at a '?' set it to '0' then '1', recursing after each, and
-# restore it to '?' on the way back. Record the string when the end is reached.
 
 
 def binary_wildcard_combinations(s):

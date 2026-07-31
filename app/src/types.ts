@@ -97,6 +97,7 @@ export interface ProblemFull extends AttemptState {
   tags: string[]
   sources: string[]
   description: string
+  hint: string | null
   starter: string
   solution: string
   tests: string

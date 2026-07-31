@@ -1,8 +1,5 @@
 # Biggest Island
 #
-# Difficulty: medium
-# Tags: #matrix #graph #dfs
-#
 # You are given a rectangular grid `grid` where each cell is either "L" (land) or
 # "W" (water). An island is a maximal group of land cells connected
 # horizontally or vertically (NOT diagonally). Return the size (number of land
@@ -24,10 +21,6 @@
 #   [["L"]]                     -> 1
 #   [["W", "W"], ["W", "W"]]    -> 0    (no land)
 #   [["L", "W"], ["W", "L"]]    -> 1    (diagonals do not connect)
-#
-# Approach: scan every cell; when an unvisited land cell is found, flood-fill its
-# whole island with iterative DFS (4-directional), counting cells, and track the
-# maximum island size seen.
 
 
 def biggest_island(grid):

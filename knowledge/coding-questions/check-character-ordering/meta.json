@@ -1,0 +1,8 @@
+{
+  "difficulty": "easy",
+  "tags": [
+    "string",
+    "uber"
+  ],
+  "hint": "scan the string keeping only characters present in `ordering` and collapsing runs of the same character, then compare the resulting sequence to `ordering` exactly."
+}

@@ -1,0 +1,8 @@
+{
+  "difficulty": "medium",
+  "tags": [
+    "string",
+    "google"
+  ],
+  "hint": "simulate row by row, keeping a cyclic index into words and the current line length; a word of length L needs L (or L+1 with a leading space) columns."
+}

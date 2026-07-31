@@ -1,6 +1,4 @@
 # Check Balanced
-# Difficulty: easy
-# Tags: #tree #dfs #recursion
 #
 # You are given a binary tree. Implement a function to check whether it is
 # balanced. For the purpose of this problem, a balanced tree is one in which the
@@ -21,9 +19,6 @@
 #   is_balanced({})   -> True                      (single node)
 #   is_balanced({'left': {'left': {}}}) -> False   (left height 2 vs right 0)
 #   A full tree of depth 4 -> True
-#
-# Approach: a single post-order DFS returns each subtree's height, or -1 as a
-# sentinel once any subtree is found unbalanced, so it short-circuits in O(n).
 
 
 def is_balanced(n):

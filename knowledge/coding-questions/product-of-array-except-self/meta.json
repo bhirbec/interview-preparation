@@ -1,0 +1,8 @@
+{
+  "difficulty": "medium",
+  "tags": [
+    "array",
+    "google"
+  ],
+  "hint": "fill the output with running prefix products left-to-right, then multiply in the running suffix products right-to-left."
+}

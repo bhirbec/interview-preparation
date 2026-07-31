@@ -1,8 +1,5 @@
 # Number of Provinces
 #
-# Difficulty: medium
-# Tags: #graph #connected-components #dfs
-#
 # You are given the adjacency matrix of an undirected graph on `n` nodes,
 # encoded as a list of `n` strings each of length `n`. `matrix[i][j] == '1'`
 # means there is a direct edge between node i and node j, and '0' means there
@@ -32,10 +29,6 @@
 #   ["110", "111", "011"]       -> 1   0-1 and 1-2 connect all three transitively
 #   ["1"]                       -> 1
 #   []                          -> 0
-#
-# Approach: treat each row index as a graph node and each '1' as an edge. Scan
-# nodes; from each unvisited node run an iterative DFS over its row to mark the
-# whole component visited, incrementing the group count once per component.
 
 
 def number_of_provinces(matrix):

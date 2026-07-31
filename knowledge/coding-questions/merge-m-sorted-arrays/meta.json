@@ -1,0 +1,10 @@
+{
+  "difficulty": "medium",
+  "tags": [
+    "array",
+    "heap",
+    "sorting",
+    "google"
+  ],
+  "hint": "push the head of each non-empty array into a min-heap, then repeatedly pop the smallest and push the next element from the same array (O(total * log m))."
+}

@@ -1,0 +1,9 @@
+{
+  "difficulty": "medium",
+  "tags": [
+    "hashtable",
+    "string",
+    "sorting"
+  ],
+  "hint": "map each word to a canonical key (its letters sorted). Words sharing a key are anagrams, so bucket them in a hash table, then concatenate the buckets. Building the canonical key costs O(w log w) per word of length w."
+}

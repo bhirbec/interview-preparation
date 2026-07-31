@@ -1,0 +1,10 @@
+{
+  "difficulty": "medium",
+  "tags": [
+    "tree",
+    "dfs",
+    "recursion",
+    "google"
+  ],
+  "hint": "DFS carrying the number built so far (current * 10 + node value); at each leaf add the accumulated number to the running total."
+}

@@ -1,6 +1,4 @@
 # Boolean Evaluation
-# Difficulty: hard
-# Tags: #recursion #dynamic-programming
 #
 # You are given a boolean expression consisting of the symbols 0 (false), 1
 # (true), and the operators & (AND), | (OR), and ^ (XOR), and a desired boolean
@@ -19,12 +17,6 @@
 #   count_eval('0&0&0&1^1|0', 1) -> 10
 #   count_eval('1', 1) -> 1
 #   count_eval('1', 0) -> 0
-#
-# Approach: recurse on every operator position, splitting the expression into a
-# left and right sub-expression. For each split, combine the counts of the two
-# sides across the four (left_result, right_result) pairs that make the operator
-# produce the target result. Memoize on (sub-expression, target) to avoid the
-# exponential recomputation of overlapping sub-problems.
 
 
 def count_eval(expr, result):

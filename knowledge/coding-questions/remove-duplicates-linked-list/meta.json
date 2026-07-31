@@ -1,0 +1,9 @@
+{
+  "difficulty": "easy",
+  "tags": [
+    "linked-list",
+    "hashtable",
+    "runner"
+  ],
+  "hint": "keep a hash set of values already seen and walk the list with a `previous` pointer, splicing out (previous.next = node.next) any node whose value is already in the set."
+}

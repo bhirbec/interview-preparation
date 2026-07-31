@@ -1,8 +1,5 @@
 # Reverse Linked List
 #
-# Difficulty: easy
-# Tags: #linked-list #recursion
-#
 # You are given the head node of a singly linked list. Reverse the list so that
 # the last node becomes the new head and every `next` pointer points to what was
 # previously the node before it. Return the head of the reversed list.
@@ -16,10 +13,6 @@
 #   1 -> 2                  =>  2 -> 1
 #   7                       =>  7           (single node)
 #   (empty)                 =>  (empty)
-#
-# Approach: recurse to the end of the list to obtain the new head, then on the
-# way back up flip each pair of pointers so the successor points to its
-# predecessor.
 
 
 class Node:

@@ -1,6 +1,4 @@
 # Robot in a Grid
-# Difficulty: medium
-# Tags: #matrix #dynamic-programming #dfs #recursion
 #
 # A robot sits in the top-left corner of an r x c grid and wants to reach the
 # bottom-right corner. It can move only RIGHT or DOWN. Some cells are "off
@@ -21,9 +19,6 @@
 #
 #   [[0]] -> [(0, 0)]
 #   [[1]] -> []  (start blocked)
-#
-# Approach: DFS from (0, 0) trying right then down, memoizing failed cells so
-# each cell is explored at most once (O(r*c)). Build the path on the way back up.
 
 
 def find_path(matrix):

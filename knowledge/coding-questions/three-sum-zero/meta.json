@@ -1,0 +1,10 @@
+{
+  "difficulty": "medium",
+  "tags": [
+    "array",
+    "two-pointers",
+    "sorting",
+    "twitter"
+  ],
+  "hint": "sort, then for each anchor index scan the remaining suffix with two pointers, skipping equal neighbours to avoid emitting duplicate triplets."
+}

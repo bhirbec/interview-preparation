@@ -1,0 +1,9 @@
+{
+  "difficulty": "medium",
+  "tags": [
+    "array",
+    "hashtable",
+    "uber"
+  ],
+  "hint": "precompute a hash map from every a+b pair-sum to the list of (x, y) pairs producing it; then for each z scan the pairs stored under target - z."
+}

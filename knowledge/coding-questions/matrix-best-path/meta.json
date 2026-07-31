@@ -1,0 +1,9 @@
+{
+  "difficulty": "hard",
+  "tags": [
+    "matrix",
+    "greedy",
+    "imo"
+  ],
+  "hint": "scan values 1..R*C in order; greedily keep a value if its cell is still reachable, then mark the cells above-right and below-left of it as unreachable (they can no longer share a monotone path with the kept cell)."
+}

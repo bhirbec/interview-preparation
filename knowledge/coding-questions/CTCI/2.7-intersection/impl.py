@@ -1,6 +1,4 @@
 # Intersection
-# Difficulty: medium
-# Tags: #linked-list #two-pointers #runner
 #
 # You are given the heads of two singly linked lists. Determine whether the two
 # lists intersect, and if they do, return the node at which the intersection
@@ -18,11 +16,6 @@
 #
 #   Two fully separate lists                              => None
 #   Both heads being the same node                        => that node
-#
-# Approach: walk each list to find its tail and length. If the tails are not
-# the same object the lists cannot intersect. Otherwise advance a pointer in
-# the longer list by the length difference, then advance both pointers in
-# lockstep until they reference the same node -- that node is the intersection.
 
 
 class Node:

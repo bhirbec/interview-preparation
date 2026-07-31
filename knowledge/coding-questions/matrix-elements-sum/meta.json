@@ -1,0 +1,8 @@
+{
+  "difficulty": "easy",
+  "tags": [
+    "matrix",
+    "array"
+  ],
+  "hint": "walk each column top-to-bottom, accumulating prices until a 0 breaks the column."
+}

@@ -1,0 +1,9 @@
+{
+  "difficulty": "easy",
+  "tags": [
+    "string",
+    "greedy",
+    "uber"
+  ],
+  "hint": "walk the words in order, tracking the current line's length; append a word if it still fits (accounting for the separating space), otherwise flush the current line and start a new one with that word."
+}

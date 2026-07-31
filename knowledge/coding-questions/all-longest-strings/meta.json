@@ -1,0 +1,8 @@
+{
+  "difficulty": "easy",
+  "tags": [
+    "array",
+    "string"
+  ],
+  "hint": "find the maximum length in one pass, then collect all strings that match it in a second pass, preserving order."
+}

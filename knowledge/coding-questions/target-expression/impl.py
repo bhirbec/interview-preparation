@@ -1,8 +1,5 @@
 # Target Expression
 #
-# Difficulty: medium
-# Tags: #backtracking #recursion #string #vmware
-#
 # You are given a list of single digits (each 0-9) and an integer target. Between
 # consecutive digits you may insert nothing (concatenating them into a larger
 # number), a '+', or a '-'. The digits must be used in their original order, and
@@ -22,9 +19,6 @@
 #   digits = [5],          target = 5     -> "5"
 #   digits = [5],          target = 3     -> None
 #   digits = [1, 2],       target = 100   -> None
-#
-# Approach: backtracking over where each number ends; extend the running total
-# with the next number added or subtracted until all digits are consumed.
 
 
 def find_expression(digits, target):

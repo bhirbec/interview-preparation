@@ -1,8 +1,5 @@
 # Mining Base Location
 #
-# Difficulty: medium
-# Tags: #bfs #matrix #graph #google
-#
 # You are given a rectangular map given as a list of equal-length strings, where
 # each cell is one of:
 #   '#' - a mountain (impassable)
@@ -28,10 +25,6 @@
 #   ["   ", "   "]             -> None     # no mining sites
 #   ["*#", "#*"]               -> None     # sites are mutually unreachable
 #   ["*   ", "    ", "*  *"]   -> (2, 0)   # geometric median of the three sites
-#
-# Approach: BFS from each mining site to accumulate, per cell, the total distance
-# and how many sites reached it; the answer is the reachable-by-all cell with the
-# smallest total (first in row-major order on ties).
 
 
 def find_base(grid):

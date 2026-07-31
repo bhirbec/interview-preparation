@@ -1,0 +1,8 @@
+{
+  "difficulty": "medium",
+  "tags": [
+    "graph",
+    "bfs"
+  ],
+  "hint": "breadth-first search from origin, marking nodes visited to avoid cycling forever, returning True as soon as dest is dequeued."
+}

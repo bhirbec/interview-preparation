@@ -1,8 +1,5 @@
 # Word Search
 #
-# Difficulty: medium
-# Tags: #matrix #dfs #backtracking #uber
-#
 # You are given a rectangular `grid` of letters and a `word`. Return True if the
 # word can be traced through the grid, subject to these rules:
 #   1. Start from any cell.
@@ -25,10 +22,6 @@
 #   word = "ABDC" -> True    (A -> B -> D -> C, an L-shaped path)
 #   word = "ABCD" -> False   (B and C are not adjacent)
 #   word = "AA"   -> False   (cannot reuse the single A)
-#
-# Approach: from every cell that matches the first letter, run a depth-first
-# search that marks the cell visited, recurses into the four neighbors for the
-# next letter, then unmarks it on backtrack.
 
 
 def word_search(grid, word):

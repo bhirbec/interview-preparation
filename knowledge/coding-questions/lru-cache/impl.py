@@ -1,8 +1,6 @@
 # LRU Cache
 #
-# Difficulty: medium
 # Source: https://careercup.com/question?id=5674107183038464
-# Tags: #hashtable #linked-list #uber
 #
 # Design a Least Recently Used (LRU) cache with a fixed positive `capacity`,
 # supporting two operations, each in O(1) average time:
@@ -28,10 +26,6 @@
 #   c.get(1)        -> -1
 #   c.get(3)        -> 3
 #   c.get(4)        -> 4
-#
-# Approach: a hash map from key to a node in a doubly linked list ordered by
-# recency (most recent at the head). get/put move the touched node to the head;
-# an over-capacity put removes the tail node and drops it from the map.
 
 
 class _Node(object):

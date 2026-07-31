@@ -1,0 +1,10 @@
+{
+  "difficulty": "hard",
+  "tags": [
+    "graph",
+    "topological-sort",
+    "dfs",
+    "recursion"
+  ],
+  "hint": "DFS-based topological sort. Track nodes currently on the recursion stack to detect cycles; emit each node after all of its successors (reverse post-order) to obtain a valid build order."
+}

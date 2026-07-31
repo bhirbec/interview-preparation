@@ -1,6 +1,4 @@
 # Route Between Nodes
-# Difficulty: medium
-# Tags: #graph #bfs
 #
 # You are given a directed graph and two nodes. Write an algorithm to determine
 # whether there is a route (a directed path) between the two nodes.
@@ -22,9 +20,6 @@
 #   exists_path(graph, 1, 5) -> True   (1 -> 2 -> 4 -> 5)
 #   exists_path(graph, 5, 6) -> False  (no edge leads into 6)
 #   exists_path(graph, 3, 3) -> True   (a node reaches itself)
-#
-# Approach: breadth-first search from origin, marking nodes visited to avoid
-# cycling forever, returning True as soon as dest is dequeued.
 
 
 def exists_path(graph, origin, dest):

@@ -1,6 +1,4 @@
 # Validate BST
-# Difficulty: medium
-# Tags: #tree #binary-search-tree #dfs #recursion
 #
 # You are given a binary tree. Implement a function to check whether it is a
 # binary search tree: for every node, all values in its left subtree are less
@@ -21,10 +19,6 @@
 #   invalid: root 10 with a right-subtree node 6 (< 10)               -> False
 #   is_bst(None)            -> True
 #   is_bst(Node(1))         -> True
-#
-# Approach: recurse carrying an open (min, max) bound for each node; a node is
-# valid only if min < value < max, then tighten the bound for each child. This
-# catches violations that a naive parent-only comparison would miss.
 
 
 class Node():

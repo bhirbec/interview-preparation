@@ -1,6 +1,4 @@
 # Eight Queens
-# Difficulty: hard
-# Tags: #backtracking #recursion
 #
 # You are given an N x N chess board. Place N queens on the board so that none
 # of them can attack another, i.e. no two queens share the same row, column, or
@@ -22,11 +20,6 @@
 #   count of solutions for n = 1 -> 1
 #   count of solutions for n = 4 -> 2
 #   count of solutions for n = 8 -> 92
-#
-# Approach: classic backtracking. Place one queen per row, and for each candidate
-# column check it does not collide with any already-placed queen (same column or
-# same diagonal). Recurse row by row, yielding a copy of the board once all rows
-# are filled.
 
 
 def place_queens(n):

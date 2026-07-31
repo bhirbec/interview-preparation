@@ -1,8 +1,6 @@
 # Check Character Ordering
 #
-# Difficulty: easy
 # Source: https://careercup.com/question?id=5659201272545280
-# Tags: #string #uber
 #
 # You are given an input string `text` and an `ordering` string made of distinct
 # characters. Return True if, considering only the characters of `text` that also
@@ -24,10 +22,6 @@
 #       ('!' appears after o and d, but the ordering wants it first)
 #   text = "hello world!", ordering = "he!"  -> True
 #   text = "aaaabbbcccc", ordering = "ac"    -> True
-#
-# Approach: scan the string keeping only characters present in `ordering` and
-# collapsing runs of the same character, then compare the resulting sequence to
-# `ordering` exactly.
 
 
 def check_ordering(text, ordering):

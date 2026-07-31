@@ -1,8 +1,5 @@
 # All Longest Strings
 #
-# Difficulty: easy
-# Tags: #array #string
-#
 # You are given an array of strings `input_array`. Return an array containing all
 # of its longest strings — every string whose length equals the maximum string
 # length in the array — keeping their original relative order.
@@ -22,9 +19,6 @@
 #   ["a", "abc", "cba"]                -> ["abc", "cba"]
 #
 #   ["enn", "b"]                       -> ["enn"]
-#
-# Approach: find the maximum length in one pass, then collect all strings that
-# match it in a second pass, preserving order.
 
 
 def all_longest_strings(input_array):

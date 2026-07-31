@@ -1,8 +1,6 @@
 # Binary Tree Vertical Order Traversal
 #
-# Difficulty: medium
 # Source: https://www.careercup.com/question?id=5749533368647680
-# Tags: #tree #bfs #hashtable #facebook
 #
 # You are given the root of a binary tree of integers. Assign the root column 0;
 # a left child sits one column to the left of its parent and a right child one
@@ -27,9 +25,6 @@
 #   root = None            -> []
 #   single node 9         -> [[9]]
 #   left chain 1 -> 2 -> 3 -> [[3], [2], [1]]
-#
-# Approach: BFS carrying each node's column index, bucket values by column in a
-# hash map while tracking min/max column, then emit columns in index order.
 
 
 class TreeNode:

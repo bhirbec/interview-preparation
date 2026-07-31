@@ -1,0 +1,9 @@
+{
+  "difficulty": "easy",
+  "tags": [
+    "string",
+    "hashtable",
+    "google"
+  ],
+  "hint": "count each character; use floor(count/2) pairs on each side, and place one leftover odd character in the middle if any character has an odd count."
+}

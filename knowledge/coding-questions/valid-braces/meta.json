@@ -1,0 +1,8 @@
+{
+  "difficulty": "easy",
+  "tags": [
+    "string",
+    "stack"
+  ],
+  "hint": "scan left to right using a stack. Push every opening bracket. On a closing bracket, the stack top must be its matching opener (fail if the stack is empty or the top does not match). After the scan the stack must be empty."
+}

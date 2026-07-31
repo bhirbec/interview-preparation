@@ -6,11 +6,12 @@ import { useEffect, useState } from 'react'
 // and reflow the prose ones, while preserving blocks whose line breaks or
 // alignment are meaningful (constraints lists, aligned example tables).
 //
-// The trailing "Approach:" block is a solution hint, so it is hidden behind a
-// Show/Hide button rather than shown by default.
+// The `hint` (a solution nudge, sourced from the problem's meta.json) is hidden
+// behind a Show/Hide button rather than shown by default.
 
 interface Props {
   text: string
+  hint?: string | null
 }
 
 // A block is reflowable prose only if every line reads like plain sentence text:
@@ -39,23 +40,18 @@ function renderBlock(block: string, i: number) {
   )
 }
 
-export default function Description({ text }: Props) {
+export default function Description({ text, hint }: Props) {
   const [showHint, setShowHint] = useState(false)
 
   // Collapse the hint again when the problem changes.
   useEffect(() => setShowHint(false), [text])
 
   const blocks = text.split(/\n[ \t]*\n/)
-  const hintIdx = blocks.findIndex((b) => /^approach\b/i.test(b.trim()))
-  // Only the "Approach" block itself is the hint; everything else (statement,
-  // constraints, examples) stays visible regardless of where Approach appears.
-  const mainBlocks = hintIdx === -1 ? blocks : blocks.filter((_, i) => i !== hintIdx)
-  const hintBlocks = hintIdx === -1 ? [] : [blocks[hintIdx]]
 
   return (
     <div className="prose">
-      {mainBlocks.map(renderBlock)}
-      {hintBlocks.length > 0 && (
+      {blocks.map(renderBlock)}
+      {hint && (
         <div className="hint">
           <button
             type="button"
@@ -64,7 +60,7 @@ export default function Description({ text }: Props) {
           >
             {showHint ? '🡳 Hide hint' : '💡 Show hint'}
           </button>
-          {showHint && <div className="hint-body">{hintBlocks.map(renderBlock)}</div>}
+          {showHint && <p className="hint-body para">{hint}</p>}
         </div>
       )}
     </div>

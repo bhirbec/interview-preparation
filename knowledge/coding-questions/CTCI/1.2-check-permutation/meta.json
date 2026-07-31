@@ -1,0 +1,9 @@
+{
+  "difficulty": "easy",
+  "tags": [
+    "string",
+    "hashtable",
+    "sorting"
+  ],
+  "hint": "count the characters of s1 in a hash map, then decrement those counts while scanning s2; the strings are permutations iff the lengths match and every count ends at zero (O(n))."
+}

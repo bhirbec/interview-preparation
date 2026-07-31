@@ -1,0 +1,8 @@
+{
+  "difficulty": "medium",
+  "tags": [
+    "bit-manipulation",
+    "math"
+  ],
+  "hint": "build a mask that clears bits j..i of n (all ones except that window), apply it, then shift m left by i and OR it in."
+}

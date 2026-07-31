@@ -1,0 +1,9 @@
+{
+  "difficulty": "medium",
+  "tags": [
+    "matrix",
+    "graph",
+    "dfs"
+  ],
+  "hint": "scan every cell; when an unvisited land cell is found, flood-fill its whole island with iterative DFS (4-directional), counting cells, and track the maximum island size seen."
+}

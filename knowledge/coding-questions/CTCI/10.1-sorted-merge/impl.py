@@ -1,6 +1,4 @@
 # Sorted Merge
-# Difficulty: easy
-# Tags: #array #sorting #two-pointers
 #
 # You are given two sorted arrays, arr1 and arr2. arr1 already holds its own
 # sorted elements at the front, followed by a trailing buffer of exactly
@@ -23,11 +21,6 @@
 #   merge([1, 4, 6, 17, None, None, None], [3, 3, 10]) -> [1, 3, 3, 4, 6, 10, 17]
 #   merge([1, 4, 6, 17], []) -> [1, 4, 6, 17]
 #   merge([1, 4, 6, 17, None, None], [-1, -1]) -> [-1, -1, 1, 4, 6, 17]
-#
-# Approach: fill arr1 from the back. Two read pointers walk the real portion of
-# arr1 and arr2 from their high ends; the larger element is written to the next
-# open slot at the tail. Working backwards means the buffer is always ahead of
-# the read pointer, so no unread value is overwritten.
 
 
 def merge(arr1, arr2):

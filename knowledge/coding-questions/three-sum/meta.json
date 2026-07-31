@@ -1,0 +1,10 @@
+{
+  "difficulty": "medium",
+  "tags": [
+    "array",
+    "two-pointers",
+    "sorting",
+    "google"
+  ],
+  "hint": "sort the array, then for each index i sweep the remainder with two pointers, skipping equal neighbors to avoid duplicate triplets. O(n^2)."
+}

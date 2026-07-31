@@ -1,6 +1,4 @@
 # Return Kth to Last
-# Difficulty: easy
-# Tags: #linked-list #two-pointers #runner #recursion
 #
 # You are given the head of a singly linked list and an integer k (1-indexed).
 # Return the value of the kth node counting from the end of the list. k = 1

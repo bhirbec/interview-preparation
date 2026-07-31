@@ -1,0 +1,8 @@
+{
+  "difficulty": "hard",
+  "tags": [
+    "recursion",
+    "dynamic-programming"
+  ],
+  "hint": "recurse on every operator position, splitting the expression into a left and right sub-expression. For each split, combine the counts of the two sides across the four (left_result, right_result) pairs that make the operator produce the target result. Memoize on (sub-expression, target) to avoid the exponential recomputation of overlapping sub-problems."
+}

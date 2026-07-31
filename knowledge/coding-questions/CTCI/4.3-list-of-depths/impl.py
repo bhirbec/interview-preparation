@@ -1,6 +1,4 @@
 # List of Depths
-# Difficulty: medium
-# Tags: #tree #bfs #linked-list
 #
 # You are given a binary tree. Write an algorithm that creates a linked list of
 # all the nodes at each depth (so a tree of depth D produces D linked lists).
@@ -24,10 +22,6 @@
 #
 #   get_layers({'value': 1}) -> one layer: [[1]]
 #   get_layers(None)         -> []
-#
-# Approach: breadth-first traversal tagging each node with its depth; append
-# values to the linked list for that depth, appending (not prepending) so nodes
-# keep their left-to-right order.
 
 
 class LinkedList():

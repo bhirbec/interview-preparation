@@ -1,8 +1,5 @@
 # Make Array Consecutive
 #
-# Difficulty: easy
-# Tags: #array #math
-#
 # You are given an array of distinct non-negative integers `statues`, where each
 # value is the size of a statue you own. You want your collection to contain
 # every size in a consecutive range with no gaps — that is, for the smallest and
@@ -22,8 +19,6 @@
 #   [0, 3]        -> 2   (needs 1, 2)
 #   [5, 4, 6]     -> 0   (already consecutive)
 #   [6]           -> 0   (a single statue is trivially consecutive)
-#
-# Approach: answer = (max - min + 1) - len(statues), using exact integer math.
 
 
 def make_array_consecutive(statues):

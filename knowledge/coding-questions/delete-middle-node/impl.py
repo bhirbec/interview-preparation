@@ -1,8 +1,5 @@
 # Delete Middle Node
 #
-# Difficulty: easy
-# Tags: #linked-list
-#
 # Implement an algorithm to delete a node from the middle of a singly linked
 # list, given access ONLY to that node (you do not have the head of the list).
 # After the call, the target node's value must be gone from the list and every
@@ -18,11 +15,6 @@
 #   1 -> 2 -> [3] -> 4 -> 5,  delete node holding 3   =>  1 -> 2 -> 4 -> 5
 #   [1] -> 2 -> 3,            delete node holding 1   =>  2 -> 3
 #   1 -> 2 -> 3 -> [4] -> 5,  delete node holding 4   =>  1 -> 2 -> 3 -> 5
-#
-# Approach: with no access to the predecessor, copy the successor's value into
-# the target node and unlink the successor (node.value, node.next =
-# node.next.value, node.next.next) — effectively overwriting the node with the
-# one after it.
 
 
 class Node:
