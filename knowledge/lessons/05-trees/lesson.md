@@ -1,4 +1,4 @@
-# Trees & Binary Search Trees
+# Binary Trees
 
 A binary tree is a recursive structure: every node has a left and right subtree
 that are themselves trees. That recursion is your best tool — most tree problems
@@ -6,28 +6,35 @@ have a clean **"solve the children, then combine"** shape.
 
 ## Traversals
 
-- **DFS** (recursion or an explicit stack): pre-order (node, left, right),
-  in-order (left, node, right), post-order (left, right, node). **In-order of a
-  BST yields sorted values** — remember that.
-- **BFS** (a queue): visit level by level; use it when depth/levels matter.
+- **DFS** (recursion or an explicit stack):
+  - **pre-order** — node, left, right (copy/serialize a tree)
+  - **in-order** — left, node, right
+  - **post-order** — left, right, node (compute a value from the children first)
+- **BFS** (a queue): visit level by level; reach for it when depth or per-level
+  grouping matters.
 
 ## The core pattern
 
+Almost every tree problem is a post-order recursion — get the answer for each
+subtree, then combine:
+
 ```python
-def dfs(node):
+def solve(node):
     if node is None:
         return base_case
-    left = dfs(node.left)
-    right = dfs(node.right)
+    left = solve(node.left)
+    right = solve(node.right)
     return combine(node.val, left, right)
 ```
 
-## Binary Search Trees
+Height, balanced-ness, subtree sums, node counts, and "does this subtree have
+property X" all fit this mould — the trick is choosing what each call **returns**
+so the parent can combine cheaply (e.g. return `(height, is_balanced)` in one
+pass instead of recomputing height at every node).
 
-A BST keeps `left < node < right` **for every node**, so search/insert is
-O(h) — O(log n) when balanced. A common bug: validating a BST by only comparing a
-node to its immediate children. You must thread a **(low, high) range** down the
-recursion so each node respects the bounds set by *all* its ancestors.
+## The essentials
 
-The exercises cover construction, level-order, validation, path sums, and subtree
-matching.
+Handle the `None` (empty) case first — it's the base case and the source of most
+bugs. Prefer a **single post-order pass** that returns everything the parent needs
+over repeatedly re-walking subtrees. For level-by-level work, BFS with a queue and
+a per-level count is cleaner than tracking depths in a DFS.
