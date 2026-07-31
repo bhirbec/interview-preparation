@@ -1,3 +1,4 @@
+import { MdLightMode, MdDarkMode } from 'react-icons/md'
 import { useTheme } from '../theme'
 
 export default function ThemeToggle() {
@@ -10,7 +11,7 @@ export default function ThemeToggle() {
       title={`Switch to ${theme === 'dark' ? 'light' : 'dark'} mode`}
       aria-label="Toggle color theme"
     >
-      {theme === 'dark' ? '☀️' : '🌙'}
+      {theme === 'dark' ? <MdLightMode /> : <MdDarkMode />}
     </button>
   )
 }

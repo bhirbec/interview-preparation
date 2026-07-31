@@ -67,7 +67,6 @@ export default function ProblemList() {
     <div className="page list-page">
       <header className="app-header">
         <AppMenu />
-        <h1>Coding Trainer</h1>
       </header>
 
       <div className="list-layout">
