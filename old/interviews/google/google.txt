@@ -1,9 +1,6 @@
 Questions found on glassdoor
 ============================
 
-* Implement a queue using two stacks
-You stick the stacks butt to butt, and then turn them inside out, then they are a queue! Man, I love Science!
-
 * Given a social network as a graph, return the closest path to a given node from a given node.
 Standard Breath First Search on a social network.
 
