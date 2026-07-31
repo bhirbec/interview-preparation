@@ -48,10 +48,7 @@ export default function AppMenu() {
             <MdListAlt />
             <span>Questions</span>
           </Link>
-          <div className="drawer-item theme-row">
-            <span>Theme</span>
-            <ThemeToggle />
-          </div>
+          <ThemeToggle />
         </nav>
       </aside>
     </>

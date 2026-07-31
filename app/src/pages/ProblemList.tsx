@@ -65,9 +65,7 @@ export default function ProblemList() {
 
   return (
     <div className="page list-page">
-      <header className="app-header">
-        <AppMenu />
-      </header>
+      <AppMenu />
 
       <div className="list-layout">
         <aside className="filters">

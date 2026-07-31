@@ -91,10 +91,9 @@ body {
   align-items: center;
   gap: 0.75rem;
   margin-bottom: 1rem;
-  /* Reserve space for the fixed top-left 3-dot menu button so it never overlaps
-     header content (and so the otherwise-empty list header keeps a top strip). */
+  /* Reserve horizontal room for the fixed top-left 3-dot menu button so it never
+     overlaps header content on the detail page. */
   padding-left: 2rem;
-  min-height: 2rem;
 }
 
 .app-header h1 {
@@ -102,23 +101,15 @@ body {
   margin: 0;
 }
 
+/* The theme control is a borderless drawer row (icon + "Theme"), like Questions. */
 .theme-toggle {
-  margin-left: auto;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  background: var(--panel);
-  border: 1px solid var(--border);
-  border-radius: 8px;
-  padding: 0.35rem;
-  font-size: 1.15rem;
-  line-height: 1;
+  width: 100%;
+  background: transparent;
+  border: none;
   cursor: pointer;
-  color: var(--text);
-}
-
-.theme-toggle:hover {
-  border-color: var(--accent);
+  color: inherit;
+  font: inherit;
+  text-align: left;
 }
 
 /* ---- left drawer menu (3-dot) ---- */
@@ -224,12 +215,8 @@ body {
   flex: 0 0 auto;
 }
 
-a.drawer-item:hover {
+.drawer-item:hover {
   background: var(--border);
-}
-
-.theme-row {
-  justify-content: space-between;
 }
 
 .back {
