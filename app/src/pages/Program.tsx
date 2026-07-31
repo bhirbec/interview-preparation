@@ -1,20 +1,20 @@
 import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { MdCheckCircle } from 'react-icons/md'
-import type { ChapterSummary, ProgramResponse } from '../types'
+import type { LessonSummary, LessonsResponse } from '../types'
 import AppMenu from '../components/AppMenu'
 import { api } from '../api'
 
-// Group chapters by topic, preserving the order topics first appear.
-function groupByTopic(chapters: ChapterSummary[]): [string, ChapterSummary[]][] {
+// Group lessons by topic, preserving the order topics first appear.
+function groupByTopic(lessons: LessonSummary[]): [string, LessonSummary[]][] {
   const order: string[] = []
-  const map = new Map<string, ChapterSummary[]>()
-  for (const c of chapters) {
-    if (!map.has(c.topic)) {
-      map.set(c.topic, [])
-      order.push(c.topic)
+  const map = new Map<string, LessonSummary[]>()
+  for (const l of lessons) {
+    if (!map.has(l.topic)) {
+      map.set(l.topic, [])
+      order.push(l.topic)
     }
-    map.get(c.topic)!.push(c)
+    map.get(l.topic)!.push(l)
   }
   return order.map((t) => [t, map.get(t)!])
 }
@@ -24,16 +24,16 @@ function pct(part: number, whole: number): string {
 }
 
 export default function Program() {
-  const [data, setData] = useState<ProgramResponse | null>(null)
+  const [data, setData] = useState<LessonsResponse | null>(null)
 
   useEffect(() => {
-    api.getProgram().then(setData).catch(() => setData({ chapters: [] }))
+    api.getLessons().then(setData).catch(() => setData({ lessons: [] }))
   }, [])
 
   if (!data) return <div className="loading">Loading…</div>
 
-  const done = data.chapters.filter((c) => c.done).length
-  const total = data.chapters.length
+  const done = data.lessons.filter((l) => l.done).length
+  const total = data.lessons.length
 
   return (
     <div className="page program-page">
@@ -43,29 +43,29 @@ export default function Program() {
       </header>
       <div className="program-summary">
         <p className="program-sub">
-          {done} of {total} chapters complete
+          {done} of {total} lessons complete
         </p>
         <span className="progress-bar wide">
           <span className="progress-fill" style={{ width: pct(done, total) }} />
         </span>
       </div>
 
-      {groupByTopic(data.chapters).map(([topic, chapters]) => (
+      {groupByTopic(data.lessons).map(([topic, lessons]) => (
         <section key={topic} className="topic-group">
           <h3>{topic}</h3>
-          <ul className="chapter-list">
-            {chapters.map((c) => (
-              <li key={c.id}>
-                <Link to={`/chapter/${c.id}`} className={`chapter-card ${c.done ? 'done' : ''}`}>
-                  <span className="chapter-check">{c.done && <MdCheckCircle />}</span>
-                  <span className="chapter-title">{c.title}</span>
-                  <span className="chapter-count">
-                    {c.solvedCount}/{c.exerciseCount}
+          <ul className="lesson-cards">
+            {lessons.map((l) => (
+              <li key={l.id}>
+                <Link to={`/lesson/${l.id}`} className={`lesson-card ${l.done ? 'done' : ''}`}>
+                  <span className="lesson-check">{l.done && <MdCheckCircle />}</span>
+                  <span className="lesson-name">{l.title}</span>
+                  <span className="lesson-count">
+                    {l.solvedCount}/{l.exerciseCount}
                   </span>
                   <span className="progress-bar">
                     <span
                       className="progress-fill"
-                      style={{ width: pct(c.solvedCount, c.exerciseCount) }}
+                      style={{ width: pct(l.solvedCount, l.exerciseCount) }}
                     />
                   </span>
                 </Link>

@@ -35,7 +35,7 @@ ROOT = os.path.dirname(HERE)
 QUESTIONS_DIR = os.environ.get(
     "QUESTIONS_DIR", os.path.join(ROOT, "coding-questions")
 )
-PROGRAM_DIR = os.environ.get("PROGRAM_DIR", os.path.join(ROOT, "program"))
+LESSONS_DIR = os.environ.get("LESSONS_DIR", os.path.join(ROOT, "lessons"))
 
 
 def find_problem_dirs(root):
@@ -140,34 +140,34 @@ def natural_key(pid):
   return re.sub(r"\d+", lambda m: m.group().zfill(6), pid)
 
 
-def import_chapters(conn, valid_ids):
-  """Import program/<nn>-<slug>/ (chapter.json + lesson.md) into the chapter
-  table. Chapter id = folder slug without the numeric prefix; position = prefix.
-  Warns about (but keeps) exercise ids not in the catalog."""
-  if not os.path.isdir(PROGRAM_DIR):
+def import_lessons(conn, valid_ids):
+  """Import lessons/<nn>-<slug>/ (meta.json + lesson.md) into the lesson table.
+  Lesson id = folder slug without the numeric prefix; position = prefix. Warns
+  about (but keeps) exercise ids not in the catalog."""
+  if not os.path.isdir(LESSONS_DIR):
     return [], []
   imported = []
   missing = []
-  for name in sorted(os.listdir(PROGRAM_DIR)):
-    folder = os.path.join(PROGRAM_DIR, name)
-    meta_path = os.path.join(folder, "chapter.json")
+  for name in sorted(os.listdir(LESSONS_DIR)):
+    folder = os.path.join(LESSONS_DIR, name)
+    meta_path = os.path.join(folder, "meta.json")
     if not os.path.isfile(meta_path):
       continue
     m = re.match(r"(\d+)-(.+)", name)
     position = int(m.group(1)) if m else 0
-    cid = m.group(2) if m else name
+    lid = m.group(2) if m else name
     meta = json.loads(_read(meta_path))
-    lesson = _read(os.path.join(folder, "lesson.md"))
+    body = _read(os.path.join(folder, "lesson.md"))
     exercises = meta.get("exercises", [])
     for ex in exercises:
       if ex not in valid_ids:
-        missing.append((cid, ex))
-    db.upsert_chapter(conn, cid, meta["title"], meta.get("topic", ""),
-                      lesson, json.dumps(exercises), position)
-    imported.append(cid)
+        missing.append((lid, ex))
+    db.upsert_lesson(conn, lid, meta["title"], meta.get("topic", ""),
+                     body, json.dumps(exercises), position)
+    imported.append(lid)
   if imported:
     placeholders = ",".join("?" * len(imported))
-    conn.execute(f"DELETE FROM chapter WHERE id NOT IN ({placeholders})", imported)
+    conn.execute(f"DELETE FROM lesson WHERE id NOT IN ({placeholders})", imported)
   return imported, missing
 
 
@@ -209,14 +209,14 @@ def main():
     if ids:
       placeholders = ",".join("?" * len(ids))
       conn.execute(f"DELETE FROM problem WHERE id NOT IN ({placeholders})", ids)
-    chapters, missing = import_chapters(conn, set(ids))
+    lessons, missing = import_lessons(conn, set(ids))
 
   print(f"Imported {len(problems)} problems into the problem table.")
-  print(f"Imported {len(chapters)} chapters into the chapter table.")
+  print(f"Imported {len(lessons)} lessons into the lesson table.")
   if skipped:
     print(f"Skipped {len(skipped)} folders missing solution.py/tests.py: {skipped}")
   if missing:
-    print(f"WARNING: {len(missing)} chapter exercise ids not in catalog: {missing}")
+    print(f"WARNING: {len(missing)} lesson exercise ids not in catalog: {missing}")
 
 
 if __name__ == "__main__":

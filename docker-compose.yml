@@ -28,13 +28,13 @@ services:
     volumes:
       - ./backend:/app
       - ./coding-questions:/coding-questions:ro
-      - ./program:/program:ro
+      - ./lessons:/lessons:ro
       - api_data:/data
       - ./logs:/logs
     environment:
       DB_PATH: /data/trainer.db
       QUESTIONS_DIR: /coding-questions
-      PROGRAM_DIR: /program
+      LESSONS_DIR: /lessons
     command: /bin/sh -c "mkdir -p /logs && uvicorn server:app --host 0.0.0.0 --port 8000 --reload 2>&1 | tee /logs/api.log"
 
 volumes:

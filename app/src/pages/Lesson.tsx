@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react'
 import { Link, useParams } from 'react-router-dom'
 import ReactMarkdown from 'react-markdown'
 import remarkGfm from 'remark-gfm'
-import type { ChapterDetail, ProblemStatus } from '../types'
+import type { LessonDetail, ProblemStatus } from '../types'
 import AppMenu from '../components/AppMenu'
 import { api } from '../api'
 
@@ -17,9 +17,9 @@ const STATUS_CLASS: Record<ProblemStatus, string> = {
   'not-started': 'none',
 }
 
-export default function Chapter() {
+export default function Lesson() {
   const id = useParams()['*'] || ''
-  const [data, setData] = useState<ChapterDetail | null>(null)
+  const [data, setData] = useState<LessonDetail | null>(null)
   const [notFound, setNotFound] = useState(false)
 
   useEffect(() => {
@@ -28,8 +28,8 @@ export default function Chapter() {
     setData(null)
     setNotFound(false)
     api
-      .getChapter(id)
-      .then((c) => !cancelled && setData(c))
+      .getLesson(id)
+      .then((l) => !cancelled && setData(l))
       .catch(() => !cancelled && setNotFound(true))
     return () => {
       cancelled = true
@@ -45,7 +45,7 @@ export default function Chapter() {
             ← Program
           </Link>
         </header>
-        <p>Chapter not found.</p>
+        <p>Lesson not found.</p>
       </div>
     )
   }
@@ -53,7 +53,7 @@ export default function Chapter() {
   if (!data) return <div className="loading">Loading…</div>
 
   return (
-    <div className="page chapter-page">
+    <div className="page lesson-page">
       <header className="app-header">
         <AppMenu />
         <Link to="/program" className="back">
@@ -62,12 +62,12 @@ export default function Chapter() {
         <h1>{data.title}</h1>
       </header>
 
-      <div className="chapter-body">
+      <div className="lesson-body">
         <article className="lesson">
-          <ReactMarkdown remarkPlugins={[remarkGfm]}>{data.lesson}</ReactMarkdown>
+          <ReactMarkdown remarkPlugins={[remarkGfm]}>{data.body}</ReactMarkdown>
         </article>
 
-        <section className="chapter-exercises">
+        <section className="lesson-exercises">
           <h3>Exercises</h3>
           <ul className="exercise-list">
             {data.exercises.map((e) => (

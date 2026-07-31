@@ -2,7 +2,7 @@ import { Routes, Route } from 'react-router-dom'
 import ProblemList from './pages/ProblemList'
 import ProblemDetail from './pages/ProblemDetail'
 import Program from './pages/Program'
-import Chapter from './pages/Chapter'
+import Lesson from './pages/Lesson'
 
 export default function App() {
   return (
@@ -11,7 +11,7 @@ export default function App() {
       {/* Ids can contain "/" (e.g. CTCI/1.1-is-unique), so use a splat route. */}
       <Route path="/problem/*" element={<ProblemDetail />} />
       <Route path="/program" element={<Program />} />
-      <Route path="/chapter/*" element={<Chapter />} />
+      <Route path="/lesson/*" element={<Lesson />} />
     </Routes>
   )
 }

@@ -66,14 +66,15 @@ CREATE TABLE IF NOT EXISTS attempt (
 
 CREATE INDEX IF NOT EXISTS idx_attempt_problem ON attempt (problem_id, id DESC);
 
--- Curriculum chapters (populated from program/ by build.py). A chapter groups a
--- lesson with an explicit list of exercise problem ids; progress is derived from
--- the attempt table (a chapter is "done" once any exercise has ever been solved).
-CREATE TABLE IF NOT EXISTS chapter (
+-- Curriculum lessons (populated from lessons/ by build.py). A lesson groups
+-- markdown content with an explicit list of exercise problem ids; progress is
+-- derived from the attempt table (a lesson is "done" once any exercise has ever
+-- been solved).
+CREATE TABLE IF NOT EXISTS lesson (
   id        TEXT PRIMARY KEY,
   title     TEXT NOT NULL,
   topic     TEXT,
-  lesson    TEXT,
+  body      TEXT,               -- markdown lesson content
   exercises TEXT,               -- JSON array of problem ids
   position  INTEGER
 );
@@ -122,6 +123,7 @@ def init_db():
     conn.executescript(SCHEMA)
     _add_run_attempt_id(conn)
     _backfill_solved_attempts(conn)
+    conn.execute("DROP TABLE IF EXISTS chapter")  # renamed to lesson
 
 
 # --- data access -----------------------------------------------------------
@@ -294,25 +296,25 @@ def query_problem_page(conn, *, search, difficulties, taglist, status, limit, of
 # --- curriculum / progress ---
 
 
-def upsert_chapter(conn, id, title, topic, lesson, exercises_json, position):
+def upsert_lesson(conn, id, title, topic, body, exercises_json, position):
   conn.execute(
       """
-      INSERT INTO chapter (id, title, topic, lesson, exercises, position)
+      INSERT INTO lesson (id, title, topic, body, exercises, position)
       VALUES (?, ?, ?, ?, ?, ?)
       ON CONFLICT(id) DO UPDATE SET
-        title = excluded.title, topic = excluded.topic, lesson = excluded.lesson,
+        title = excluded.title, topic = excluded.topic, body = excluded.body,
         exercises = excluded.exercises, position = excluded.position
       """,
-      (id, title, topic, lesson, exercises_json, position),
+      (id, title, topic, body, exercises_json, position),
   )
 
 
-def list_chapters(conn):
-  return conn.execute("SELECT * FROM chapter ORDER BY position").fetchall()
+def list_lessons(conn):
+  return conn.execute("SELECT * FROM lesson ORDER BY position").fetchall()
 
 
-def get_chapter_row(conn, id):
-  return conn.execute("SELECT * FROM chapter WHERE id = ?", (id,)).fetchone()
+def get_lesson_row(conn, id):
+  return conn.execute("SELECT * FROM lesson WHERE id = ?", (id,)).fetchone()
 
 
 def ever_solved_problem_ids(conn):
