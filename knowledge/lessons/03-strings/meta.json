@@ -1,0 +1,11 @@
+{
+  "title": "Strings",
+  "topic": "Arrays & Strings",
+  "exercises": [
+    "CTCI/1.6-string-compression",
+    "CTCI/1.4-palindrome-permutation",
+    "CTCI/1.2-check-permutation",
+    "check-character-ordering",
+    "count-palindromic-substrings"
+  ]
+}

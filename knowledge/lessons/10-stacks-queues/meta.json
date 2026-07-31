@@ -1,0 +1,8 @@
+{
+  "title": "Stacks & Queues",
+  "topic": "Stacks, Queues & Heaps",
+  "exercises": [
+    "valid-braces",
+    "task-cooldown"
+  ]
+}

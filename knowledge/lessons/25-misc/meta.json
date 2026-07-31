@@ -1,0 +1,8 @@
+{
+  "title": "Assorted Problems",
+  "topic": "Miscellaneous",
+  "exercises": [
+    "fit-words-in-grid",
+    "points-in-triangle"
+  ]
+}

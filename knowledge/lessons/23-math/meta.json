@@ -1,0 +1,10 @@
+{
+  "title": "Math & Numbers",
+  "topic": "Math & Bit Manipulation",
+  "exercises": [
+    "century-from-year",
+    "good-numbers",
+    "divisor-team",
+    "CTCI/17.6-count-of-twos"
+  ]
+}

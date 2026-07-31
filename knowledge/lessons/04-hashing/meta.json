@@ -1,0 +1,12 @@
+{
+  "title": "Hashing",
+  "topic": "Arrays & Strings",
+  "exercises": [
+    "CTCI/1.1-is-unique",
+    "three-array-target-sum",
+    "find-anagrams",
+    "longest-palindrome",
+    "remove-common-phrases",
+    "lru-cache"
+  ]
+}

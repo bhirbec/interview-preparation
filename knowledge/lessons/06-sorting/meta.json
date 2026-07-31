@@ -1,0 +1,9 @@
+{
+  "title": "Sorting",
+  "topic": "Sorting & Searching",
+  "exercises": [
+    "CTCI/10.1-sorted-merge",
+    "CTCI/10.2-group-anagrams",
+    "highlight-chemical-symbols"
+  ]
+}

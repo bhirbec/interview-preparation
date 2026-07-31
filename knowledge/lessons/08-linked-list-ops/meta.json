@@ -1,0 +1,11 @@
+{
+  "title": "Linked List Operations",
+  "topic": "Linked Lists",
+  "exercises": [
+    "reverse-linked-list",
+    "remove-duplicates-linked-list",
+    "delete-middle-node",
+    "CTCI/2.1-remove-dups",
+    "CTCI/2.5-sum-lists"
+  ]
+}

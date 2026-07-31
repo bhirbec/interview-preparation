@@ -1,0 +1,9 @@
+{
+  "title": "Bit Manipulation",
+  "topic": "Math & Bit Manipulation",
+  "exercises": [
+    "CTCI/17.1-add-without-plus",
+    "CTCI/5.1-insertion",
+    "bit-strings-by-popcount"
+  ]
+}

@@ -1,0 +1,12 @@
+{
+  "title": "Two Pointers",
+  "topic": "Arrays & Strings",
+  "exercises": [
+    "three-sum",
+    "three-sum-zero",
+    "trapping-rain-water",
+    "subarray-sum-to-target",
+    "longest-subarray-sum-at-most-k",
+    "check-palindrome"
+  ]
+}

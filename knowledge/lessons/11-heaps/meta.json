@@ -1,0 +1,7 @@
+{
+  "title": "Heaps & Priority Queues",
+  "topic": "Stacks, Queues & Heaps",
+  "exercises": [
+    "merge-m-sorted-arrays"
+  ]
+}
