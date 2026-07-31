@@ -33,9 +33,11 @@ import db
 HERE = os.path.dirname(os.path.abspath(__file__))
 ROOT = os.path.dirname(HERE)
 QUESTIONS_DIR = os.environ.get(
-    "QUESTIONS_DIR", os.path.join(ROOT, "coding-questions")
+    "QUESTIONS_DIR", os.path.join(ROOT, "knowledge", "coding-questions")
 )
-LESSONS_DIR = os.environ.get("LESSONS_DIR", os.path.join(ROOT, "lessons"))
+LESSONS_DIR = os.environ.get(
+    "LESSONS_DIR", os.path.join(ROOT, "knowledge", "lessons")
+)
 
 
 def find_problem_dirs(root):
