@@ -1,0 +1,9 @@
+{
+  "difficulty": "hard",
+  "tags": [
+    "math",
+    "backtracking",
+    "facebook"
+  ],
+  "hint": "Sort the sums. With the values in increasing order, the two smallest sums must be x1+x2 and x1+x3 \u2014 so guessing which sum is x2+x3 pins down x1 = (s0 + s1 - guess) / 2. After that, the smallest unused sum is always x1 + (next value): peel values off greedily, cancelling their sums with the known values, and backtrack to the next guess if anything fails to cancel."
+}

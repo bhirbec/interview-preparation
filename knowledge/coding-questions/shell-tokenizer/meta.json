@@ -1,0 +1,8 @@
+{
+  "difficulty": "easy",
+  "tags": [
+    "string",
+    "google"
+  ],
+  "hint": "One pass with two pieces of state: the characters of the token being built (plus a flag that a token has started, so \\\"\\\" yields an empty token) and whether you are inside quotes. A quote toggles the flag; a space outside quotes closes the current token."
+}

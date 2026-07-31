@@ -6,6 +6,7 @@
     "CTCI/1.4-palindrome-permutation",
     "CTCI/1.2-check-permutation",
     "check-character-ordering",
-    "count-palindromic-substrings"
+    "count-palindromic-substrings",
+    "shell-tokenizer"
   ]
 }
