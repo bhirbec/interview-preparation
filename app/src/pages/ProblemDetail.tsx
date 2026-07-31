@@ -4,7 +4,7 @@ import type { TestResult } from '../types'
 import CodeEditor from '../components/CodeEditor'
 import Description from '../components/Description'
 import TestResults from '../components/TestResults'
-import ThemeToggle from '../components/ThemeToggle'
+import AppMenu from '../components/AppMenu'
 import History from '../components/History'
 import AttemptTimer from '../components/AttemptTimer'
 import { runTests, warmUpPyodide } from '../pyodide'
@@ -90,6 +90,7 @@ export default function ProblemDetail() {
   return (
     <div className="page detail">
       <header className="app-header">
+        <AppMenu />
         <Link to="/" className="back">
           ← Problems
         </Link>
@@ -103,7 +104,6 @@ export default function ProblemDetail() {
           onChange={reload}
           onStart={() => loadCode(problem.starter)}
         />
-        <ThemeToggle />
       </header>
 
       <div className="columns">
