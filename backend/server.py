@@ -1,7 +1,7 @@
 """Coding-trainer API.
 
 No auth (single implicit user). Problems live in the `problem` table (populated
-by build.py) and are identified by their path-based id (e.g. "maximum-subarray"
+by etl.py) and are identified by their path-based id (e.g. "maximum-subarray"
 or "CTCI/1.1-is-unique"). Ids can contain "/", so id-specific endpoints take the
 id as a query parameter or request-body field rather than a path segment.
 """

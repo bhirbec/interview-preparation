@@ -1,27 +1,24 @@
 #!/usr/bin/env python3
-"""Import the coding-questions catalog into the database.
+"""ETL for the knowledge/ content: extract the coding-questions catalog and the
+lessons, transform them, and load them into the SQLite database.
 
-Recursively finds every coding-questions/**/ folder that has the three-file
-layout and imports it into the `problem` table. The problem id is the folder
-path relative to coding-questions/ (e.g. "maximum-subarray" or
-"CTCI/1.1-is-unique").
-
-Each problem folder has three files (no parsing/stubbing heuristics — the files
-are authored directly):
+Each coding-question folder (under knowledge/coding-questions/) has four files:
 
     impl.py      # description comment + input classes + the STUBBED primary
+    meta.json    # { difficulty, tags, hint }
     solution.py  # input classes + the full solution
     tests.py     # import unittest + test helpers + the unittest.TestCase
 
-The stored `starter` is impl.py with its leading description comment stripped
-(the description is shown in its own panel). The stored `tests` is tests.py with
-its `if __name__ == '__main__'` guard stripped (the app collects the TestCase
-itself).
+The problem id is the folder path relative to the coding-questions dir (e.g.
+"maximum-subarray" or "CTCI/1.1-is-unique"). The stored `starter` is impl.py with
+its leading description comment stripped (shown in its own panel); `tests` is
+tests.py with its `if __name__ == '__main__'` guard stripped. Lessons
+(knowledge/lessons/<slug>/ meta.json + lesson.md) load into the `lesson` table.
 
-Run it inside the api container (which has the DB + a read-only mount of
-coding-questions):
+Run it inside the api container (which has the DB + read-only mounts of the
+content):
 
-    docker compose exec api python build.py
+    docker compose exec api python etl.py
 """
 
 import json

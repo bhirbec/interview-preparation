@@ -177,9 +177,9 @@ move-and-cleanup step for local sources (step 7).
      primary) or a needed input class is missing from `impl.py` (add it there).
 
 9. **Import into the catalog.** The catalog lives in the SQLite DB, imported by
-   `backend/build.py`. Re-run it so the app picks up the new/edited problem:
+   `backend/etl.py`. Re-run it so the app picks up the new/edited problem:
    ```
-   docker compose exec api python build.py
+   docker compose exec api python etl.py
    ```
    If the containers aren't running, say so and tell the user to run it once
    they're up.
