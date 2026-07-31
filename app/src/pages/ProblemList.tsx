@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { Link } from 'react-router-dom'
 import type { ProblemListItem, StatusFilter } from '../types'
-import ThemeToggle from '../components/ThemeToggle'
+import AppMenu from '../components/AppMenu'
 import { formatDuration } from '../time'
 import { attemptView } from '../attempt'
 import { useTicker } from '../hooks/useTicker'
@@ -65,10 +65,7 @@ export default function ProblemList() {
 
   return (
     <div className="page list-page">
-      <header className="app-header">
-        <h1>Coding Trainer</h1>
-        <ThemeToggle />
-      </header>
+      <AppMenu />
 
       <div className="list-layout">
         <aside className="filters">

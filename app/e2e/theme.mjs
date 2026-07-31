@@ -21,7 +21,8 @@ try {
   assert(initial === 'dark', `dark is the default theme (got "${initial}")`)
   await page.screenshot({ path: join(here, 'theme-dark.png'), fullPage: true })
 
-  await page.locator('.theme-toggle').click()
+  await page.locator('.menu-btn').click() // theme toggle now lives in the drawer
+  await page.locator('.drawer.open .theme-toggle').click()
   const afterToggle = await page.evaluate(() => document.documentElement.getAttribute('data-theme'))
   assert(afterToggle === 'light', `toggle switches to light (got "${afterToggle}")`)
   await page.screenshot({ path: join(here, 'theme-light.png'), fullPage: true })

@@ -91,6 +91,9 @@ body {
   align-items: center;
   gap: 0.75rem;
   margin-bottom: 1rem;
+  /* Reserve horizontal room for the fixed top-left 3-dot menu button so it never
+     overlaps header content on the detail page. */
+  padding-left: 2rem;
 }
 
 .app-header h1 {
@@ -98,19 +101,122 @@ body {
   margin: 0;
 }
 
+/* The theme control is a borderless drawer row (icon + "Theme"), like Questions. */
 .theme-toggle {
-  margin-left: auto;
+  width: 100%;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  color: inherit;
+  font: inherit;
+  text-align: left;
+}
+
+/* ---- left drawer menu (3-dot) ---- */
+.menu-btn {
+  position: fixed;
+  top: 0.9rem;
+  left: 0.9rem;
+  z-index: 30;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
   background: var(--panel);
   border: 1px solid var(--border);
   border-radius: 8px;
-  padding: 0.35rem 0.55rem;
-  font-size: 1rem;
+  padding: 0.35rem;
+  font-size: 1.35rem;
   line-height: 1;
   cursor: pointer;
+  color: var(--text);
 }
 
-.theme-toggle:hover {
+.menu-btn:hover {
   border-color: var(--accent);
+}
+
+.drawer-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.4);
+  z-index: 40;
+}
+
+.drawer {
+  position: fixed;
+  top: 0;
+  left: 0;
+  height: 100vh;
+  width: 260px;
+  max-width: 80vw;
+  background: var(--panel);
+  border-right: 1px solid var(--border);
+  box-shadow: 2px 0 16px rgba(0, 0, 0, 0.25);
+  transform: translateX(-100%);
+  transition: transform 0.2s ease;
+  z-index: 50;
+  display: flex;
+  flex-direction: column;
+  padding: 0.75rem;
+}
+
+.drawer.open {
+  transform: translateX(0);
+}
+
+.drawer-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 0.5rem;
+}
+
+.drawer-title {
+  font-weight: 600;
+  font-size: 1.05rem;
+}
+
+.drawer-close {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: transparent;
+  border: none;
+  color: var(--muted);
+  font-size: 1.25rem;
+  cursor: pointer;
+  line-height: 1;
+}
+
+.drawer-close:hover {
+  color: var(--text);
+}
+
+.drawer-items {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.drawer-item {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  padding: 0.5rem 0.6rem;
+  border-radius: 8px;
+  color: var(--text);
+  text-decoration: none;
+  font-size: 0.95rem;
+}
+
+.drawer-item > svg {
+  font-size: 1.25rem;
+  color: var(--muted);
+  flex: 0 0 auto;
+}
+
+.drawer-item:hover {
+  background: var(--border);
 }
 
 .back {
