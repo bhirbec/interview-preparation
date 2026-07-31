@@ -1,10 +1,12 @@
 # Flooded World
 #
-# You are given an n x n grid `grid` where grid[i][j] is the elevation of cell
-# (i, j). Water rises one unit per day: on day d, every cell with elevation <= d
-# is submerged and can be entered. Starting from the top-left cell (0, 0), you may
-# move up, down, left, or right between submerged cells. Return the first day on
-# which the bottom-right cell (n-1, n-1) becomes reachable from the start.
+# The world is flooding. You are given an n x n grid `grid` where grid[i][j] is
+# the elevation of cell (i, j). The water level rises one unit per day, so on
+# day d every cell with elevation <= d is under water. You are in a boat at the
+# top-left cell (0, 0), and a boat can only travel over flooded cells: on day d
+# you may move up, down, left, or right between cells whose elevation is <= d.
+# Return the first day on which you can reach the bottom-right cell (n-1, n-1).
+# (Note the boat needs water below it even on the start and end cells.)
 #
 # Equivalently, among all paths from the top-left to the bottom-right, return the
 # minimum possible value of the maximum elevation on the path.
