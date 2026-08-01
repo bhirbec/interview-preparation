@@ -1,0 +1,12 @@
+{
+  "difficulty": "medium",
+  "tags": [
+    "string",
+    "sliding-window",
+    "hashtable"
+  ],
+  "sources": [
+    "https://leetcode.com/problems/longest-substring-without-repeating-characters/"
+  ],
+  "hint": "slide a window while remembering each character's last index; when the new character repeats inside the window, jump the left edge past its previous occurrence."
+}

@@ -1,0 +1,11 @@
+{
+  "difficulty": "medium",
+  "tags": [
+    "stack",
+    "math"
+  ],
+  "sources": [
+    "https://leetcode.com/problems/evaluate-reverse-polish-notation/"
+  ],
+  "hint": "push numbers on a stack; on an operator, pop the right then the left operand, apply it, and push the result — use int(a / b) for truncation toward zero."
+}

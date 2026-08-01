@@ -1,0 +1,11 @@
+{
+  "difficulty": "medium",
+  "tags": [
+    "array",
+    "sorting"
+  ],
+  "sources": [
+    "https://leetcode.com/problems/merge-intervals/"
+  ],
+  "hint": "sort by start, then sweep once: extend the last merged interval while the next one starts before or at its end, otherwise start a new one."
+}

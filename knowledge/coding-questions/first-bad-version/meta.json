@@ -1,0 +1,10 @@
+{
+  "difficulty": "easy",
+  "tags": [
+    "binary-search"
+  ],
+  "sources": [
+    "https://leetcode.com/problems/first-bad-version/"
+  ],
+  "hint": "binary-search the boundary: if mid is bad the answer is at or before mid, otherwise it is after mid; stop when low meets high."
+}

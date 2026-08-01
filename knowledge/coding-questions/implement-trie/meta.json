@@ -1,0 +1,11 @@
+{
+  "difficulty": "medium",
+  "tags": [
+    "trie",
+    "string"
+  ],
+  "sources": [
+    "https://leetcode.com/problems/implement-trie-prefix-tree/"
+  ],
+  "hint": "nest dicts keyed by character, one level per letter, and mark word ends with a sentinel key so search and starts_with differ only in that final check."
+}
