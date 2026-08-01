@@ -4,5 +4,8 @@
     "dynamic-programming",
     "recursion"
   ],
+  "sources": [
+    "https://youtu.be/ocZMDMZwhCY?t=360"
+  ],
   "hint": "Interval DP: let dp(i, j) be the cheapest way to multiply matrices i..j. Guess the outermost split point k: dp(i, j) = min over k of dp(i, k) + dp(k+1, j) + dims[i]*dims[k+1]*dims[j+1]. Memoize; O(n^3) overall."
 }

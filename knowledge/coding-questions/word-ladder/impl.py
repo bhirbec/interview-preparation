@@ -1,7 +1,5 @@
 # Word Ladder
 #
-# Source: https://www.careercup.com/question?id=14947965
-#
 # Given a start word, a target word, and a dictionary of words (all of the same
 # length), find a shortest transformation sequence from start to target such that
 # each step changes exactly one letter and every intermediate word AND the target

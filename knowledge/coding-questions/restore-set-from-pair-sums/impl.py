@@ -1,5 +1,4 @@
 # Restore Set From Pair Sums
-# Source: https://www.careercup.com/question?id=5751343965798400
 #
 # There was a collection X of N numbers (N >= 3, duplicates allowed). Someone
 # computed the sum of every unordered pair — all N * (N - 1) / 2 of them — and

@@ -1,5 +1,4 @@
 # Text Justification
-# Source: https://youtu.be/ENyox7kNKeY?list=PLfMspJ0TLR5HRFu2kLh3U4mvStMO8QURm
 #
 # You are given a list of words and a page width. Split the words, keeping
 # their order, into consecutive lines. A line holds words joined by single

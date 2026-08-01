@@ -5,5 +5,8 @@
     "array",
     "facebook"
   ],
+  "sources": [
+    "https://careercup.com/question?id=5726440612954112"
+  ],
   "hint": "a sliding window works because all values are positive \u2014 grow the window while the running sum is below target, shrink from the left when it overshoots."
 }

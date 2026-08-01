@@ -6,5 +6,8 @@
     "hashtable",
     "facebook"
   ],
+  "sources": [
+    "https://www.careercup.com/question?id=5749533368647680"
+  ],
   "hint": "BFS carrying each node's column index, bucket values by column in a hash map while tracking min/max column, then emit columns in index order."
 }

@@ -5,5 +5,8 @@
     "hashtable",
     "imo"
   ],
+  "sources": [
+    "https://www.glassdoor.com/Interview/Given-a-set-of-Sentences-containing-lower-case-letters-only-remove-common-phrases-from-each-sentence-Here-a-phrase-is-def-QTN_171719.htm"
+  ],
   "hint": "hash every 3+ word window to the set of sentences containing it; the common windows are those seen in 2+ sentences, then blank out every word position each covers."
 }

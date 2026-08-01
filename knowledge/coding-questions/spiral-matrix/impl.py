@@ -1,7 +1,5 @@
 # Spiral Matrix
 #
-# Source: https://www.facebook.com/careers/life/sample_interview_questions
-#
 # You are given an integer n. Return an n x n matrix filled with the integers
 # 1, 2, ..., n*n laid out in clockwise spiral order, starting in the top-left
 # corner and moving right first.

@@ -1,7 +1,5 @@
 # Three Sum (Triplets to Zero)
 #
-# Source: https://careercup.com/question?id=5735322939817984
-#
 # You are given a list of integers `nums`. Return all unique triplets
 # [a, b, c] of distinct positions in the list whose values sum to zero.
 #

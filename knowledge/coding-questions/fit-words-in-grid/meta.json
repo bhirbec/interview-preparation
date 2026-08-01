@@ -4,5 +4,8 @@
     "string",
     "google"
   ],
+  "sources": [
+    "https://www.careercup.com/question?id=5701279419465728"
+  ],
   "hint": "simulate row by row, keeping a cyclic index into words and the current line length; a word of length L needs L (or L+1 with a leading space) columns."
 }

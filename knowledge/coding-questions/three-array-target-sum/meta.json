@@ -5,5 +5,8 @@
     "hashtable",
     "uber"
   ],
+  "sources": [
+    "https://careercup.com/question?id=6287187793412096"
+  ],
   "hint": "precompute a hash map from every a+b pair-sum to the list of (x, y) pairs producing it; then for each z scan the pairs stored under target - z."
 }

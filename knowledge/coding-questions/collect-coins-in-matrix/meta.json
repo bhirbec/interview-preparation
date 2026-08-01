@@ -6,5 +6,8 @@
     "array",
     "facebook"
   ],
+  "sources": [
+    "https://www.careercup.com/question?id=5722807649435648"
+  ],
   "hint": "sort by x, then run an O(n^2) LIS keeping only pairs where both coordinates strictly increase."
 }

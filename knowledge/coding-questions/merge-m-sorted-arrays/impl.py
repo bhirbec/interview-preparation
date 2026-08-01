@@ -1,7 +1,5 @@
 # Merge M Sorted Arrays
 #
-# Source: https://www.glassdoor.com/Interview/You-are-given-a-collection-of-M-arrays-with-N-integers-Every-array-is-sorted-Develop-an-algorithm-to-combine-each-array-i-QTN_1195702.htm
-#
 # You are given a collection of arrays, each of which is already sorted in
 # non-decreasing order. Merge them into a single array sorted in non-decreasing
 # order and return it.

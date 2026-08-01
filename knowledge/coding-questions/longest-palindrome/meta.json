@@ -5,5 +5,8 @@
     "hashtable",
     "google"
   ],
+  "sources": [
+    "https://www.careercup.com/question?id=5631060781039616"
+  ],
   "hint": "count each character; use floor(count/2) pairs on each side, and place one leftover odd character in the middle if any character has an odd count."
 }

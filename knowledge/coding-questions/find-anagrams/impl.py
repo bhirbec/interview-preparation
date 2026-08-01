@@ -1,7 +1,5 @@
 # Find Anagrams
 #
-# Source: https://careercup.com/question?id=5687065971785728
-#
 # You are given a list of strings `words`. Two words are anagrams of each other
 # when one can be rearranged into the other (same multiset of characters).
 #

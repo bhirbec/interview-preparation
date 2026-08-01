@@ -6,5 +6,8 @@
     "sorting",
     "google"
   ],
+  "sources": [
+    "https://www.glassdoor.com/Interview/You-are-given-a-collection-of-M-arrays-with-N-integers-Every-array-is-sorted-Develop-an-algorithm-to-combine-each-array-i-QTN_1195702.htm"
+  ],
   "hint": "push the head of each non-empty array into a min-heap, then repeatedly pop the smallest and push the next element from the same array (O(total * log m))."
 }

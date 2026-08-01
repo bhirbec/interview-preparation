@@ -1,7 +1,5 @@
 # Remove Common Phrases
 #
-# Source: https://www.glassdoor.com/Interview/Given-a-set-of-Sentences-containing-lower-case-letters-only-remove-common-phrases-from-each-sentence-Here-a-phrase-is-def-QTN_171719.htm
-#
 # You are given a list of sentences; each sentence is a string of lower-case
 # words separated by single spaces. A "phrase" is any run of 3 or more
 # consecutive words within a sentence. A phrase is "common" if the exact same run

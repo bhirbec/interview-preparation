@@ -1,7 +1,5 @@
 # Fit Words In Grid
 #
-# Source: https://www.careercup.com/question?id=5701279419465728
-#
 # You are given a list of `words`, a number of rows `num_rows`, and a number of
 # columns `num_cols`. The words are written out in order, cycling back to the
 # first word after the last, and packed greedily into rows: within a row, words

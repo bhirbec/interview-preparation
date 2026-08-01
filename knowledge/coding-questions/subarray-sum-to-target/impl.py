@@ -1,7 +1,5 @@
 # Subarray Sum To Target
 #
-# Source: https://careercup.com/question?id=5726440612954112
-#
 # You are given an array `arr` of positive integers and a positive integer
 # `target`. Return the pair of indices (start, end), inclusive, of a contiguous
 # subarray whose values sum exactly to `target`. If several subarrays qualify,

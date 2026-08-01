@@ -5,5 +5,8 @@
     "recursion",
     "math"
   ],
+  "sources": [
+    "https://youtu.be/OQ5jsbhAv_M?t=306"
+  ],
   "hint": "The naive recursion recomputes the same terms exponentially many times. Either memoize the recursion, or build bottom-up keeping only the last two values."
 }

@@ -1,7 +1,5 @@
 # Three Array Target Sum
 #
-# Source: https://careercup.com/question?id=6287187793412096
-#
 # You are given three integer arrays `a`, `b`, `c` and an integer `target`.
 # Taking exactly one element from each array, find every triple (x, y, z) with
 # x from `a`, y from `b`, z from `c` such that x + y + z == target.

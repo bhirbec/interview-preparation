@@ -1,7 +1,5 @@
 # Collect Coins In Matrix
 #
-# Source: https://www.careercup.com/question?id=5722807649435648
-#
 # There are N coins placed on a grid, each at an integer coordinate (x, y) with
 # x >= 1 and y >= 1. You start at (0, 0). From your current position (a, b) you
 # may jump to any position (a + dx, b + dy) with dx >= 1 and dy >= 1 (both

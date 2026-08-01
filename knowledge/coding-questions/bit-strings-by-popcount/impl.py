@@ -1,7 +1,5 @@
 # Bit Strings By Popcount
 #
-# Source: https://www.careercup.com/question?id=5726391455711232
-#
 # Given an integer k (the number of bits), return every length-k binary string,
 # ordered first by the number of set bits (ascending) and, within the same number
 # of set bits, by numeric value (ascending). The result includes the all-zeros

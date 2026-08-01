@@ -1,7 +1,5 @@
 # Museum Guard Distances
 #
-# Source: https://www.careercup.com/question?id=5722862468988928
-#
 # A museum is represented by a square matrix whose cells are one of:
 #   'O' - open space
 #   'G' - a guard

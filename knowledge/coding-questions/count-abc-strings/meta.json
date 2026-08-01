@@ -5,5 +5,8 @@
     "recursion",
     "google"
   ],
+  "sources": [
+    "https://www.careercup.com/question?id=5717453712654336"
+  ],
   "hint": "count with a memoized recursion over (position, number of 'b' used, current run of consecutive 'c'), branching on placing 'a', 'b' or 'c'."
 }

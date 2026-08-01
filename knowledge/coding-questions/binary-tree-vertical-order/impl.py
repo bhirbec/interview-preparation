@@ -1,7 +1,5 @@
 # Binary Tree Vertical Order Traversal
 #
-# Source: https://www.careercup.com/question?id=5749533368647680
-#
 # You are given the root of a binary tree of integers. Assign the root column 0;
 # a left child sits one column to the left of its parent and a right child one
 # column to the right. Traverse the tree top-to-bottom, level by level.

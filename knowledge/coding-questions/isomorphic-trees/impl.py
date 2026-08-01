@@ -1,7 +1,5 @@
 # Isomorphic Trees
 #
-# Source: http://www.geeksforgeeks.org/tree-isomorphism-problem
-#
 # Two binary trees are isomorphic if one can be obtained from the other by
 # swapping the left and right children of any number of nodes (any nodes, at any
 # levels). Given the roots of two binary trees, return True if they are

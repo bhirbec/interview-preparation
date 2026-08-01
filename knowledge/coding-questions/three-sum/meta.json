@@ -6,5 +6,9 @@
     "sorting",
     "google"
   ],
+  "sources": [
+    "https://www.glassdoor.com/Interview/3-sum-problem-that-can-be-found-on-leetcode-QTN_1202200.htm",
+    "https://en.wikipedia.org/wiki/3SUM"
+  ],
   "hint": "sort the array, then for each index i sweep the remainder with two pointers, skipping equal neighbors to avoid duplicate triplets. O(n^2)."
 }
