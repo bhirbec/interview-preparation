@@ -1,0 +1,13 @@
+{
+  "difficulty": "medium",
+  "tags": [
+    "array",
+    "data-structure",
+    "implementation",
+    "amortized-analysis"
+  ],
+  "sources": [
+    "https://github.com/jwasham/coding-interview-university#arrays"
+  ],
+  "hint": "keep size and capacity separate: allocate a fresh buffer at double the capacity when a push overflows, and copy back down to half once size falls to a quarter of capacity."
+}

@@ -1,0 +1,13 @@
+{
+  "difficulty": "medium",
+  "tags": [
+    "sorting",
+    "divide-and-conquer",
+    "recursion",
+    "algorithm"
+  ],
+  "sources": [
+    "https://github.com/jwasham/practice-python/blob/master/merge_sort/merge_sort.py"
+  ],
+  "hint": "the recursion is the easy half -- the work is in merge(): walk two cursors and take from the left list whenever the fronts tie, which is what makes the sort stable."
+}

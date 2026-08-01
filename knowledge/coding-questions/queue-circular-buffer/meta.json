@@ -1,0 +1,13 @@
+{
+  "difficulty": "easy",
+  "tags": [
+    "queue",
+    "array",
+    "data-structure",
+    "implementation"
+  ],
+  "sources": [
+    "https://github.com/jwasham/coding-interview-university#queue"
+  ],
+  "hint": "store a head index plus a count instead of head and tail indices -- the write slot is (head + count) % capacity, and the count alone tells you empty from full."
+}

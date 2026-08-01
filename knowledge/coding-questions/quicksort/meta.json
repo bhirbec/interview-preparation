@@ -1,0 +1,13 @@
+{
+  "difficulty": "medium",
+  "tags": [
+    "sorting",
+    "divide-and-conquer",
+    "in-place",
+    "algorithm"
+  ],
+  "sources": [
+    "https://github.com/jwasham/practice-python/blob/master/quick_sort/quick_sort.py"
+  ],
+  "hint": "swap the middle element to the end, then sweep the range keeping a boundary index for \"everything before me is smaller than the pivot\", and finally swap the pivot into that boundary."
+}
