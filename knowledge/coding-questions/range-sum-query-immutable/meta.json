@@ -1,0 +1,12 @@
+{
+  "difficulty": "easy",
+  "tags": [
+    "prefix-sum",
+    "design",
+    "array"
+  ],
+  "sources": [
+    "https://leetcode.com/problems/range-sum-query-immutable/"
+  ],
+  "hint": "precompute prefix[i] = sum of the first i values once, then any range is prefix[right + 1] - prefix[left]."
+}

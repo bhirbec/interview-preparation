@@ -1,0 +1,13 @@
+{
+  "difficulty": "medium",
+  "tags": [
+    "greedy",
+    "intervals",
+    "sorting",
+    "array"
+  ],
+  "sources": [
+    "https://leetcode.com/problems/non-overlapping-intervals/"
+  ],
+  "hint": "sort by end time and always keep the interval that finishes earliest — it leaves the most room for the rest, so every interval that clashes with it is a removal."
+}

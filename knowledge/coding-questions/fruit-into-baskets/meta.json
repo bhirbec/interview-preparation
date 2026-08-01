@@ -1,0 +1,12 @@
+{
+  "difficulty": "medium",
+  "tags": [
+    "sliding-window",
+    "array",
+    "hashtable"
+  ],
+  "sources": [
+    "https://leetcode.com/problems/fruit-into-baskets/"
+  ],
+  "hint": "slide a window while keeping a count per fruit type, and advance the left edge until at most two types remain in the window."
+}

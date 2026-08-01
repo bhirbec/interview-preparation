@@ -1,0 +1,13 @@
+{
+  "difficulty": "medium",
+  "tags": [
+    "heap",
+    "priority-queue",
+    "hashtable",
+    "array"
+  ],
+  "sources": [
+    "https://leetcode.com/problems/top-k-frequent-elements/"
+  ],
+  "hint": "count the values, then keep only the k best in a size-k min-heap keyed on (frequency, -value) so each distinct value costs O(log k) instead of a full sort."
+}
