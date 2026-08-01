@@ -1,0 +1,13 @@
+{
+  "difficulty": "easy",
+  "tags": [
+    "graph",
+    "bfs",
+    "queue",
+    "traversal"
+  ],
+  "sources": [
+    "https://github.com/jwasham/coding-interview-university#graphs"
+  ],
+  "hint": "use a FIFO queue and mark each node as seen at the moment you enqueue it -- marking on dequeue instead lets a node with two parents on the same level enter the queue twice."
+}

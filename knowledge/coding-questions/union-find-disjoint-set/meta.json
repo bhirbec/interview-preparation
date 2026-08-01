@@ -1,0 +1,14 @@
+{
+  "difficulty": "medium",
+  "tags": [
+    "union-find",
+    "disjoint-set",
+    "graph",
+    "data-structure",
+    "implementation"
+  ],
+  "sources": [
+    "https://github.com/jwasham/coding-interview-university#disjoint-sets--union-find"
+  ],
+  "hint": "rank is an upper bound on tree height, not a count of elements -- it only increases when you merge two roots of equal rank, and path compression never needs to update it."
+}

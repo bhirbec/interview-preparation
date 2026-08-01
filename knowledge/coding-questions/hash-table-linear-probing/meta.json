@@ -1,0 +1,13 @@
+{
+  "difficulty": "medium",
+  "tags": [
+    "hashtable",
+    "array",
+    "data-structure",
+    "implementation"
+  ],
+  "sources": [
+    "https://github.com/jwasham/coding-interview-university#hash-table"
+  ],
+  "hint": "a lookup stops at the first never-used slot, so removal must leave a tombstone rather than a blank -- and add() should reuse the first tombstone it walked past instead of the empty slot at the end of the chain."
+}

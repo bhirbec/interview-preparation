@@ -1,0 +1,13 @@
+{
+  "difficulty": "medium",
+  "tags": [
+    "linked-list",
+    "data-structure",
+    "implementation",
+    "two-pointers"
+  ],
+  "sources": [
+    "https://github.com/jwasham/coding-interview-university#linked-lists"
+  ],
+  "hint": "every mutation must keep head, tail and the cached size consistent -- the cases that bite are removing the last node (tail moves back to its predecessor) and emptying the list (both pointers go to None)."
+}

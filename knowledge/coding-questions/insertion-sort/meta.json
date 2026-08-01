@@ -1,0 +1,12 @@
+{
+  "difficulty": "easy",
+  "tags": [
+    "sorting",
+    "in-place",
+    "algorithm"
+  ],
+  "sources": [
+    "https://github.com/jwasham/coding-interview-university#sorting"
+  ],
+  "hint": "hold the current element in a temporary, shift every larger element in the sorted prefix one slot right, then drop the temporary into the gap that opens up."
+}

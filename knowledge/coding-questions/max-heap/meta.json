@@ -1,0 +1,13 @@
+{
+  "difficulty": "medium",
+  "tags": [
+    "heap",
+    "priority-queue",
+    "data-structure",
+    "implementation"
+  ],
+  "sources": [
+    "https://github.com/jwasham/coding-interview-university#heap--priority-queue--binary-heap"
+  ],
+  "hint": "removal always moves the last leaf into the hole and then repairs from there -- sift it down, and also sift it up, because a leaf pulled from a different subtree can be larger than its new parent."
+}
