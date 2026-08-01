@@ -1,0 +1,13 @@
+{
+  "difficulty": "medium",
+  "tags": [
+    "trie",
+    "string",
+    "hashtable",
+    "dfs"
+  ],
+  "sources": [
+    "https://leetcode.com/problems/longest-word-in-dictionary/"
+  ],
+  "hint": "insert every word into a trie marking word ends, then walk down from the root only through nodes that end a word — the deepest such path is the answer."
+}

@@ -1,0 +1,11 @@
+{
+  "difficulty": "easy",
+  "tags": [
+    "sliding-window",
+    "array"
+  ],
+  "sources": [
+    "https://leetcode.com/problems/maximum-average-subarray-i/"
+  ],
+  "hint": "the window has a fixed width, so sum the first k values once and then slide: add the entering element and subtract the leaving one."
+}

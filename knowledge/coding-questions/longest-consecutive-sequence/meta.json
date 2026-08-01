@@ -1,0 +1,12 @@
+{
+  "difficulty": "medium",
+  "tags": [
+    "union-find",
+    "hashtable",
+    "array"
+  ],
+  "sources": [
+    "https://leetcode.com/problems/longest-consecutive-sequence/"
+  ],
+  "hint": "put everything in a set and only start counting from values whose predecessor is absent, so each run is walked exactly once and the whole scan stays O(n)."
+}

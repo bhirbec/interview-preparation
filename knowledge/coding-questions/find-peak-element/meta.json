@@ -1,0 +1,11 @@
+{
+  "difficulty": "medium",
+  "tags": [
+    "binary-search",
+    "array"
+  ],
+  "sources": [
+    "https://leetcode.com/problems/find-peak-element/"
+  ],
+  "hint": "compare the midpoint with its right neighbour: if the slope goes up, a peak must exist to the right, otherwise the midpoint itself or something to its left is one."
+}

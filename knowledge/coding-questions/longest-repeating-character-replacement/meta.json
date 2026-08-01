@@ -1,0 +1,12 @@
+{
+  "difficulty": "medium",
+  "tags": [
+    "sliding-window",
+    "string",
+    "hashtable"
+  ],
+  "sources": [
+    "https://leetcode.com/problems/longest-repeating-character-replacement/"
+  ],
+  "hint": "a window is valid when its length minus the count of its most frequent letter is at most k; grow the window and shrink it by one whenever that budget is exceeded."
+}

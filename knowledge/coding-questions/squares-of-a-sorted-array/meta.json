@@ -1,0 +1,12 @@
+{
+  "difficulty": "easy",
+  "tags": [
+    "two-pointers",
+    "array",
+    "sorting"
+  ],
+  "sources": [
+    "https://leetcode.com/problems/squares-of-a-sorted-array/"
+  ],
+  "hint": "the largest square is always at one end of the array, so walk two pointers inward and fill the answer from the back."
+}
