@@ -1,0 +1,10 @@
+{
+  "difficulty": "medium",
+  "tags": [
+    "stack"
+  ],
+  "sources": [
+    "https://leetcode.com/problems/min-stack/"
+  ],
+  "hint": "alongside each pushed value, store the minimum of the stack as it was at that moment, so pop restores the previous minimum for free."
+}

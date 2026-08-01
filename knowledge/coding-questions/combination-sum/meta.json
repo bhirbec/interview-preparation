@@ -1,0 +1,12 @@
+{
+  "difficulty": "medium",
+  "tags": [
+    "backtracking",
+    "recursion",
+    "array"
+  ],
+  "sources": [
+    "https://leetcode.com/problems/combination-sum/"
+  ],
+  "hint": "backtrack with a start index: at each step either reuse the current candidate (same index) or move on (next index), so each multiset is built exactly once in non-decreasing order."
+}

@@ -1,0 +1,11 @@
+{
+  "difficulty": "medium",
+  "tags": [
+    "stack",
+    "array"
+  ],
+  "sources": [
+    "https://leetcode.com/problems/daily-temperatures/"
+  ],
+  "hint": "keep a stack of day indices with no warmer day seen yet; each new temperature pops every colder index off the stack and resolves its wait in O(1) amortized."
+}

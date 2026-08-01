@@ -1,0 +1,12 @@
+{
+  "difficulty": "medium",
+  "tags": [
+    "heap",
+    "array",
+    "geometry"
+  ],
+  "sources": [
+    "https://leetcode.com/problems/k-closest-points-to-origin/"
+  ],
+  "hint": "compare squared distances (no sqrt needed) and keep a max-heap of size k, so each point costs O(log k) instead of sorting everything."
+}

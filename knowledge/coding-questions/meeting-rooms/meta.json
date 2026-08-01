@@ -1,0 +1,11 @@
+{
+  "difficulty": "easy",
+  "tags": [
+    "array",
+    "sorting"
+  ],
+  "sources": [
+    "https://leetcode.com/problems/meeting-rooms/"
+  ],
+  "hint": "sort by start time; the schedule works iff every meeting starts no earlier than the previous one ends."
+}
