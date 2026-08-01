@@ -4,5 +4,8 @@
     "dynamic-programming",
     "array"
   ],
+  "sources": [
+    "https://www.coursera.org/learn/algorithm-design-analysis-2/supplement/mfwuk/week-3-overview"
+  ],
   "hint": "For each position either skip it (best of the prefix one shorter) or take it (weight + best of the prefix two shorter): dp[i] = max(dp[i-1], dp[i-2] + w[i]). Two rolling variables suffice."
 }

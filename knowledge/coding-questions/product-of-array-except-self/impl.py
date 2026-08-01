@@ -1,7 +1,5 @@
 # Product Of Array Except Self
 #
-# Source: https://www.glassdoor.com/Interview/google-software-engineer-interview-questions-SRCH_KE0,24.htm
-#
 # You are given an array of integers `nums`. Return an array `out` of the same
 # length where out[i] is the product of every element of `nums` except nums[i].
 # You must NOT use the division operator.

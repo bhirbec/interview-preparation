@@ -3,5 +3,9 @@
   "tags": [
     "dynamic-programming"
   ],
+  "sources": [
+    "https://www.coursera.org/learn/algorithm-design-analysis-2/lecture/LIgLJ/the-knapsack-problem",
+    "https://youtu.be/ocZMDMZwhCY?t=2589"
+  ],
   "hint": "dp[x] = best value achievable with capacity x. For each item, sweep capacities from high to low (so the item is used at most once) and relax dp[x] = max(dp[x], dp[x - weight] + value)."
 }

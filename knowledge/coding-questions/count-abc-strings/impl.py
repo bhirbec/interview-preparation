@@ -1,7 +1,5 @@
 # Count ABC Strings
 #
-# Source: https://www.careercup.com/question?id=5717453712654336
-#
 # Given a length n, return how many strings of length n can be formed from the
 # letters 'a', 'b' and 'c' subject to two rules:
 #   - the string contains at most one 'b', and

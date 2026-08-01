@@ -1,6 +1,6 @@
 ---
 name: coding-question
-description: Turn a YouTube coding-challenge video OR an existing local implementation into a coding question under ./knowledge/coding-questions, authored as four files (impl.py skeleton, meta.json difficulty/tags/hint, solution.py full solution, tests.py). Use when the user gives a YouTube URL (e.g. a CodeSignal/LeetCode explainer) or a local path to an existing solution file. Invoke with the video URL or local path as the argument.
+description: Turn a YouTube coding-challenge video OR an existing local implementation into a coding question under ./knowledge/coding-questions, authored as four files (impl.py skeleton, meta.json difficulty/tags/sources/hint, solution.py full solution, tests.py). Use when the user gives a YouTube URL (e.g. a CodeSignal/LeetCode explainer) or a local path to an existing solution file. Invoke with the video URL or local path as the argument.
 argument-hint: <youtube-url-or-local-path>
 ---
 
@@ -11,12 +11,13 @@ to an existing implementation already in this repo, create a new folder under
 `./knowledge/coding-questions/<name>/` containing four files:
 
 - **`impl.py`** — the skeleton the user starts with in the editor: the
-  problem-description comment block (title, optional `# Source:`, statement,
-  examples — **no** Difficulty/Tags/Approach), any input data-structure classes
+  problem-description comment block (title, statement, examples — **no**
+  Source/Difficulty/Tags/Approach), any input data-structure classes
   (e.g. `Node`), and the primary function **stubbed** with `raise NotImplementedError`.
 - **`meta.json`** — `{ "difficulty": "<easy|medium|hard>", "tags": ["tag1", ...],
-  "hint": "<one-line approach>" }`. Difficulty, tags, and the solution hint live
-  here (not in the impl.py comment); `hint` is `""` when there's no useful nudge.
+  "sources": ["<url>", ...], "hint": "<one-line approach>" }`. Difficulty, tags,
+  source URLs, and the solution hint live here (not in the impl.py comment);
+  `hint` is `""` when there's no useful nudge.
 - **`solution.py`** — the full working solution: the same input classes + the
   implemented primary function (+ any private helpers or alternate variants).
 - **`tests.py`** — `import unittest`, any test-only helper functions (e.g.
@@ -66,21 +67,22 @@ move-and-cleanup step for local sources (step 7).
    - **Problem-description comment block** at the top of `impl.py`:
      - **Title** on line 1 — just the title (`# Century From Year`, not
        `# Century From Year (CodeSignal)`).
-     - `# Source: <url>` — **only if the input carries a reference link**; omit
-       otherwise. Preserve every genuine reference URL (the YouTube URL in video
-       mode; any Coursera/YouTube/GeeksforGeeks/LeetCode link in a local source's
-       comments/README). One `# Source:` line per URL. Keep them out of the title.
      - A **faithful problem statement** the way a clean interview/LeetCode prompt
        reads: address the reader ("You are given...", "Return..."), state input
        and required output precisely, list constraints (size bounds, value
        ranges, guarantees). Strip cutesy narrative (mascots, character names,
        gift-giving framings) — state the underlying task plainly. Then 2-4
        concrete examples (include the tricky boundary cases).
-     - **Do NOT put difficulty, tags, or the approach/hint in this comment** —
-       they go in `meta.json`.
+     - **Do NOT put sources, difficulty, tags, or the approach/hint in this
+       comment** — they go in `meta.json`.
 
    - **`meta.json`** in the same folder:
-     `{ "difficulty": "<easy|medium|hard>", "tags": ["tag1", ...], "hint": "..." }`
+     `{ "difficulty": "<easy|medium|hard>", "tags": ["tag1", ...],
+     "sources": ["<url>", ...], "hint": "..." }`
+     - `sources`: reference URLs — **only if the input carries a reference
+       link**; omit the key otherwise. Preserve every genuine reference URL (the
+       YouTube URL in video mode; any Coursera/YouTube/GeeksforGeeks/LeetCode
+       link in a local source's comments/README).
      - `hint`: a one-line **approach** nudge (shown as a collapsible hint in the
        app), or `""` when there's no useful nudge.
      - `tags`: techniques/data-structures/topics. **Reuse existing tags — don't

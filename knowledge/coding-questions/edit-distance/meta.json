@@ -4,5 +4,9 @@
     "dynamic-programming",
     "string"
   ],
+  "sources": [
+    "https://en.wikipedia.org/wiki/Edit_distance",
+    "https://youtu.be/ocZMDMZwhCY?t=1441"
+  ],
   "hint": "dp[i][j] = distance between the first i chars of a and first j of b. If the last chars match it's dp[i-1][j-1]; otherwise 1 + min(insert dp[i][j-1], delete dp[i-1][j], replace dp[i-1][j-1]). Base cases: dp[i][0] = i, dp[0][j] = j."
 }

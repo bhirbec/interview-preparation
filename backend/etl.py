@@ -5,7 +5,7 @@ lessons, transform them, and load them into the SQLite database.
 Each coding-question folder (under knowledge/coding-questions/) has four files:
 
     impl.py      # description comment + input classes + the STUBBED primary
-    meta.json    # { difficulty, tags, hint }
+    meta.json    # { difficulty, tags, sources, hint }
     solution.py  # input classes + the full solution
     tests.py     # import unittest + test helpers + the unittest.TestCase
 
@@ -111,9 +111,10 @@ def parse_metadata(comment_lines):
 def build_problem(pid, folder):
   impl = _read(os.path.join(folder, "impl.py"))
   comment, code = split_comment(impl)
-  meta = parse_metadata(comment)  # title, sources, description (from impl.py)
+  meta = parse_metadata(comment)  # title, description (from impl.py)
 
-  # difficulty / tags / hint live in meta.json (fall back to impl.py if absent).
+  # difficulty / tags / sources / hint live in meta.json (fall back to impl.py
+  # if absent).
   meta_path = os.path.join(folder, "meta.json")
   mj = json.loads(_read(meta_path)) if os.path.exists(meta_path) else {}
 
@@ -130,7 +131,7 @@ def build_problem(pid, folder):
       "title": meta["title"],
       "difficulty": mj.get("difficulty", meta["difficulty"]),
       "tags": mj.get("tags", meta["tags"]),
-      "sources": meta["sources"],
+      "sources": mj.get("sources", meta["sources"]),
       "description": meta["description"],
       "hint": mj.get("hint", ""),
       "primary_function": primary,

@@ -4,5 +4,8 @@
     "dynamic-programming",
     "recursion"
   ],
+  "sources": [
+    "https://www.youtube.com/watch?v=sF7hzgUW5uY"
+  ],
   "hint": "Best revenue for length L: try every length c for the first piece and recurse on the rest \u2014 dp[L] = max over c of prices[c] + dp[L - c]. Build bottom-up from dp[0] = 0."
 }

@@ -1,5 +1,4 @@
 # Matrix Chain Multiplication
-# Source: https://youtu.be/ocZMDMZwhCY?t=360
 #
 # Matrix multiplication is associative: A @ B @ C can be computed as (A @ B) @ C
 # or A @ (B @ C) — the result is the same, but the amount of work is not.

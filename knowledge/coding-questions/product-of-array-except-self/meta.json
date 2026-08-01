@@ -4,5 +4,8 @@
     "array",
     "google"
   ],
+  "sources": [
+    "https://www.glassdoor.com/Interview/google-software-engineer-interview-questions-SRCH_KE0,24.htm"
+  ],
   "hint": "fill the output with running prefix products left-to-right, then multiply in the running suffix products right-to-left."
 }

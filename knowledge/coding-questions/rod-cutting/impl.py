@@ -1,5 +1,4 @@
 # Rod Cutting
-# Source: https://www.youtube.com/watch?v=sF7hzgUW5uY
 #
 # You have a rod of integer length n and a price list: prices[i] is the
 # selling price of a rod piece of length i (prices[0] is 0 and unused). You

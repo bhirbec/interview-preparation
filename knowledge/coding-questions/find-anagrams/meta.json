@@ -6,5 +6,8 @@
     "sorting",
     "twitter"
   ],
+  "sources": [
+    "https://careercup.com/question?id=5687065971785728"
+  ],
   "hint": "bucket words by their sorted-character key, then emit every word whose bucket holds more than one word."
 }

@@ -1,6 +1,4 @@
 # Knapsack
-# Source: https://www.coursera.org/learn/algorithm-design-analysis-2/lecture/LIgLJ/the-knapsack-problem
-# Source: https://youtu.be/ocZMDMZwhCY?t=2589
 #
 # You are given a list of items, each a (value, weight) pair of positive
 # integers, and a knapsack of integer capacity. Choose a subset of the items

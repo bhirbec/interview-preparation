@@ -1,7 +1,5 @@
 # Good Numbers
 #
-# Source: https://www.careercup.com/question?id=5751843230580736
-#
 # A number t is "good" if it can be written as the sum of two cubes in at least
 # two distinct ways, i.e. there exist at least two different unordered pairs of
 # positive integers (a, b) with a <= b such that a^3 + b^3 == t. Given n, return

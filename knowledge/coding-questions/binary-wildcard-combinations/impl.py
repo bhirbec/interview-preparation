@@ -1,7 +1,5 @@
 # Binary Wildcard Combinations
 #
-# Source: https://www.careercup.com/question?id=20308668
-#
 # You are given a string `s` consisting only of the characters '0', '1', and
 # '?'. Each '?' is a wildcard that can be either '0' or '1'. Return a list of
 # all strings obtainable by replacing every '?' with '0' or '1'. Fixed '0'/'1'

@@ -1,7 +1,5 @@
 # Word Wrap
 #
-# Source: https://www.glassdoor.com/Interview/Given-a-message-one-two-three-four-five-six-seven-eight-nine-chop-it-in-chunks-no-exceed-the-give-buffer-size-and-print-QTN_1438219.htm
-#
 # You are given a message `text` made of words separated by single spaces, and a
 # positive integer `width`. Break the message into lines using greedy word wrap:
 # read the words left to right and pack as many whole words as possible onto the

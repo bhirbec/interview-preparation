@@ -5,5 +5,8 @@
     "array",
     "facebook"
   ],
+  "sources": [
+    "https://www.facebook.com/careers/life/sample_interview_questions"
+  ],
   "hint": "keep top/bottom/left/right boundaries and walk right, down, left, up, shrinking a boundary after each side until they cross."
 }

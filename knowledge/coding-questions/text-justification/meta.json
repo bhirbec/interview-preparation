@@ -4,5 +4,8 @@
     "dynamic-programming",
     "string"
   ],
+  "sources": [
+    "https://youtu.be/ENyox7kNKeY?list=PLfMspJ0TLR5HRFu2kLh3U4mvStMO8QURm"
+  ],
   "hint": "Let dp(i) be the minimum cost of laying out words[i:]. Try every j where the first line could end: dp(i) = min over j of badness(i, j) + dp(j), stopping once words[i:j] no longer fit. Memoize, keep parent pointers, and rebuild the lines from them."
 }

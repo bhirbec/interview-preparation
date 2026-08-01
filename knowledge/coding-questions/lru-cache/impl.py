@@ -1,7 +1,5 @@
 # LRU Cache
 #
-# Source: https://careercup.com/question?id=5674107183038464
-#
 # Design a Least Recently Used (LRU) cache with a fixed positive `capacity`,
 # supporting two operations, each in O(1) average time:
 #   - get(key): return the value for `key`, or -1 if it is not present. A

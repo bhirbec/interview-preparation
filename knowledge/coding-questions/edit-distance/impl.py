@@ -1,6 +1,4 @@
 # Edit Distance
-# Source: https://en.wikipedia.org/wiki/Edit_distance
-# Source: https://youtu.be/ocZMDMZwhCY?t=1441
 #
 # You are given two strings a and b. Return the minimum number of single-
 # character operations needed to turn a into b, where an operation is one of:

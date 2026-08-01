@@ -1,7 +1,5 @@
 # Divisor-Free Team Size
 #
-# Source: https://careercup.com/question?id=5673924747591680
-#
 # You are given an integer `n`. Players are numbered 1, 2, ..., n. Two players
 # conflict when one player's number divides the other's (for example 3 and 9, or
 # 2 and 8). A "clean" team is a set of players with no conflicting pair.

@@ -1,7 +1,5 @@
 # Longest Palindrome
 #
-# Source: https://www.careercup.com/question?id=5631060781039616
-#
 # You are given a string `s`. By removing and rearranging its characters, build
 # the longest palindrome possible and return it. If several palindromes share the
 # maximum length, returning any one of them is acceptable.

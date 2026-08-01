@@ -1,5 +1,4 @@
 # Fibonacci Number
-# Source: https://youtu.be/OQ5jsbhAv_M?t=306
 #
 # The Fibonacci sequence starts with F(1) = 1 and F(2) = 1, and every later
 # term is the sum of the two preceding ones: F(n) = F(n-1) + F(n-2).

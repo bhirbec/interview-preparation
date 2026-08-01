@@ -1,7 +1,5 @@
 # Check Character Ordering
 #
-# Source: https://careercup.com/question?id=5659201272545280
-#
 # You are given an input string `text` and an `ordering` string made of distinct
 # characters. Return True if, considering only the characters of `text` that also
 # appear in `ordering`, they occur in exactly the relative order given by

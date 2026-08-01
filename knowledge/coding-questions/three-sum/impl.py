@@ -1,8 +1,5 @@
 # Three Sum
 #
-# Source: https://www.glassdoor.com/Interview/3-sum-problem-that-can-be-found-on-leetcode-QTN_1202200.htm
-# Source: https://en.wikipedia.org/wiki/3SUM
-#
 # You are given an array of integers `nums` and an integer `target`. Return all
 # unique triplets (a, b, c) drawn from three DISTINCT positions of `nums` whose
 # values sum to `target`.

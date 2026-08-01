@@ -4,5 +4,8 @@
     "string",
     "uber"
   ],
+  "sources": [
+    "https://careercup.com/question?id=5659201272545280"
+  ],
   "hint": "scan the string keeping only characters present in `ordering` and collapsing runs of the same character, then compare the resulting sequence to `ordering` exactly."
 }

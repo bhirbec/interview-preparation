@@ -4,5 +4,8 @@
     "math",
     "google"
   ],
+  "sources": [
+    "https://www.careercup.com/question?id=5751843230580736"
+  ],
   "hint": "for every pair 1 <= a <= b with a^3 + b^3 <= n, tally the sum in a counts array; every index counted at least twice is good."
 }

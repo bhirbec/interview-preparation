@@ -1,5 +1,4 @@
 # Max Non-Adjacent Sum
-# Source: https://www.coursera.org/learn/algorithm-design-analysis-2/supplement/mfwuk/week-3-overview
 #
 # You are given a list of non-negative integer weights arranged in a row (the
 # vertices of a path graph). Choose a subset of positions such that no two
