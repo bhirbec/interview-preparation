@@ -3,6 +3,28 @@
 This repository contains resources to prepare for technical interviews. You will find common algorithms,
 well known data structures, and some coding questions found through websites like careerup.
 
+<h2>Development</h2>
+
+Run the whole stack with `docker compose up` — the app is served on
+http://localhost:3100 and the api on http://localhost:8001.
+
+The content under `knowledge/` (coding questions + lessons) is compiled into
+static JSON under `app/public/data/` (gitignored) by `backend/build_content.py`.
+The api container runs it on boot; after editing `knowledge/`, regenerate with:
+
+```
+docker compose exec api python build_content.py
+```
+
+It only needs the stdlib, so it also runs on the host without a container:
+
+```
+CONTENT_OUT=app/public/data python3 backend/build_content.py
+```
+
+The database ETL (`docker compose exec api python etl.py`) loads the same
+content into SQLite and is still what the api serves today.
+
 <h2>Other Ressources</h2>
 
 Coding challenges:

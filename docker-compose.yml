@@ -31,11 +31,15 @@ services:
       - ./knowledge/lessons:/lessons:ro
       - api_data:/data
       - ./logs:/logs
+      # Mount the whole public/ dir (it exists and is tracked): Docker would
+      # create a missing public/data root-owned.
+      - ./app/public:/public-out
     environment:
       DB_PATH: /data/trainer.db
       QUESTIONS_DIR: /coding-questions
       LESSONS_DIR: /lessons
-    command: /bin/sh -c "mkdir -p /logs && uvicorn server:app --host 0.0.0.0 --port 8000 --reload 2>&1 | tee /logs/api.log"
+      CONTENT_OUT: /public-out/data
+    command: /bin/sh -c "mkdir -p /logs && python build_content.py && uvicorn server:app --host 0.0.0.0 --port 8000 --reload 2>&1 | tee /logs/api.log"
 
 volumes:
   frontend_node_modules:
