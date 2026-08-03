@@ -344,7 +344,9 @@ def _progress_entry(pid, a, attempt_run_count, run_count, solves) -> dict:
   `solves` is EVERY solved attempt (ascending), not just the latest: the stats
   minimum-elapsed fold, the stats per-day sets and lesson "ever solved" all need
   more than the latest attempt (after a Retake the latest attempt is unsolved,
-  but the lesson must stay complete).
+  but the lesson must stay complete). Each solve carries its attempt id so the
+  client can restore db.solved_attempts' global "ORDER BY id" across problems —
+  the folds' tie-breaks depend on that row order.
   """
   return {
       "id": pid,
@@ -359,7 +361,7 @@ def _solves_by_problem(rows) -> dict:
   by_id = {}
   for r in rows:
     by_id.setdefault(r["problem_id"], []).append(
-        {"solvedAt": r["solved_at"], "elapsedMs": r["elapsed_ms"]}
+        {"attemptId": r["id"], "solvedAt": r["solved_at"], "elapsedMs": r["elapsed_ms"]}
     )
   return by_id
 

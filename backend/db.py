@@ -409,11 +409,11 @@ def solved_attempts(conn, pid=None):
   """
   if pid is None:
     return conn.execute(
-        "SELECT problem_id, solved_at, elapsed_ms FROM attempt "
+        "SELECT id, problem_id, solved_at, elapsed_ms FROM attempt "
         "WHERE solved_at IS NOT NULL ORDER BY id"
     ).fetchall()
   return conn.execute(
-      "SELECT problem_id, solved_at, elapsed_ms FROM attempt "
+      "SELECT id, problem_id, solved_at, elapsed_ms FROM attempt "
       "WHERE solved_at IS NOT NULL AND problem_id = ? ORDER BY id",
       (pid,),
   ).fetchall()

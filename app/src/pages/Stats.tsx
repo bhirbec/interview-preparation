@@ -3,6 +3,8 @@ import { Link } from 'react-router-dom'
 import type { StatsResponse, TimeStat } from '../types'
 import AppMenu from '../components/AppMenu'
 import { api } from '../api'
+import { loadCatalog } from '../content'
+import { computeStats } from '../stats'
 import { formatDuration } from '../time'
 
 const HEATMAP_WEEKS = 18
@@ -61,7 +63,9 @@ export default function Stats() {
   const [data, setData] = useState<StatsResponse | null>(null)
 
   useEffect(() => {
-    api.getStats().then(setData).catch(() => setData(null))
+    Promise.all([loadCatalog(), api.getProgress()])
+      .then(([catalog, progress]) => setData(computeStats(catalog.problems, progress.problems)))
+      .catch(() => setData(null))
   }, [])
 
   if (!data) return <div className="loading">Loading…</div>

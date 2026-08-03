@@ -71,6 +71,7 @@ export interface LessonsContent {
 // --- user state (GET /api/progress) ---
 
 export interface Solve {
+  attemptId: number // restores db.solved_attempts' global ORDER BY id
   solvedAt: string
   elapsedMs: number | null
 }
