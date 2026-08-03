@@ -29,13 +29,20 @@ services:
       - ./backend:/app
       - ./knowledge/coding-questions:/coding-questions:ro
       - ./knowledge/lessons:/lessons:ro
+      # Writable: build_content.py generates the static content the app serves.
+      # Mount app/public (tracked, already exists) rather than app/public/data —
+      # Docker creates a missing bind-mount path root-owned.
+      - ./app/public:/public-out
       - api_data:/data
       - ./logs:/logs
     environment:
       DB_PATH: /data/trainer.db
       QUESTIONS_DIR: /coding-questions
       LESSONS_DIR: /lessons
-    command: /bin/sh -c "mkdir -p /logs && uvicorn server:app --host 0.0.0.0 --port 8000 --reload 2>&1 | tee /logs/api.log"
+      CONTENT_OUT: /public-out/data
+    # The generated content is gitignored, so build it on boot: a fresh clone
+    # must not come up blank.
+    command: /bin/sh -c "mkdir -p /logs && python build_content.py && uvicorn server:app --host 0.0.0.0 --port 8000 --reload 2>&1 | tee /logs/api.log"
 
 volumes:
   frontend_node_modules:
