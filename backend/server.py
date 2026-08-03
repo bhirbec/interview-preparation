@@ -335,6 +335,83 @@ def _attempt_fields(a) -> dict:
   }
 
 
+# --- user state (the only thing still in SQLite) ---
+
+
+def _progress_entry(pid, a, attempt_run_count, run_count, solves) -> dict:
+  """One problem's dynamic state. The client joins this onto the static catalog.
+
+  `solves` is EVERY solved attempt (ascending), not just the latest: the stats
+  minimum-elapsed fold, the stats per-day sets and lesson "ever solved" all need
+  more than the latest attempt (after a Retake the latest attempt is unsolved,
+  but the lesson must stay complete).
+  """
+  return {
+      "id": pid,
+      **_attempt_fields(a),
+      "attemptRunCount": attempt_run_count,
+      "runCount": run_count,
+      "solves": solves,
+  }
+
+
+def _solves_by_problem(rows) -> dict:
+  by_id = {}
+  for r in rows:
+    by_id.setdefault(r["problem_id"], []).append(
+        {"solvedAt": r["solved_at"], "elapsedMs": r["elapsed_ms"]}
+    )
+  return by_id
+
+
+@app.get("/api/progress")
+def progress():
+  """Every problem's dynamic state, in one bundle (three queries, no N+1).
+
+  Includes problems that have runs but no attempt rows, so the client's sum of
+  runCount matches SELECT COUNT(*) FROM run, and ids that are no longer in the
+  catalog — both are deliberate.
+  """
+  with db.connect() as conn:
+    attempts = db.latest_attempts(conn)
+    counts = db.run_counts(conn)
+    solves = _solves_by_problem(db.solved_attempts(conn))
+
+  run_counts = {r["problem_id"]: r["n"] for r in counts}
+  seen = {a["problem_id"] for a in attempts}
+  items = [
+      _progress_entry(a["problem_id"], a, a["run_count"],
+                      run_counts.get(a["problem_id"], 0),
+                      solves.get(a["problem_id"], []))
+      for a in attempts
+  ]
+  items += [
+      _progress_entry(pid, None, 0, n, solves.get(pid, []))
+      for pid, n in run_counts.items() if pid not in seen
+  ]
+  return {"problems": items}
+
+
+@app.get("/api/problem/state")
+def problem_state(id: str):
+  """One problem's dynamic state + its saved code.
+
+  Never 404s: whether an id exists is now a *content* question, answered by
+  catalog.json. An unknown id is simply not-started with no code.
+  """
+  with db.connect() as conn:
+    a = db.latest_attempt_with_run_count(conn, id)
+    counts = db.run_counts(conn, id)
+    solves = _solves_by_problem(db.solved_attempts(conn, id))
+    code = db.get_submission_code(conn, id)
+
+  entry = _progress_entry(
+      id, a, a["run_count"] if a else 0,
+      counts[0]["n"] if counts else 0, solves.get(id, []),
+  )
+  return {**entry, "code": code}
+
+
 @app.get("/api/problems")
 def list_problems(
     search: str = "",
