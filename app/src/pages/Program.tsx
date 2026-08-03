@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom'
 import { MdCheckCircle } from 'react-icons/md'
 import type { LessonSummary, LessonsResponse } from '../types'
 import AppMenu from '../components/AppMenu'
-import { queryLessons, syncProgress } from '../db'
+import { queryLessons, sync } from '../db'
 
 // Group lessons by topic, preserving the order topics first appear.
 function groupByTopic(lessons: LessonSummary[]): [string, LessonSummary[]][] {
@@ -26,11 +26,11 @@ function pct(part: number, whole: number): string {
 export default function Program() {
   const [data, setData] = useState<LessonsResponse | null>(null)
 
-  // Repopulate the progress tables before querying, so a solve made elsewhere
-  // in this session is reflected without a page reload.
+  // Repopulate the tables before querying, so a solve made elsewhere in this
+  // session — or a content rebuild — is reflected without a page reload.
   useEffect(() => {
     let cancelled = false
-    syncProgress()
+    sync()
       .then(() => !cancelled && setData(queryLessons()))
       .catch(() => !cancelled && setData({ lessons: [] }))
     return () => {

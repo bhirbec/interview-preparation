@@ -51,11 +51,12 @@ page.on('pageerror', (e) => console.log('  [pageerror]', e.message))
 try {
   await page.goto(BASE, { waitUntil: 'networkidle' })
 
-  // One page.evaluate for everything: the database is initialized and the
-  // progress tables populated once, then every query replays against it.
+  // One page.evaluate for everything: the database is initialized and both the
+  // content and progress tables populated once, then every query replays
+  // against it.
   const answers = await page.evaluate(async ({ queries, lessonIds }) => {
     const db = await import('/src/db.ts')
-    await db.syncProgress()
+    await db.sync()
     return {
       problems: queries.map((url) => {
         const q = new URLSearchParams(url.split('?')[1])

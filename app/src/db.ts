@@ -34,14 +34,14 @@ import type {
   TimeStat,
 } from './types'
 import { api } from './api'
-import { loadCatalog, loadLessons } from './content'
+import { clearContentCache, loadCatalog, loadLessons } from './content'
 
 // Copied out of node_modules into public/ (see README) so the bundle is
 // self-contained.
 const WASM_URL = '/sql-wasm.wasm'
 
 const SCHEMA = `
--- Content: built once, when catalog.json and lessons.json land.
+-- Content: rebuilt whenever catalog.json's generatedAt changes (syncContent).
 CREATE TABLE problem (
   id         TEXT PRIMARY KEY,
   title      TEXT NOT NULL,
@@ -115,6 +115,9 @@ const DIFF_ORDER = `
 
 let handle: Database | null = null
 let lessonBodies = new Map<string, string>()
+// generatedAt of the build currently in the content tables; null until
+// loadContent() has run. syncContent() compares against it.
+let contentVersion: string | null = null
 
 function db(): Database {
   if (!handle) throw new Error('db.ts: ensureDb() has not resolved yet')
@@ -184,19 +187,19 @@ function pyRound(x: number): number {
 
 let ready: Promise<void> | null = null
 
-// Memoized: instantiate the WASM, create the schema, then load the static
-// content. Hooks await this once and query synchronously afterwards.
-export function ensureDb(): Promise<void> {
+// Memoized: instantiate the WASM and create the empty schema. Filling it is
+// sync()'s job — content and progress are both rebuilt from data that can
+// change under an open tab, so neither belongs in a promise that resolves
+// once. This is what keeps the WASM instantiated exactly once per page load.
+function ensureDb(): Promise<void> {
   if (!ready) {
     const p = (async () => {
       // The wasm is vendored in public/ and served from our own origin, never
       // a CDN — this app is meant to be a self-contained static bundle.
       const SQL = await initSqlJs({ locateFile: () => WASM_URL })
-      const [catalog, lessons] = await Promise.all([loadCatalog(), loadLessons()])
       const fresh = new SQL.Database()
       fresh.run(SCHEMA)
       handle = fresh
-      loadContent(catalog, lessons)
     })()
     ready = p
     p.catch(() => {
@@ -206,10 +209,18 @@ export function ensureDb(): Promise<void> {
   return ready
 }
 
+// Rebuild the content tables from a catalog.json / lessons.json pair. Mirrors
+// loadProgress below: it clears first, so it is equally correct as the initial
+// population and as a repopulation after build_content.py ran.
 function loadContent(catalog: Catalog, lessons: LessonsContent): void {
   const conn = db()
   conn.run('BEGIN')
   try {
+    conn.run('DELETE FROM problem')
+    conn.run('DELETE FROM problem_tag')
+    conn.run('DELETE FROM lesson')
+    conn.run('DELETE FROM lesson_exercise')
+
     const problem = conn.prepare(
       'INSERT INTO problem (id, title, difficulty, position) VALUES (?, ?, ?, ?)',
     )
@@ -238,6 +249,7 @@ function loadContent(catalog: Catalog, lessons: LessonsContent): void {
     lesson.free()
     exercise.free()
     conn.run('COMMIT')
+    contentVersion = catalog.generatedAt
   } catch (e) {
     conn.run('ROLLBACK')
     throw e
@@ -282,11 +294,44 @@ export function loadProgress(entries: ProgressEntry[]): void {
 }
 
 // Fetch the progress bundle and rebuild the dynamic tables, initializing the
-// database on the way if needed. Every page that renders user state calls this
-// on mount and after any mutation.
-export async function syncProgress(): Promise<void> {
+// database on the way if needed.
+async function syncProgress(): Promise<void> {
   const [bundle] = await Promise.all([api.getProgress(), ensureDb()])
   loadProgress(bundle.problems)
+}
+
+// Repopulate the content tables when the generated content changed under the
+// open tab — i.e. `docker compose exec api python build_content.py` ran since
+// the last navigation. Without this the content tables were insert-once per JS
+// context and only a hard reload picked up a rebuild.
+//
+// The generatedAt check is what keeps this cheap enough to run on every mount:
+// catalog.json is fetched with cache: 'no-cache', so the unchanged case is one
+// conditional request answered 304 with no body, and nothing else happens.
+//
+// Two things this must not do. It must not refresh the catalog alone — the
+// per-problem JSON cached in content.ts has to be dropped in the same breath,
+// hence clearContentCache(). And it must not invalidate `ready`: the database
+// handle is reused so the sql.js WASM is instantiated once per page load, no
+// matter how many times the content is rebuilt.
+async function syncContent(): Promise<void> {
+  const [catalog] = await Promise.all([loadCatalog(), ensureDb()])
+  if (catalog.generatedAt === contentVersion) return
+  clearContentCache()
+  loadContent(catalog, await loadLessons())
+}
+
+// Bring the whole database up to date and initialize it on the way if needed:
+// the static content (only when the build changed) and the user's progress
+// (always). Every page mounts through this single entry point, so a new page
+// cannot refresh one half and forget the other.
+export async function sync(): Promise<void> {
+  // allSettled, not all: the two halves are independent, and a failing
+  // /api/progress must not resolve callers before the content tables are
+  // filled — they would render an empty catalog rather than a catalog with no
+  // progress on it. The first failure still surfaces.
+  const results = await Promise.allSettled([syncContent(), syncProgress()])
+  for (const r of results) if (r.status === 'rejected') throw r.reason
 }
 
 // --- catalog list -----------------------------------------------------------

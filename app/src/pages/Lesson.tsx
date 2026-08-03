@@ -4,7 +4,7 @@ import ReactMarkdown from 'react-markdown'
 import remarkGfm from 'remark-gfm'
 import type { LessonDetail, ProblemStatus } from '../types'
 import AppMenu from '../components/AppMenu'
-import { queryLesson, syncProgress } from '../db'
+import { queryLesson, sync } from '../db'
 
 const STATUS_ICON: Record<ProblemStatus, string> = {
   solved: '✓',
@@ -27,7 +27,7 @@ export default function Lesson() {
     let cancelled = false
     setData(null)
     setNotFound(false)
-    syncProgress()
+    sync()
       .then(() => {
         if (cancelled) return
         const lesson = queryLesson(id)

@@ -1,12 +1,13 @@
 import { useEffect, useMemo, useState } from 'react'
 import type { Facets, ProblemPage, StatusFilter } from '../types'
-import { ensureDb, queryFacets, queryProblems, syncProgress } from '../db'
+import { queryFacets, queryProblems, sync } from '../db'
 
 // Owns the catalog's filter/pagination state. Everything is answered locally:
-// the database is initialized once (WASM + the static catalog) and the progress
-// tables are rebuilt from /api/progress, after which each filter change is a
-// synchronous re-query inside a useMemo — no debounce, because there is no
-// round trip left to throttle. Every filter change resets to page 1.
+// the database is initialized once (WASM), its tables are refreshed by sync()
+// — the static catalog when it was rebuilt, the progress tables always — after
+// which each filter change is a synchronous re-query inside a useMemo — no
+// debounce, because there is no round trip left to throttle. Every filter
+// change resets to page 1.
 export function useCatalog() {
   const [search, setSearchState] = useState('')
   const [difficulty, setDifficulty] = useState<string[]>([])
@@ -20,7 +21,7 @@ export function useCatalog() {
 
   useEffect(() => {
     let cancelled = false
-    Promise.all([ensureDb(), syncProgress()])
+    sync()
       .then(() => !cancelled && setReady(true))
       .catch(() => !cancelled && setReady(true))
     return () => {
