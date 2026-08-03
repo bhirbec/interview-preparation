@@ -1,4 +1,7 @@
 {
+  // Editor tooling only — the app runs in Docker. Create with:
+  //   cd backend && uv sync
+  "python.defaultInterpreterPath": "${workspaceFolder}/backend/.venv/bin/python",
   "python.REPL.enableREPLSmartSend": false,
   "[python]": {
     "editor.tabSize": 2,

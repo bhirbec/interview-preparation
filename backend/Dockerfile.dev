@@ -1,9 +1,21 @@
 FROM python:3.13-slim
 
+# Same tool the host uses, so the container installs from the same uv.lock.
+COPY --from=ghcr.io/astral-sh/uv:0.7.13 /uv /bin/uv
+
 WORKDIR /app
 
-COPY requirements.txt ./
-RUN pip install --no-cache-dir -r requirements.txt
+# The venv must live OUTSIDE /app: docker-compose bind-mounts ./backend onto
+# /app at runtime, which would shadow a venv created here at build time.
+# Putting /opt/venv/bin first on PATH makes `python` and `uvicorn` resolve to it.
+ENV UV_PROJECT_ENVIRONMENT=/opt/venv \
+    PATH="/opt/venv/bin:$PATH"
+
+# Only the manifests: `package = false` in pyproject.toml means uv provisions
+# the environment without building the app, so the source stays bind-mounted and
+# this layer caches until a dependency actually changes.
+COPY pyproject.toml uv.lock ./
+RUN uv sync --frozen --no-dev
 
 EXPOSE 8000
 
