@@ -1,36 +1,59 @@
-import { useEffect, useState } from 'react'
-import type { Facets, ProblemPage, StatusFilter } from '../types'
+import { useEffect, useMemo, useState } from 'react'
+import type { CatalogProblem, ProblemPage, ProgressEntry, StatusFilter } from '../types'
 import { api } from '../api'
+import { loadCatalog } from '../content'
+import { attemptStateOf, indexProgress, statusOf } from '../progress'
+import { deriveFacets, filterProblems, paginate } from '../search'
 
-// Owns the catalog's server-side filter/pagination state and fetching: facets
-// (once) and a debounced problem-list query on any filter/page change. Every
-// filter change resets to page 1.
+const PAGE_SIZE = 20
+
+// Owns the catalog's filter/pagination state. The catalog is static JSON and
+// the progress bundle is one request, both loaded once; filtering, faceting and
+// pagination then fold in memory, so there is nothing to debounce. Every filter
+// change resets to page 1.
 export function useCatalog() {
   const [search, setSearchState] = useState('')
   const [difficulty, setDifficulty] = useState<string[]>([])
   const [tags, setTags] = useState<string[]>([])
   const [status, setStatusState] = useState<StatusFilter>('all')
   const [page, setPage] = useState(1)
-  const [data, setData] = useState<ProblemPage | null>(null)
-  const [facets, setFacets] = useState<Facets | null>(null)
+  const [problems, setProblems] = useState<CatalogProblem[] | null>(null)
+  const [entries, setEntries] = useState<ProgressEntry[] | null>(null)
 
   useEffect(() => {
-    api.getFacets().then(setFacets).catch(() => setFacets({ difficulties: [], tags: [] }))
+    loadCatalog()
+      .then((c) => setProblems(c.problems))
+      .catch(() => setProblems([]))
+    api
+      .getProgress()
+      .then((p) => setEntries(p.problems))
+      .catch(() => setEntries([]))
   }, [])
 
-  useEffect(() => {
-    let cancelled = false
-    const t = setTimeout(() => {
-      api
-        .listProblems({ search, difficulty, tags, status, page })
-        .then((d) => !cancelled && setData(d))
-        .catch(() => !cancelled && setData({ items: [], total: 0, page, pageSize: 20 }))
-    }, 250)
-    return () => {
-      cancelled = true
-      clearTimeout(t)
+  const facets = useMemo(() => (problems ? deriveFacets(problems) : null), [problems])
+  const progress = useMemo(() => indexProgress(entries ?? []), [entries])
+
+  // `data` stays null until BOTH the catalog and the progress bundle arrive, so
+  // rows never flash a wrong status.
+  const data = useMemo<ProblemPage | null>(() => {
+    if (!problems || !entries) return null
+    const matched = filterProblems(problems, { search, difficulty, tags, status }, (id) =>
+      statusOf(progress, id),
+    )
+    const { items, total, page: current, pageSize } = paginate(matched, page, PAGE_SIZE)
+    return {
+      items: items.map((p) => ({
+        id: p.id,
+        title: p.title,
+        difficulty: p.difficulty,
+        tags: p.tags,
+        ...attemptStateOf(progress.get(p.id)),
+      })),
+      total,
+      page: current,
+      pageSize,
     }
-  }, [search, difficulty, tags, status, page])
+  }, [problems, entries, progress, search, difficulty, tags, status, page])
 
   function toggleIn(list: string[], set: (v: string[]) => void, value: string) {
     set(list.includes(value) ? list.filter((x) => x !== value) : [...list, value])

@@ -2,8 +2,10 @@ import type {
   Facets,
   LessonDetail,
   LessonsResponse,
-  ProblemFull,
+  ProblemView,
   ProblemPage,
+  ProblemState,
+  ProgressBundle,
   RunRecord,
   StatsResponse,
   StatusFilter,
@@ -64,12 +66,16 @@ export const api = {
     return get<ProblemPage>(`/api/problems?${q.toString()}`)
   },
 
-  getProblem: (id: string) => get<ProblemFull>(`/api/problem?id=${enc(id)}`),
+  getProblem: (id: string) => get<ProblemView>(`/api/problem?id=${enc(id)}`),
 
   getLessons: () => get<LessonsResponse>('/api/lessons'),
   getLesson: (id: string) => get<LessonDetail>(`/api/lesson?id=${enc(id)}`),
 
   getStats: () => get<StatsResponse>('/api/stats'),
+
+  // Dynamic state — never memoized, unlike the static content in content.ts.
+  getProgress: () => get<ProgressBundle>('/api/progress'),
+  getProblemState: (id: string) => get<ProblemState>(`/api/problem/state?id=${enc(id)}`),
 
   saveCode: (id: string, code: string) =>
     send<{ ok: boolean; updatedAt: string }>('PUT', '/api/problem/code', { id, code }),
