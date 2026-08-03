@@ -23,7 +23,7 @@ export default function ProblemDetail() {
   const [error, setError] = useState<string | null>(null)
   const [running, setRunning] = useState(false)
 
-  const { problem, setProblem, notFound, runs, setRuns, reload } = useProblem(
+  const { problem, setState, notFound, runs, setRuns, reload } = useProblem(
     id,
     (p) => setCode(p.code ?? p.starter),
   )
@@ -77,9 +77,12 @@ export default function ProblemDetail() {
       const failed = res.length - passed
       await saveNow()
       await api.createRun(id, { code, passed, failed, total: res.length, durationMs })
-      const [freshRuns, state] = await Promise.all([api.listRuns(id), api.getProblem(id)])
+      const [freshRuns, state] = await Promise.all([
+        api.listRuns(id),
+        api.getProblemState(id),
+      ])
       setRuns(freshRuns)
-      setProblem(state)
+      setState(state)
     } catch (e) {
       setError(e instanceof Error ? e.message : String(e))
     } finally {

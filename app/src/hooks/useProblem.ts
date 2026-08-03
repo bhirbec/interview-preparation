@@ -1,13 +1,21 @@
-import { useEffect, useRef, useState } from 'react'
-import type { ProblemView, RunRecord } from '../types'
+import { useEffect, useMemo, useRef, useState } from 'react'
+import type { ProblemContent, ProblemState, ProblemView, RunRecord } from '../types'
 import { api } from '../api'
+import { loadProblem } from '../content'
+import { attemptStateOf } from '../progress'
 
-// Loads a problem (definition + saved code + runs) and its run history, and
-// exposes a `reload` that refreshes only the problem (attempt status/timing)
-// without disturbing the editor. `onLoad` fires once per id, when the problem is
-// first fetched — use it to seed editor state (reload does NOT call it).
+function merge(content: ProblemContent, state: ProblemState): ProblemView {
+  return { ...content, ...attemptStateOf(state), code: state.code }
+}
+
+// Loads a problem's static content (one JSON file) and its dynamic state (saved
+// code + latest attempt) side by side, merged into one `problem`, plus its run
+// history. `reload` refreshes ONLY the state, so Start/Pause/Resume don't
+// re-download the problem text. `onLoad` fires once per id, after BOTH halves
+// resolve — it needs `code ?? starter` (reload does NOT call it).
 export function useProblem(id: string, onLoad: (p: ProblemView) => void) {
-  const [problem, setProblem] = useState<ProblemView | null>(null)
+  const [content, setContent] = useState<ProblemContent | null>(null)
+  const [state, setState] = useState<ProblemState | null>(null)
   const [notFound, setNotFound] = useState(false)
   const [runs, setRuns] = useState<RunRecord[]>([])
   const onLoadRef = useRef(onLoad)
@@ -16,14 +24,15 @@ export function useProblem(id: string, onLoad: (p: ProblemView) => void) {
   useEffect(() => {
     if (!id) return
     let cancelled = false
-    setProblem(null)
+    setContent(null)
+    setState(null)
     setNotFound(false)
-    api
-      .getProblem(id)
-      .then((p) => {
+    Promise.all([loadProblem(id), api.getProblemState(id)])
+      .then(([c, s]) => {
         if (cancelled) return
-        setProblem(p)
-        onLoadRef.current(p)
+        setContent(c)
+        setState(s)
+        onLoadRef.current(merge(c, s))
       })
       .catch(() => !cancelled && setNotFound(true))
     api
@@ -36,8 +45,13 @@ export function useProblem(id: string, onLoad: (p: ProblemView) => void) {
   }, [id])
 
   function reload() {
-    api.getProblem(id).then(setProblem).catch(() => {})
+    api.getProblemState(id).then(setState).catch(() => {})
   }
 
-  return { problem, setProblem, notFound, runs, setRuns, reload }
+  const problem = useMemo(
+    () => (content && state ? merge(content, state) : null),
+    [content, state],
+  )
+
+  return { problem, setState, notFound, runs, setRuns, reload }
 }
