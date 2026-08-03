@@ -189,6 +189,36 @@ def latest_attempt(conn, pid):
   ).fetchone()
 
 
+def latest_attempts(conn):
+  """The latest attempt of every problem, plus that attempt's run count.
+
+  One query for the whole progress bundle (no N+1); ordered by problem_id so the
+  bundle is deterministic."""
+  return conn.execute(
+      """
+      SELECT a.*, (SELECT COUNT(*) FROM run WHERE attempt_id = a.id) AS run_count
+      FROM attempt a
+      WHERE a.id = (SELECT MAX(id) FROM attempt WHERE problem_id = a.problem_id)
+      ORDER BY a.problem_id
+      """
+  ).fetchall()
+
+
+def run_counts(conn, pid=None):
+  """(problem_id, n) for every problem with runs — all attempts, not just the
+  latest. Problems with no runs are absent."""
+  if pid is None:
+    return conn.execute(
+        "SELECT problem_id, COUNT(*) AS n FROM run GROUP BY problem_id "
+        "ORDER BY problem_id"
+    ).fetchall()
+  return conn.execute(
+      "SELECT problem_id, COUNT(*) AS n FROM run WHERE problem_id = ? "
+      "GROUP BY problem_id",
+      (pid,),
+  ).fetchall()
+
+
 def latest_attempt_with_run_count(conn, pid):
   return conn.execute(
       """
@@ -372,12 +402,20 @@ def all_problem_meta(conn):
   ).fetchall()
 
 
-def solved_attempts(conn):
+def solved_attempts(conn, pid=None):
   """Every solved attempt: problem_id, solved_at, elapsed_ms (may be NULL for
-  backfilled solves)."""
+  backfilled solves). Ascending by attempt id — the folds over these rows have
+  order-dependent tie-breaks, so the ordering is explicit rather than incidental.
+  """
+  if pid is None:
+    return conn.execute(
+        "SELECT problem_id, solved_at, elapsed_ms FROM attempt "
+        "WHERE solved_at IS NOT NULL ORDER BY id"
+    ).fetchall()
   return conn.execute(
       "SELECT problem_id, solved_at, elapsed_ms FROM attempt "
-      "WHERE solved_at IS NOT NULL"
+      "WHERE solved_at IS NOT NULL AND problem_id = ? ORDER BY id",
+      (pid,),
   ).fetchall()
 
 
