@@ -1,7 +1,7 @@
 // End-to-end test of persistence against the state API: autosave, run
 // recording, history, last-all-passed status, and reload restoring code.
 import { chromium } from 'playwright'
-import { problemContent } from './fixtures.mjs'
+import { problemContent, resetProblem } from './fixtures.mjs'
 
 const BASE = process.env.BASE_URL || 'http://localhost:3100'
 const ID = 'maximum-subarray'
@@ -11,6 +11,7 @@ function assert(cond, msg) {
   console.log('  ok -', msg)
 }
 
+resetProblem(ID) // repeatable: back to not-started, whatever ran before
 const solution = problemContent(ID).solution
 
 const browser = await chromium.launch()
@@ -20,6 +21,11 @@ page.on('pageerror', (e) => console.log('  [pageerror]', e.message))
 try {
   await page.goto(`${BASE}/problem/${ID}`, { waitUntil: 'networkidle' })
   await page.locator('.cm-content').waitFor()
+
+  // Run Tests is gated behind a timed attempt, so this test owns its own.
+  await page.locator('.timer-btn.start, .timer-btn.retake').first().click()
+  await page.locator('.timer.running').waitFor()
+
   const editor = page.locator('.cm-content')
   await editor.click()
   await page.keyboard.press(process.platform === 'darwin' ? 'Meta+A' : 'Control+A')
