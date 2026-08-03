@@ -1,10 +1,13 @@
 """SQLite storage for the coding-trainer API.
 
-Four tables, keyed by the problem slug (a stable id, so etl.py never changes):
-  - problem:    the imported catalog (definition + starter/solution/tests).
+User state only — the knowledge content is static JSON built by
+build_content.py. Three tables, keyed by the problem slug (a stable id, so a
+content rebuild never invalidates them):
   - submission: the latest autosaved implementation per problem.
   - run:        one row per test run (result + the code that produced it).
   - attempt:    a log of timed attempts; the latest one drives a problem's status.
+
+Every access pattern is a key-value read or write keyed by problem_id.
 """
 
 import os
@@ -16,21 +19,6 @@ DB_PATH = os.environ.get(
 )
 
 SCHEMA = """
-CREATE TABLE IF NOT EXISTS problem (
-  id               TEXT PRIMARY KEY,   -- path relative to coding-questions/, e.g. CTCI/1.1-is-unique
-  title            TEXT NOT NULL,
-  difficulty       TEXT,
-  tags             TEXT,               -- JSON array
-  sources          TEXT,               -- JSON array
-  description      TEXT,
-  hint             TEXT,               -- solution hint (the former "Approach")
-  primary_function TEXT,
-  starter          TEXT,
-  solution         TEXT,
-  tests            TEXT,
-  position         INTEGER
-);
-
 CREATE TABLE IF NOT EXISTS submission (
   problem_id TEXT PRIMARY KEY,
   code       TEXT NOT NULL,
@@ -66,19 +54,6 @@ CREATE TABLE IF NOT EXISTS attempt (
 );
 
 CREATE INDEX IF NOT EXISTS idx_attempt_problem ON attempt (problem_id, id DESC);
-
--- Curriculum lessons (populated from lessons/ by etl.py). A lesson groups
--- markdown content with an explicit list of exercise problem ids; progress is
--- derived from the attempt table (a lesson is "done" once any exercise has ever
--- been solved).
-CREATE TABLE IF NOT EXISTS lesson (
-  id        TEXT PRIMARY KEY,
-  title     TEXT NOT NULL,
-  topic     TEXT,
-  body      TEXT,               -- markdown lesson content
-  exercises TEXT,               -- JSON array of problem ids
-  position  INTEGER
-);
 """
 
 
@@ -98,12 +73,6 @@ def _add_run_attempt_id(conn):
   cols = [r["name"] for r in conn.execute("PRAGMA table_info(run)").fetchall()]
   if "attempt_id" not in cols:
     conn.execute("ALTER TABLE run ADD COLUMN attempt_id INTEGER")
-
-
-def _add_problem_hint(conn):
-  cols = [r["name"] for r in conn.execute("PRAGMA table_info(problem)").fetchall()]
-  if "hint" not in cols:
-    conn.execute("ALTER TABLE problem ADD COLUMN hint TEXT")
 
 
 def _backfill_solved_attempts(conn):
@@ -129,29 +98,17 @@ def init_db():
   with connect() as conn:
     conn.executescript(SCHEMA)
     _add_run_attempt_id(conn)
-    _add_problem_hint(conn)
     _backfill_solved_attempts(conn)
     conn.execute("DROP TABLE IF EXISTS chapter")  # renamed to lesson
+    # The content moved to static JSON; drop the tables in existing dev volumes.
+    conn.execute("DROP TABLE IF EXISTS problem")
+    conn.execute("DROP TABLE IF EXISTS lesson")
 
 
 # --- data access -----------------------------------------------------------
 # Each function takes an open connection so the caller controls the transaction
 # boundary (commit happens when its `with connect()` block exits). Rows are
 # returned raw; server.py owns the snake_case→camelCase serialization.
-
-# SQL mirror of server._attempt_fields' status derivation, for the list status
-# filter (the latest attempt is joined as `a`). Keep the two in sync.
-STATUS_EXPR = """
-  CASE
-    WHEN a.solved_at IS NOT NULL THEN 'solved'
-    WHEN a.id IS NOT NULL THEN 'started'
-    ELSE 'not-started'
-  END
-"""
-
-
-def get_problem_row(conn, pid):
-  return conn.execute("SELECT * FROM problem WHERE id = ?", (pid,)).fetchone()
 
 
 def get_submission_code(conn, pid):
@@ -171,16 +128,6 @@ def upsert_submission(conn, pid, code, ts):
       """,
       (pid, code, ts),
   )
-
-
-def difficulty_counts(conn):
-  return conn.execute(
-      "SELECT difficulty, COUNT(*) AS c FROM problem GROUP BY difficulty"
-  ).fetchall()
-
-
-def all_tag_json(conn):
-  return conn.execute("SELECT tags FROM problem").fetchall()
 
 
 def latest_attempt(conn, pid):
@@ -282,126 +229,6 @@ def list_run_rows(conn, pid, limit):
   ).fetchall()
 
 
-def query_problem_page(conn, *, search, difficulties, taglist, status, limit, offset):
-  """(total, rows) for a filtered catalog page. difficulties/taglist are lists;
-  multiple tags are ANDed. status is one of the three states or "" (any)."""
-  conds = []
-  params = {}
-
-  if search.strip():
-    params["like"] = f"%{search.strip().lower()}%"
-    conds.append("(lower(p.title) LIKE :like OR lower(p.tags) LIKE :like)")
-
-  if difficulties:
-    placeholders = []
-    for i, d in enumerate(difficulties):
-      params[f"diff{i}"] = d
-      placeholders.append(f":diff{i}")
-    conds.append(f"p.difficulty IN ({','.join(placeholders)})")
-
-  for i, t in enumerate(taglist):
-    params[f"tag{i}"] = f'%"{t}"%'  # tags column is a JSON array of quoted strings
-    conds.append(f"p.tags LIKE :tag{i}")
-
-  if status in ("not-started", "started", "solved"):
-    conds.append(f"({STATUS_EXPR.strip()}) = :status")
-    params["status"] = status
-
-  where = ("WHERE " + " AND ".join(conds)) if conds else ""
-  base_from = """
-    FROM problem p
-    LEFT JOIN attempt a ON a.id = (SELECT MAX(id) FROM attempt WHERE problem_id = p.id)
-  """
-
-  total = conn.execute(
-      f"SELECT COUNT(*) AS n {base_from} {where}", params
-  ).fetchone()["n"]
-  rows = conn.execute(
-      f"""
-      SELECT p.id, p.title, p.difficulty, p.tags,
-             a.started_at, a.accumulated_ms, a.running_since,
-             a.solved_at, a.elapsed_ms,
-             (SELECT COUNT(*) FROM run WHERE attempt_id = a.id) AS attempt_run_count
-      {base_from} {where}
-      ORDER BY p.position
-      LIMIT :limit OFFSET :offset
-      """,
-      {**params, "limit": limit, "offset": offset},
-  ).fetchall()
-  return total, rows
-
-
-# --- curriculum / progress ---
-
-
-def upsert_lesson(conn, id, title, topic, body, exercises_json, position):
-  conn.execute(
-      """
-      INSERT INTO lesson (id, title, topic, body, exercises, position)
-      VALUES (?, ?, ?, ?, ?, ?)
-      ON CONFLICT(id) DO UPDATE SET
-        title = excluded.title, topic = excluded.topic, body = excluded.body,
-        exercises = excluded.exercises, position = excluded.position
-      """,
-      (id, title, topic, body, exercises_json, position),
-  )
-
-
-def list_lessons(conn):
-  return conn.execute("SELECT * FROM lesson ORDER BY position").fetchall()
-
-
-def get_lesson_row(conn, id):
-  return conn.execute("SELECT * FROM lesson WHERE id = ?", (id,)).fetchone()
-
-
-def ever_solved_problem_ids(conn):
-  """Problems solved at least once (a chapter is 'done' once any exercise is
-  solved, and a later Retake must not un-complete it)."""
-  return {
-      r["problem_id"]
-      for r in conn.execute(
-          "SELECT DISTINCT problem_id FROM attempt WHERE solved_at IS NOT NULL"
-      ).fetchall()
-  }
-
-
-def started_problem_ids(conn):
-  """Problems whose latest attempt exists but is unsolved (in progress)."""
-  return {
-      r["problem_id"]
-      for r in conn.execute(
-          """
-          SELECT a.problem_id FROM attempt a
-          WHERE a.id = (SELECT MAX(id) FROM attempt WHERE problem_id = a.problem_id)
-            AND a.solved_at IS NULL
-          """
-      ).fetchall()
-  }
-
-
-def problems_brief(conn, ids):
-  """id → {title, difficulty} for the given problem ids (missing ids omitted)."""
-  if not ids:
-    return {}
-  placeholders = ",".join("?" for _ in ids)
-  rows = conn.execute(
-      f"SELECT id, title, difficulty FROM problem WHERE id IN ({placeholders})",
-      list(ids),
-  ).fetchall()
-  return {r["id"]: {"title": r["title"], "difficulty": r["difficulty"]} for r in rows}
-
-
-# --- stats ---
-
-
-def all_problem_meta(conn):
-  """id, title, difficulty, tags for every problem (for stats totals)."""
-  return conn.execute(
-      "SELECT id, title, difficulty, tags FROM problem"
-  ).fetchall()
-
-
 def solved_attempts(conn, pid=None):
   """Every solved attempt: problem_id, solved_at, elapsed_ms (may be NULL for
   backfilled solves). Ascending by attempt id — the folds over these rows have
@@ -417,7 +244,3 @@ def solved_attempts(conn, pid=None):
       "WHERE solved_at IS NOT NULL AND problem_id = ? ORDER BY id",
       (pid,),
   ).fetchall()
-
-
-def count_runs(conn):
-  return conn.execute("SELECT COUNT(*) AS n FROM run").fetchone()["n"]

@@ -1,15 +1,6 @@
-import type {
-  Facets,
-  LessonDetail,
-  LessonsResponse,
-  ProblemView,
-  ProblemPage,
-  ProblemState,
-  ProgressBundle,
-  RunRecord,
-  StatsResponse,
-  StatusFilter,
-} from './types'
+// The user-state API: saved code, test runs and timed attempts. Everything the
+// app renders beyond that is static content — see content.ts.
+import type { ProblemState, ProgressBundle, RunRecord } from './types'
 
 async function asJson<T>(res: Response): Promise<T> {
   if (!res.ok) throw new Error(`API ${res.status} ${res.statusText}`)
@@ -43,36 +34,7 @@ export interface NewRun {
   durationMs: number
 }
 
-export interface ListParams {
-  search?: string
-  difficulty?: string[]
-  tags?: string[]
-  status?: StatusFilter
-  page?: number
-  pageSize?: number
-}
-
 export const api = {
-  getFacets: () => get<Facets>('/api/facets'),
-
-  listProblems: (params: ListParams) => {
-    const q = new URLSearchParams()
-    if (params.search?.trim()) q.set('search', params.search.trim())
-    if (params.difficulty?.length) q.set('difficulty', params.difficulty.join(','))
-    if (params.tags?.length) q.set('tags', params.tags.join(','))
-    if (params.status && params.status !== 'all') q.set('status', params.status)
-    q.set('page', String(params.page ?? 1))
-    q.set('pageSize', String(params.pageSize ?? 20))
-    return get<ProblemPage>(`/api/problems?${q.toString()}`)
-  },
-
-  getProblem: (id: string) => get<ProblemView>(`/api/problem?id=${enc(id)}`),
-
-  getLessons: () => get<LessonsResponse>('/api/lessons'),
-  getLesson: (id: string) => get<LessonDetail>(`/api/lesson?id=${enc(id)}`),
-
-  getStats: () => get<StatsResponse>('/api/stats'),
-
   // Dynamic state — never memoized, unlike the static content in content.ts.
   getProgress: () => get<ProgressBundle>('/api/progress'),
   getProblemState: (id: string) => get<ProblemState>(`/api/problem/state?id=${enc(id)}`),

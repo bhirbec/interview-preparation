@@ -18,7 +18,7 @@ const secs = (t) => {
 // Not-started, with the reference solution pre-saved so "Start clears the
 // editor" has real code to clear.
 resetProblem(PID, { seedSolution: true })
-const problem = await (await fetch(`${BASE}/api/problem?id=${PID}`)).json()
+const problem = await (await fetch(`${BASE}/data/problems/${PID}.json`)).json()
 
 const browser = await chromium.launch()
 const page = await browser.newPage()
@@ -76,7 +76,7 @@ try {
   // List row shows the recorded solve time.
   await page.goto(BASE, { waitUntil: 'networkidle' })
   await page.locator('.search').fill(problem.title)
-  await page.waitForTimeout(500)
+  await page.waitForTimeout(200)
   const badge = page.locator('.problem-row', { hasText: problem.title }).locator('.status-badge.solved')
   await badge.waitFor()
   assert(/\d+:\d\d/.test(await badge.textContent()), 'list row shows ✓ with a m:ss solve time')

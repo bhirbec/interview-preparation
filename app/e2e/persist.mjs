@@ -1,5 +1,5 @@
-// End-to-end test of persistence against the API-backed catalog: autosave,
-// run recording, history, last-all-passed status, and reload restoring code.
+// End-to-end test of persistence: autosave, run recording, history,
+// last-all-passed status, and reload restoring code.
 import { chromium } from 'playwright'
 
 const BASE = process.env.BASE_URL || 'http://localhost:3100'
@@ -10,7 +10,7 @@ function assert(cond, msg) {
   console.log('  ok -', msg)
 }
 
-const solution = (await (await fetch(`${BASE}/api/problem?id=${ID}`)).json()).solution
+const solution = (await (await fetch(`${BASE}/data/problems/${ID}.json`)).json()).solution
 
 const browser = await chromium.launch()
 const page = await browser.newPage()
@@ -52,7 +52,7 @@ try {
   // The list shows the last-all-passed time (find via search).
   await page.goto(`${BASE}/`, { waitUntil: 'networkidle' })
   await page.locator('.search').fill('maximum subarray')
-  await page.waitForTimeout(500)
+  await page.waitForTimeout(200)
   const row = page.locator('.problem-row', { has: page.getByRole('link', { name: 'Maximum Subarray' }) })
   await row.locator('.solved').waitFor()
   const solvedText = (await row.locator('.solved').textContent()).trim()

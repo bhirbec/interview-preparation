@@ -1,5 +1,5 @@
-// Smoke test of the full flow against the API-backed catalog: paginated list,
-// server-side search, opening a problem, and running tests in-browser (Pyodide).
+// Smoke test of the full flow against the static catalog: paginated list,
+// client-side search, opening a problem, and running tests in-browser (Pyodide).
 import { chromium } from 'playwright'
 import { resetProblem } from './fixtures.mjs'
 
@@ -11,10 +11,12 @@ function assert(cond, msg) {
 }
 
 resetProblem('maximum-subarray') // repeatable: back to not-started
-const solution = (await (await fetch(`${BASE}/api/problem?id=maximum-subarray`)).json()).solution
+const solution = (await (await fetch(`${BASE}/data/problems/maximum-subarray.json`)).json()).solution
 
 const browser = await chromium.launch()
 const page = await browser.newPage()
+const requests = []
+page.on('request', (r) => requests.push(r.url()))
 page.on('pageerror', (e) => console.log('  [pageerror]', e.message))
 
 try {
@@ -24,15 +26,20 @@ try {
   assert(rows === 20, `list shows a page of 20 problems (got ${rows})`)
   assert(/\d+ problems/.test(await page.locator('.list-total').textContent()), 'footer shows a total count')
 
-  // Server-side search.
+  // Client-side search: no round trip, so no debounce to wait out.
+  const before = requests.length
   await page.locator('.search').fill('graph')
-  await page.waitForTimeout(500)
+  await page.waitForTimeout(300)
   const g = await page.locator('.problem-row').count()
-  assert(g > 0 && g < 20, `server search "graph" narrows the list (got ${g})`)
+  assert(g > 0 && g < 20, `search "graph" narrows the list (got ${g})`)
+  assert(
+    !requests.slice(before).some((u) => u.includes('/api/')),
+    'searching issues no API request',
+  )
 
   // Find and open Maximum Subarray (a top-level problem sorted after CTCI).
   await page.locator('.search').fill('maximum subarray')
-  await page.waitForTimeout(500)
+  await page.waitForTimeout(200)
   await page.getByRole('link', { name: 'Maximum Subarray' }).click()
   await page.getByRole('heading', { name: 'Maximum Subarray' }).waitFor()
   await page.locator('.cm-content').waitFor()
@@ -65,7 +72,7 @@ try {
   await page.locator('.summary.all-pass').waitFor({ timeout: 60000 })
   assert(/^10\/10/.test((await page.locator('.summary').textContent()).trim()), 'solution passes 10/10')
 
-  console.log('\nPASS — API-backed list, search, and in-browser test run verified.')
+  console.log('\nPASS — static catalog, client-side search, and in-browser test run verified.')
 } catch (e) {
   await page.screenshot({ path: 'e2e/smoke-failure.png', fullPage: true }).catch(() => {})
   console.error('\nFAIL —', e.message)

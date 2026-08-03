@@ -105,10 +105,6 @@ export interface LessonSummary {
   done: boolean
 }
 
-export interface LessonsResponse {
-  lessons: LessonSummary[]
-}
-
 export interface LessonExercise {
   id: string
   title: string

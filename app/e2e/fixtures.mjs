@@ -1,18 +1,28 @@
 // Shared test setup: reset a problem's attempt/run state (and optionally seed
 // its saved code) so an e2e run is repeatable without manual DB surgery. Runs
-// against the same sqlite DB the app uses, via the api container.
+// against the same sqlite DB the app uses, via the api container. The reference
+// solution comes from the generated content, not the DB.
 import { execFileSync } from 'node:child_process'
+import { readFileSync } from 'node:fs'
 import { fileURLToPath } from 'node:url'
 import { dirname, resolve } from 'node:path'
 
 // fixtures.mjs lives at <repo>/app/e2e/ — compose file is at the repo root.
 const REPO_ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '../..')
+const CONTENT_DIR = resolve(REPO_ROOT, 'app/public/data')
 
-function runPython(src) {
-  execFileSync('docker', ['compose', 'exec', '-T', 'api', 'python', '-c', src], {
+function runPython(src, ...args) {
+  execFileSync('docker', ['compose', 'exec', '-T', 'api', 'python', '-c', src, ...args], {
     cwd: REPO_ROOT,
     stdio: 'pipe',
   })
+}
+
+// A problem's static content, read straight off disk (built by
+// backend/build_content.py). Ids can contain "/", a real path segment.
+export function readProblem(id) {
+  const path = resolve(CONTENT_DIR, 'problems', ...id.split('/')) + '.json'
+  return JSON.parse(readFileSync(path, 'utf8'))
 }
 
 // Force a problem to "solved" by inserting a completed attempt — used to make
@@ -37,17 +47,20 @@ export function markSolved(id) {
 export function resetProblem(id, { seedSolution = false } = {}) {
   const seed = seedSolution
     ? `
-    sol = c.execute("SELECT solution FROM problem WHERE id=?", (pid,)).fetchone()["solution"]
     c.execute("INSERT INTO submission (problem_id, code, updated_at) "
               "VALUES (?, ?, '2026-01-01T00:00:00+00:00') "
-              "ON CONFLICT(problem_id) DO UPDATE SET code=excluded.code", (pid, sol))`
+              "ON CONFLICT(problem_id) DO UPDATE SET code=excluded.code",
+              (pid, sys.argv[2]))`
     : ''
   runPython(
-    `import db\n` +
-    `pid = ${JSON.stringify(id)}\n` +
-    `with db.connect() as c:\n` +
-    `    c.execute("DELETE FROM run WHERE problem_id=?", (pid,))\n` +
-    `    c.execute("DELETE FROM attempt WHERE problem_id=?", (pid,))` +
-    seed,
+    'import sys\n'
+    + 'import db\n'
+    + 'pid = sys.argv[1]\n'
+    + 'with db.connect() as c:\n'
+    + '    c.execute("DELETE FROM run WHERE problem_id=?", (pid,))\n'
+    + '    c.execute("DELETE FROM attempt WHERE problem_id=?", (pid,))'
+    + seed,
+    id,
+    seedSolution ? readProblem(id).solution : '',
   )
 }

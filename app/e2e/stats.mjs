@@ -1,7 +1,12 @@
-// The Stats page: drawer → Stats renders metrics consistent with /api/stats —
-// solved count, difficulty + topic bars, the activity heatmap, and solve times.
+// The Stats page: drawer → Stats renders the metrics computed in the browser
+// from catalog.json + /api/progress.
+//
+// This is a RENDERING test against the deterministic seed in seed-golden.mjs —
+// every expectation below is a hand-checked consequence of that fixture. The
+// numeric fidelity of the fold itself (ties, banker's rounding, streaks, …) is
+// proven separately, and far more thoroughly, by parity.mjs.
 import { chromium } from 'playwright'
-import { markSolved } from './fixtures.mjs'
+import { seedGolden } from './seed-golden.mjs'
 
 const BASE = process.env.BASE_URL || 'http://localhost:3100'
 
@@ -10,10 +15,24 @@ function assert(cond, msg) {
   console.log('  ok -', msg)
 }
 
-// Guarantee at least one solve so the page isn't empty, then read the API so we
-// can assert the rendered numbers match it.
-markSolved('three-sum')
-const stats = await (await fetch(`${BASE}/api/stats`)).json()
+// From the seed: 6 distinct problems solved, 26 runs, 1425001 ms of best times
+// (23:45), solve days 01-05/06/07 then 01-10 (longest streak 3, current 1), and
+// 3 problems in progress, 'CTCI/2.1-remove-dups' first by raw id.
+const EXPECTED = {
+  solved: 6,
+  runs: 26,
+  time: '23:45',
+  streak: 1,
+  longest: 3,
+  difficulties: 3,
+  tags: 12,
+  fastestFirst: 'Is Unique',
+  recentFirst: 'Maximum Subarray',
+  inProgress: ['Remove Dups', 'Quicksort', 'Valid Braces'],
+}
+
+seedGolden()
+const catalog = await (await fetch(`${BASE}/data/catalog.json`)).json()
 
 const browser = await chromium.launch()
 const page = await browser.newPage()
@@ -32,19 +51,22 @@ try {
 
   const cards = await page.locator('.stat-cards').textContent()
   assert(
-    cards.includes(String(stats.solvedCount)) && cards.includes(`/ ${stats.totalProblems}`),
-    `solved card shows ${stats.solvedCount} / ${stats.totalProblems} (from API)`,
+    cards.includes(String(EXPECTED.solved)) && cards.includes(`/ ${catalog.count}`),
+    `solved card shows ${EXPECTED.solved} / ${catalog.count}`,
   )
-  assert(cards.includes(String(stats.totalRuns)), `test-runs card shows ${stats.totalRuns}`)
+  assert(cards.includes(EXPECTED.time), `time-solving card shows ${EXPECTED.time}`)
+  assert(cards.includes(`${EXPECTED.streak}🔥`), `streak card shows ${EXPECTED.streak}`)
+  assert(cards.includes(`best ${EXPECTED.longest}`), `longest streak is ${EXPECTED.longest}`)
+  assert(cards.includes(String(EXPECTED.runs)), `test-runs card shows ${EXPECTED.runs}`)
 
   const bars = await page.locator('.bar-row').count()
   assert(
-    bars === stats.byDifficulty.length + stats.byTag.length,
+    bars === EXPECTED.difficulties + EXPECTED.tags,
     `difficulty + topic bars render (${bars})`,
   )
   assert((await page.locator('.heat-cell').count()) === 126, 'activity heatmap has 18×7 cells')
   assert(
-    /Overall — (avg \d+:\d\d|no timed)/.test(
+    /Overall — avg \d+:\d\d · best \d+:\d\d/.test(
       await page.locator('.solvetime-overall').textContent(),
     ),
     'solve-time overall line renders',
@@ -54,13 +76,30 @@ try {
     'topic coverage section present',
   )
 
+  const solveTime = page.locator('.stat-section', { hasText: 'Solve time' })
+  assert(
+    (await solveTime.locator('.stat-link').first().textContent()) === EXPECTED.fastestFirst,
+    `fastest solve is "${EXPECTED.fastestFirst}"`,
+  )
+  const recent = page.locator('.stat-section', { hasText: 'Recently solved' })
+  assert(
+    (await recent.locator('.stat-link').first().textContent()) === EXPECTED.recentFirst,
+    `most recent solve is "${EXPECTED.recentFirst}"`,
+  )
+  const inProgress = page.locator('.stat-section', { hasText: 'In progress' })
+  assert(
+    JSON.stringify(await inProgress.locator('.stat-link').allTextContents())
+      === JSON.stringify(EXPECTED.inProgress),
+    `in-progress list is ${EXPECTED.inProgress.join(', ')} (sorted by raw id)`,
+  )
+
   // A fastest-solve entry links to its problem.
-  await page.locator('.stat-section', { hasText: 'Solve time' }).locator('.stat-link').first().click()
+  await solveTime.locator('.stat-link').first().click()
   await page.waitForURL(/\/problem\//)
   await page.locator('.cm-content').waitFor()
   assert(true, 'a stat entry links to its problem')
 
-  console.log('\nPASS — stats renders API-consistent metrics, heatmap, and links.')
+  console.log('\nPASS — stats renders the browser-computed metrics, heatmap, and links.')
 } catch (e) {
   await page.screenshot({ path: 'e2e/stats-failure.png', fullPage: true }).catch(() => {})
   console.error('\nFAIL —', e.message)

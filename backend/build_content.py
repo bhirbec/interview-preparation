@@ -37,7 +37,6 @@ or on the host (stdlib only, no dependencies):
 import json
 import os
 import re
-import shutil
 import sys
 from datetime import datetime, timezone
 
@@ -223,19 +222,35 @@ def _dump(path, obj):
   os.makedirs(os.path.dirname(path), exist_ok=True)
   with open(path, "w") as f:
     json.dump(obj, f, ensure_ascii=False, separators=(",", ":"))
+  return path
+
+
+def _prune(out_dir, keep):
+  """Delete everything under out_dir that this build didn't just write."""
+  for dirpath, dirnames, filenames in os.walk(out_dir, topdown=False):
+    for name in filenames:
+      path = os.path.join(dirpath, name)
+      if path not in keep:
+        os.remove(path)
+    for name in dirnames:
+      path = os.path.join(dirpath, name)
+      if not os.listdir(path):
+        os.rmdir(path)
 
 
 def write_content(out_dir, problems, lessons, generated_at):
-  """Write the JSON tree, replacing whatever was there before.
+  """Write the JSON tree, then delete whatever this build didn't write.
 
   Plain writes never reconcile deletions (the old ETL did that with a
-  DELETE ... WHERE id NOT IN), so build into a sibling temp dir and swap it in.
+  DELETE ... WHERE id NOT IN), so a renamed problem would otherwise leave a
+  stale JSON forever. Reconcile rather than swapping a temp dir into place:
+  replacing the directory changes its inode, and the frontend container's view
+  of the bind mount then goes stale for part of the tree until it restarts.
   """
-  tmp_dir = out_dir.rstrip("/") + ".tmp"
-  shutil.rmtree(tmp_dir, ignore_errors=True)
-  os.makedirs(tmp_dir, exist_ok=True)
+  written = set()
+  os.makedirs(out_dir, exist_ok=True)
 
-  _dump(os.path.join(tmp_dir, "catalog.json"), {
+  written.add(_dump(os.path.join(out_dir, "catalog.json"), {
       "generatedAt": generated_at,
       "count": len(problems),
       "problems": [
@@ -248,10 +263,10 @@ def write_content(out_dir, problems, lessons, generated_at):
           }
           for position, p in enumerate(problems)
       ],
-  })
+  }))
 
   for p in problems:
-    _dump(os.path.join(tmp_dir, "problems", *p["id"].split("/")) + ".json", {
+    written.add(_dump(os.path.join(out_dir, "problems", *p["id"].split("/")) + ".json", {
         "id": p["id"],
         "title": p["title"],
         "difficulty": p["difficulty"],
@@ -263,16 +278,14 @@ def write_content(out_dir, problems, lessons, generated_at):
         "starter": p["starter"],
         "solution": p["solution"],
         "tests": p["tests"],
-    })
+    }))
 
-  _dump(os.path.join(tmp_dir, "lessons.json"), {
+  written.add(_dump(os.path.join(out_dir, "lessons.json"), {
       "generatedAt": generated_at,
       "lessons": lessons,
-  })
+  }))
 
-  shutil.rmtree(out_dir, ignore_errors=True)
-  os.makedirs(os.path.dirname(out_dir.rstrip("/")) or ".", exist_ok=True)
-  os.rename(tmp_dir, out_dir)
+  _prune(out_dir, written)
 
 
 def main():

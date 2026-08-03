@@ -81,7 +81,7 @@ export function paginate<T>(items: T[], page: number, pageSize: number): Page<T>
 }
 
 // Facet counts are global — always derived from the FULL catalog, never from
-// the filtered set (that is what /api/facets returned).
+// the filtered set, matching what the facets endpoint used to return.
 export function deriveFacets(problems: CatalogProblem[]): Facets {
   const diffCounts = new Map<string, number>()
   const tagCounts = new Map<string, number>()
