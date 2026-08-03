@@ -28,11 +28,18 @@ async function loadJson<T>(path: string): Promise<T> {
   }
 }
 
+// Every memo's "forget what you cached" hook, so clearContentCache() below can
+// drop them all at once without each memo needing its own exported resetter.
+const forget: (() => void)[] = []
+
 // Memoize the in-flight promise so concurrent callers share one request, and
 // drop the memo if it rejects so a transient failure isn't cached for the
 // session. /api/progress is dynamic and is never memoized.
 function memoize<T>(load: () => Promise<T>): () => Promise<T> {
   let cached: Promise<T> | null = null
+  forget.push(() => {
+    cached = null
+  })
   return () => {
     if (!cached) {
       const p = load()
@@ -45,7 +52,15 @@ function memoize<T>(load: () => Promise<T>): () => Promise<T> {
   }
 }
 
-export const loadCatalog = memoize(() => loadJson<Catalog>(`${DATA}/catalog.json`))
+// Deliberately NOT memoized: db.ts's syncContent() refetches this on every
+// navigation and compares generatedAt to decide whether the content was
+// rebuilt under the open tab — which is precisely the check a memo would
+// defeat. The fetch is conditional (cache: 'no-cache' above), so an unchanged
+// build costs a 304 with no body.
+export function loadCatalog(): Promise<Catalog> {
+  return loadJson<Catalog>(`${DATA}/catalog.json`)
+}
+
 export const loadLessons = memoize(() => loadJson<LessonsContent>(`${DATA}/lessons.json`))
 
 // Encode per segment: ids can contain "/" (CTCI/1.1-is-unique) and a flat
@@ -66,4 +81,14 @@ export function loadProblem(id: string): Promise<ProblemContent> {
     if (problems.get(id) === p) problems.delete(id)
   })
   return p
+}
+
+// Drop every cached content response, so the next load refetches. Called by
+// db.ts when catalog.json's generatedAt changes. The per-problem Map has to go
+// with the rest: clearing only the catalog would invert the staleness bug —
+// the list would show the new build while an already-visited detail page kept
+// serving its pre-rebuild JSON.
+export function clearContentCache(): void {
+  for (const reset of forget) reset()
+  problems.clear()
 }

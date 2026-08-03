@@ -2,7 +2,7 @@ import { useEffect, useState, type CSSProperties } from 'react'
 import { Link } from 'react-router-dom'
 import type { StatsResponse, TimeStat } from '../types'
 import AppMenu from '../components/AppMenu'
-import { computeStats, syncProgress } from '../db'
+import { computeStats, sync } from '../db'
 import { formatDuration } from '../time'
 
 const HEATMAP_WEEKS = 18
@@ -62,7 +62,7 @@ export default function Stats() {
 
   useEffect(() => {
     let cancelled = false
-    syncProgress()
+    sync()
       .then(() => !cancelled && setData(computeStats()))
       .catch(() => !cancelled && setData(null))
     return () => {
