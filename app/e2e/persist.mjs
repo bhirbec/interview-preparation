@@ -1,6 +1,7 @@
-// End-to-end test of persistence against the API-backed catalog: autosave,
-// run recording, history, last-all-passed status, and reload restoring code.
+// End-to-end test of persistence against the state API: autosave, run
+// recording, history, last-all-passed status, and reload restoring code.
 import { chromium } from 'playwright'
+import { problemContent } from './fixtures.mjs'
 
 const BASE = process.env.BASE_URL || 'http://localhost:3100'
 const ID = 'maximum-subarray'
@@ -10,7 +11,7 @@ function assert(cond, msg) {
   console.log('  ok -', msg)
 }
 
-const solution = (await (await fetch(`${BASE}/api/problem?id=${ID}`)).json()).solution
+const solution = problemContent(ID).solution
 
 const browser = await chromium.launch()
 const page = await browser.newPage()
@@ -58,7 +59,7 @@ try {
   const solvedText = (await row.locator('.solved').textContent()).trim()
   assert(solvedText.startsWith('✓'), `list shows solved status: "${solvedText}"`)
 
-  console.log('\nPASS — persistence verified end-to-end against the API.')
+  console.log('\nPASS — persistence verified end-to-end against the state API.')
 } catch (e) {
   await page.screenshot({ path: 'e2e/persist-failure.png', fullPage: true }).catch(() => {})
   console.error('\nFAIL —', e.message)

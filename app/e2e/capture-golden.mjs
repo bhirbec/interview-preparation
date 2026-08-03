@@ -2,7 +2,11 @@
 // client-side ports (search.ts, stats.ts, the lesson view models) can be
 // replayed against them (see parity.mjs).
 //
-// Run against the CURRENT server, on a frozen database:
+// The endpoints captured here were REMOVED at the end of ticket #52, so this
+// only runs against a checkout from before that commit (the fixtures it writes
+// are the record of what they returned). parity.mjs replays them forever.
+//
+// Run against that server, on a frozen database:
 //
 //     node e2e/seed-golden.mjs
 //     node e2e/capture-golden.mjs

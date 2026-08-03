@@ -226,18 +226,3 @@ export type StatusFilter = 'all' | ProblemStatus
 export interface ProblemView extends ProblemContent, AttemptState {
   code: string | null
 }
-
-// Full problem definition + this user's saved code + latest-attempt state.
-export interface ProblemFull extends AttemptState {
-  id: string
-  title: string
-  difficulty: string
-  tags: string[]
-  sources: string[]
-  description: string
-  hint: string | null
-  starter: string
-  solution: string
-  tests: string
-  code: string | null
-}

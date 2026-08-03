@@ -1,7 +1,7 @@
-// Smoke test of the full flow against the API-backed catalog: paginated list,
-// server-side search, opening a problem, and running tests in-browser (Pyodide).
+// Smoke test of the full flow against the static catalog: paginated list,
+// in-browser search, opening a problem, and running tests in-browser (Pyodide).
 import { chromium } from 'playwright'
-import { resetProblem } from './fixtures.mjs'
+import { problemContent, resetProblem } from './fixtures.mjs'
 
 const BASE = process.env.BASE_URL || 'http://localhost:3100'
 
@@ -11,7 +11,7 @@ function assert(cond, msg) {
 }
 
 resetProblem('maximum-subarray') // repeatable: back to not-started
-const solution = (await (await fetch(`${BASE}/api/problem?id=maximum-subarray`)).json()).solution
+const solution = problemContent('maximum-subarray').solution
 
 const browser = await chromium.launch()
 const page = await browser.newPage()
@@ -24,11 +24,11 @@ try {
   assert(rows === 20, `list shows a page of 20 problems (got ${rows})`)
   assert(/\d+ problems/.test(await page.locator('.list-total').textContent()), 'footer shows a total count')
 
-  // Server-side search.
+  // In-browser search (SQLite over the static catalog — no request per keystroke).
   await page.locator('.search').fill('graph')
   await page.waitForTimeout(500)
   const g = await page.locator('.problem-row').count()
-  assert(g > 0 && g < 20, `server search "graph" narrows the list (got ${g})`)
+  assert(g > 0 && g < 20, `search "graph" narrows the list (got ${g})`)
 
   // Find and open Maximum Subarray (a top-level problem sorted after CTCI).
   await page.locator('.search').fill('maximum subarray')
@@ -65,7 +65,7 @@ try {
   await page.locator('.summary.all-pass').waitFor({ timeout: 60000 })
   assert(/^10\/10/.test((await page.locator('.summary').textContent()).trim()), 'solution passes 10/10')
 
-  console.log('\nPASS — API-backed list, search, and in-browser test run verified.')
+  console.log('\nPASS — static-content list, search, and in-browser test run verified.')
 } catch (e) {
   await page.screenshot({ path: 'e2e/smoke-failure.png', fullPage: true }).catch(() => {})
   console.error('\nFAIL —', e.message)

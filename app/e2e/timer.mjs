@@ -1,7 +1,7 @@
 // Solve-timer flow: Run Tests gated behind Start; ticking timer; pause/resume;
 // solve records the elapsed time; the list row shows it.
 import { chromium } from 'playwright'
-import { resetProblem } from './fixtures.mjs'
+import { problemContent, resetProblem } from './fixtures.mjs'
 
 const BASE = process.env.BASE_URL || 'http://localhost:3100'
 const PID = 'make-array-consecutive'
@@ -18,7 +18,7 @@ const secs = (t) => {
 // Not-started, with the reference solution pre-saved so "Start clears the
 // editor" has real code to clear.
 resetProblem(PID, { seedSolution: true })
-const problem = await (await fetch(`${BASE}/api/problem?id=${PID}`)).json()
+const problem = problemContent(PID)
 
 const browser = await chromium.launch()
 const page = await browser.newPage()

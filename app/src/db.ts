@@ -304,7 +304,7 @@ function placeholders(values: readonly unknown[]): string {
   return values.map(() => '?').join(',')
 }
 
-/** The filtered, ordered, paginated catalog page (mirrors GET /api/problems). */
+/** The filtered, ordered, paginated catalog page the list view renders. */
 export function queryProblems(q: ProblemQuery): ProblemPage {
   const page = Math.max(1, q.page)
   const pageSize = Math.max(1, Math.min(100, q.pageSize))
@@ -510,7 +510,7 @@ function timeStat(row: Row | null): TimeStat {
   }
 }
 
-/** The whole stats page, aggregated in SQL (mirrors GET /api/stats). */
+/** The whole stats page, aggregated in SQL. */
 export function computeStats(): StatsResponse {
   const totalProblems = num(one('SELECT COUNT(*) AS n FROM problem')?.n)
 
