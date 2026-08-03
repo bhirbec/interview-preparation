@@ -4,6 +4,8 @@ import type {
   LessonsResponse,
   ProblemFull,
   ProblemPage,
+  ProblemState,
+  ProgressBundle,
   RunRecord,
   StatsResponse,
   StatusFilter,
@@ -70,6 +72,10 @@ export const api = {
   getLesson: (id: string) => get<LessonDetail>(`/api/lesson?id=${enc(id)}`),
 
   getStats: () => get<StatsResponse>('/api/stats'),
+
+  // Dynamic state — never memoized, unlike the static content in content.ts.
+  getProgress: () => get<ProgressBundle>('/api/progress'),
+  getProblemState: (id: string) => get<ProblemState>(`/api/problem/state?id=${enc(id)}`),
 
   saveCode: (id: string, code: string) =>
     send<{ ok: boolean; updatedAt: string }>('PUT', '/api/problem/code', { id, code }),
