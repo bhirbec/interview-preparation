@@ -18,12 +18,14 @@
     "react-icons": "^5.7.0",
     "react-markdown": "^10.1.0",
     "react-router-dom": "^7.18.2",
-    "remark-gfm": "^4.0.1"
+    "remark-gfm": "^4.0.1",
+    "sql.js": "^1.14.1"
   },
   "devDependencies": {
     "@types/node": "^26.1.2",
     "@types/react": "^19.2.17",
     "@types/react-dom": "^19.2.3",
+    "@types/sql.js": "^1.4.11",
     "@vitejs/plugin-react": "^6.0.4",
     "playwright": "^1.62.0",
     "typescript": "^7.0.2",

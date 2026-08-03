@@ -3,6 +3,40 @@
 This repository contains resources to prepare for technical interviews. You will find common algorithms,
 well known data structures, and some coding questions found through websites like careerup.
 
+<h2>Running the trainer app</h2>
+
+```
+docker compose up
+```
+
+The frontend is on http://localhost:3000 and the API on http://localhost:8000
+(override with `APP_PORT` / `API_PORT`).
+
+The knowledge content (coding questions + lessons) is served as static JSON from
+`app/public/data/`, generated from `knowledge/` by `backend/build_content.py`.
+The api container builds it on boot; re-run it after editing `knowledge/`:
+
+```
+docker compose exec api python build_content.py
+```
+
+It only needs the standard library, so it also runs on the host:
+
+```
+CONTENT_OUT=app/public/data python3 backend/build_content.py
+```
+
+The SQLite database on the server holds only user state (saved code, test runs,
+timed attempts); the content is never stored in it. The browser builds its own
+in-memory SQLite (sql.js) over the generated JSON and answers search, filtering,
+pagination, the curriculum roll-ups and the stats page from it — no request per
+keystroke. The WASM build is vendored at `app/public/sql-wasm.wasm`; refresh it
+after upgrading the dependency:
+
+```
+cp app/node_modules/sql.js/dist/sql-wasm.wasm app/public/sql-wasm.wasm
+```
+
 <h2>Other Ressources</h2>
 
 Coding challenges:

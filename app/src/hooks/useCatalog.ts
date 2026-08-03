@@ -1,36 +1,50 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import type { Facets, ProblemPage, StatusFilter } from '../types'
-import { api } from '../api'
+import { ensureDb, queryFacets, queryProblems, syncProgress } from '../db'
 
-// Owns the catalog's server-side filter/pagination state and fetching: facets
-// (once) and a debounced problem-list query on any filter/page change. Every
-// filter change resets to page 1.
+// Owns the catalog's filter/pagination state. Everything is answered locally:
+// the database is initialized once (WASM + the static catalog) and the progress
+// tables are rebuilt from /api/progress, after which each filter change is a
+// synchronous re-query inside a useMemo — no debounce, because there is no
+// round trip left to throttle. Every filter change resets to page 1.
 export function useCatalog() {
   const [search, setSearchState] = useState('')
   const [difficulty, setDifficulty] = useState<string[]>([])
   const [tags, setTags] = useState<string[]>([])
   const [status, setStatusState] = useState<StatusFilter>('all')
   const [page, setPage] = useState(1)
-  const [data, setData] = useState<ProblemPage | null>(null)
-  const [facets, setFacets] = useState<Facets | null>(null)
-
-  useEffect(() => {
-    api.getFacets().then(setFacets).catch(() => setFacets({ difficulties: [], tags: [] }))
-  }, [])
+  // `ready` gates the queries: WASM instantiation is on this page's critical
+  // path, so until it flips, `data` stays null and the page shows its loading
+  // state rather than flashing "no problems match".
+  const [ready, setReady] = useState(false)
 
   useEffect(() => {
     let cancelled = false
-    const t = setTimeout(() => {
-      api
-        .listProblems({ search, difficulty, tags, status, page })
-        .then((d) => !cancelled && setData(d))
-        .catch(() => !cancelled && setData({ items: [], total: 0, page, pageSize: 20 }))
-    }, 250)
+    Promise.all([ensureDb(), syncProgress()])
+      .then(() => !cancelled && setReady(true))
+      .catch(() => !cancelled && setReady(true))
     return () => {
       cancelled = true
-      clearTimeout(t)
     }
-  }, [search, difficulty, tags, status, page])
+  }, [])
+
+  const data = useMemo<ProblemPage | null>(() => {
+    if (!ready) return null
+    try {
+      return queryProblems({ search, difficulty, tags, status, page, pageSize: 20 })
+    } catch {
+      return { items: [], total: 0, page, pageSize: 20 }
+    }
+  }, [ready, search, difficulty, tags, status, page])
+
+  const facets = useMemo<Facets | null>(() => {
+    if (!ready) return null
+    try {
+      return queryFacets()
+    } catch {
+      return { difficulties: [], tags: [] }
+    }
+  }, [ready])
 
   function toggleIn(list: string[], set: (v: string[]) => void, value: string) {
     set(list.includes(value) ? list.filter((x) => x !== value) : [...list, value])

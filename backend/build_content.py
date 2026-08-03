@@ -1,6 +1,10 @@
 #!/usr/bin/env python3
-"""ETL for the knowledge/ content: extract the coding-questions catalog and the
-lessons, transform them, and load them into the SQLite database.
+"""Build the static knowledge content served by the React app.
+
+Reads knowledge/ (coding questions + lessons) and writes plain JSON files the
+browser fetches directly — the content is immutable between builds, so it needs
+no database. Only user state (submission/run/attempt) lives in SQLite; this
+module never imports db.
 
 Each coding-question folder (under knowledge/coding-questions/) has four files:
 
@@ -10,22 +14,32 @@ Each coding-question folder (under knowledge/coding-questions/) has four files:
     tests.py     # import unittest + test helpers + the unittest.TestCase
 
 The problem id is the folder path relative to the coding-questions dir (e.g.
-"maximum-subarray" or "CTCI/1.1-is-unique"). The stored `starter` is impl.py with
-its leading description comment stripped (shown in its own panel); `tests` is
-tests.py with its `if __name__ == '__main__'` guard stripped. Lessons
-(knowledge/lessons/<slug>/ meta.json + lesson.md) load into the `lesson` table.
+"maximum-subarray" or "CTCI/1.1-is-unique"). The emitted `starter` is impl.py
+with its leading description comment stripped (shown in its own panel); `tests`
+is tests.py with its `if __name__ == '__main__'` guard stripped.
 
-Run it inside the api container (which has the DB + read-only mounts of the
-content):
+Output (under CONTENT_OUT, default app/public/data):
 
-    docker compose exec api python etl.py
+    catalog.json          { generatedAt, count, problems: [...] } in position order
+    problems/<id>.json    one file per problem, mirroring the id path
+    lessons.json          { generatedAt, lessons: [...] } with bodies inlined
+
+Run it inside the api container (which has the read-only content mounts and a
+writable mount of app/public):
+
+    docker compose exec api python build_content.py
+
+or on the host (stdlib only, no dependencies):
+
+    CONTENT_OUT=app/public/data python3 backend/build_content.py
 """
 
 import json
 import os
 import re
-
-import db
+import shutil
+import sys
+from datetime import datetime, timezone
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 ROOT = os.path.dirname(HERE)
@@ -35,6 +49,12 @@ QUESTIONS_DIR = os.environ.get(
 LESSONS_DIR = os.environ.get(
     "LESSONS_DIR", os.path.join(ROOT, "knowledge", "lessons")
 )
+CONTENT_OUT = os.environ.get(
+    "CONTENT_OUT", os.path.join(ROOT, "app", "public", "data")
+)
+
+# Ids become URL path segments and file paths, so keep them boring.
+ID_RE = re.compile(r"^[A-Za-z0-9][A-Za-z0-9._/-]*$")
 
 
 def find_problem_dirs(root):
@@ -145,13 +165,14 @@ def natural_key(pid):
   return re.sub(r"\d+", lambda m: m.group().zfill(6), pid)
 
 
-def import_lessons(conn, valid_ids):
-  """Import lessons/<nn>-<slug>/ (meta.json + lesson.md) into the lesson table.
-  Lesson id = folder slug without the numeric prefix; position = prefix. Warns
-  about (but keeps) exercise ids not in the catalog."""
+def load_lessons(valid_ids):
+  """Read lessons/<nn>-<slug>/ (meta.json + lesson.md) into (lessons, missing).
+
+  Lesson id = folder slug without the numeric prefix; position = prefix. Reports
+  (but keeps) exercise ids not in the catalog."""
   if not os.path.isdir(LESSONS_DIR):
     return [], []
-  imported = []
+  lessons = []
   missing = []
   for name in sorted(os.listdir(LESSONS_DIR)):
     folder = os.path.join(LESSONS_DIR, name)
@@ -167,13 +188,91 @@ def import_lessons(conn, valid_ids):
     for ex in exercises:
       if ex not in valid_ids:
         missing.append((lid, ex))
-    db.upsert_lesson(conn, lid, meta["title"], meta.get("topic", ""),
-                     body, json.dumps(exercises), position)
-    imported.append(lid)
-  if imported:
-    placeholders = ",".join("?" * len(imported))
-    conn.execute(f"DELETE FROM lesson WHERE id NOT IN ({placeholders})", imported)
-  return imported, missing
+    lessons.append({
+        "id": lid,
+        "title": meta["title"],
+        "topic": meta.get("topic", ""),
+        "position": position,
+        "body": body,
+        "exercises": exercises,
+    })
+  lessons.sort(key=lambda l: (l["position"], l["id"]))
+  return lessons, missing
+
+
+def check_ids(ids):
+  """Fail the build on ids that can't be safely turned into output paths."""
+  errors = []
+  for pid in ids:
+    if not ID_RE.match(pid):
+      errors.append(f"illegal problem id: {pid!r}")
+    elif any(seg in (".", "..") for seg in pid.split("/")):
+      errors.append(f"problem id has a '.' or '..' segment: {pid!r}")
+  # macOS is case-insensitive, so two ids differing only in case would clobber
+  # each other's JSON file on a developer machine but not in CI.
+  folded = {}
+  for pid in ids:
+    folded.setdefault(pid.casefold(), []).append(pid)
+  for _key, group in sorted(folded.items()):
+    if len(group) > 1:
+      errors.append(f"problem ids collide case-insensitively: {sorted(group)}")
+  return errors
+
+
+def _dump(path, obj):
+  os.makedirs(os.path.dirname(path), exist_ok=True)
+  with open(path, "w") as f:
+    json.dump(obj, f, ensure_ascii=False, separators=(",", ":"))
+
+
+def write_content(out_dir, problems, lessons, generated_at):
+  """Write the JSON tree, replacing whatever was there before.
+
+  Plain writes never reconcile deletions (the old ETL did that with a
+  DELETE ... WHERE id NOT IN), so build into a sibling temp dir and swap it in.
+  """
+  tmp_dir = out_dir.rstrip("/") + ".tmp"
+  shutil.rmtree(tmp_dir, ignore_errors=True)
+  os.makedirs(tmp_dir, exist_ok=True)
+
+  _dump(os.path.join(tmp_dir, "catalog.json"), {
+      "generatedAt": generated_at,
+      "count": len(problems),
+      "problems": [
+          {
+              "id": p["id"],
+              "title": p["title"],
+              "difficulty": p["difficulty"],
+              "tags": p["tags"],
+              "position": position,
+          }
+          for position, p in enumerate(problems)
+      ],
+  })
+
+  for p in problems:
+    _dump(os.path.join(tmp_dir, "problems", *p["id"].split("/")) + ".json", {
+        "id": p["id"],
+        "title": p["title"],
+        "difficulty": p["difficulty"],
+        "tags": p["tags"],
+        "sources": p["sources"],
+        "description": p["description"],
+        "hint": p["hint"],
+        "primaryFunction": p["primary_function"],
+        "starter": p["starter"],
+        "solution": p["solution"],
+        "tests": p["tests"],
+    })
+
+  _dump(os.path.join(tmp_dir, "lessons.json"), {
+      "generatedAt": generated_at,
+      "lessons": lessons,
+  })
+
+  shutil.rmtree(out_dir, ignore_errors=True)
+  os.makedirs(os.path.dirname(out_dir.rstrip("/")) or ".", exist_ok=True)
+  os.rename(tmp_dir, out_dir)
 
 
 def main():
@@ -189,36 +288,18 @@ def main():
 
   problems.sort(key=lambda p: natural_key(p["id"]))
 
-  db.init_db()
   ids = [p["id"] for p in problems]
-  with db.connect() as conn:
-    for position, p in enumerate(problems):
-      conn.execute(
-          """
-          INSERT INTO problem
-            (id, title, difficulty, tags, sources, description, hint,
-             primary_function, starter, solution, tests, position)
-          VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-          ON CONFLICT(id) DO UPDATE SET
-            title=excluded.title, difficulty=excluded.difficulty,
-            tags=excluded.tags, sources=excluded.sources,
-            description=excluded.description, hint=excluded.hint,
-            primary_function=excluded.primary_function,
-            starter=excluded.starter, solution=excluded.solution,
-            tests=excluded.tests, position=excluded.position
-          """,
-          (p["id"], p["title"], p["difficulty"], json.dumps(p["tags"]),
-           json.dumps(p["sources"]), p["description"], p["hint"],
-           p["primary_function"], p["starter"], p["solution"], p["tests"],
-           position),
-      )
-    if ids:
-      placeholders = ",".join("?" * len(ids))
-      conn.execute(f"DELETE FROM problem WHERE id NOT IN ({placeholders})", ids)
-    lessons, missing = import_lessons(conn, set(ids))
+  errors = check_ids(ids)
+  if errors:
+    for e in errors:
+      print(f"ERROR: {e}", file=sys.stderr)
+    sys.exit(1)
 
-  print(f"Imported {len(problems)} problems into the problem table.")
-  print(f"Imported {len(lessons)} lessons into the lesson table.")
+  lessons, missing = load_lessons(set(ids))
+  generated_at = datetime.now(timezone.utc).isoformat()
+  write_content(CONTENT_OUT, problems, lessons, generated_at)
+
+  print(f"Wrote {len(problems)} problems and {len(lessons)} lessons to {CONTENT_OUT}.")
   if skipped:
     print(f"Skipped {len(skipped)} folders missing solution.py/tests.py: {skipped}")
   if missing:

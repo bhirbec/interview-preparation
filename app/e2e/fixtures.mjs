@@ -1,12 +1,21 @@
 // Shared test setup: reset a problem's attempt/run state (and optionally seed
 // its saved code) so an e2e run is repeatable without manual DB surgery. Runs
-// against the same sqlite DB the app uses, via the api container.
+// against the same sqlite DB the app uses, via the api container. That DB now
+// holds only user state, so the reference solution is read from the generated
+// content instead.
 import { execFileSync } from 'node:child_process'
+import { readFileSync } from 'node:fs'
 import { fileURLToPath } from 'node:url'
 import { dirname, resolve } from 'node:path'
 
 // fixtures.mjs lives at <repo>/app/e2e/ — compose file is at the repo root.
 const REPO_ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '../..')
+const CONTENT = resolve(REPO_ROOT, 'app/public/data')
+
+// The static content build mirrors an id's path, so nested ids just work.
+export function problemContent(id) {
+  return JSON.parse(readFileSync(`${CONTENT}/problems/${id}.json`, 'utf8'))
+}
 
 function runPython(src) {
   execFileSync('docker', ['compose', 'exec', '-T', 'api', 'python', '-c', src], {
@@ -37,7 +46,6 @@ export function markSolved(id) {
 export function resetProblem(id, { seedSolution = false } = {}) {
   const seed = seedSolution
     ? `
-    sol = c.execute("SELECT solution FROM problem WHERE id=?", (pid,)).fetchone()["solution"]
     c.execute("INSERT INTO submission (problem_id, code, updated_at) "
               "VALUES (?, ?, '2026-01-01T00:00:00+00:00') "
               "ON CONFLICT(problem_id) DO UPDATE SET code=excluded.code", (pid, sol))`
@@ -45,6 +53,7 @@ export function resetProblem(id, { seedSolution = false } = {}) {
   runPython(
     `import db\n` +
     `pid = ${JSON.stringify(id)}\n` +
+    (seedSolution ? `sol = ${JSON.stringify(problemContent(id).solution)}\n` : '') +
     `with db.connect() as c:\n` +
     `    c.execute("DELETE FROM run WHERE problem_id=?", (pid,))\n` +
     `    c.execute("DELETE FROM attempt WHERE problem_id=?", (pid,))` +
