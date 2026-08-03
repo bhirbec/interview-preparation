@@ -5,6 +5,9 @@ import remarkGfm from 'remark-gfm'
 import type { LessonDetail, ProblemStatus } from '../types'
 import AppMenu from '../components/AppMenu'
 import { api } from '../api'
+import { loadCatalog, loadLessons } from '../content'
+import { lessonDetail } from '../lessons'
+import { indexProgress } from '../progress'
 
 const STATUS_ICON: Record<ProblemStatus, string> = {
   solved: '✓',
@@ -27,9 +30,17 @@ export default function Lesson() {
     let cancelled = false
     setData(null)
     setNotFound(false)
-    api
-      .getLesson(id)
-      .then((l) => !cancelled && setData(l))
+    Promise.all([loadLessons(), loadCatalog(), api.getProgress()])
+      .then(([lessons, catalog, progress]) => {
+        if (cancelled) return
+        const detail = lessonDetail(
+          lessons.lessons.find((l) => l.id === id),
+          catalog.problems,
+          indexProgress(progress.problems),
+        )
+        if (detail) setData(detail)
+        else setNotFound(true)
+      })
       .catch(() => !cancelled && setNotFound(true))
     return () => {
       cancelled = true

@@ -1,9 +1,12 @@
 import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { MdCheckCircle } from 'react-icons/md'
-import type { LessonSummary, LessonsResponse } from '../types'
+import type { LessonSummary } from '../types'
 import AppMenu from '../components/AppMenu'
 import { api } from '../api'
+import { loadLessons } from '../content'
+import { lessonSummaries } from '../lessons'
+import { indexProgress } from '../progress'
 
 // Group lessons by topic, preserving the order topics first appear.
 function groupByTopic(lessons: LessonSummary[]): [string, LessonSummary[]][] {
@@ -24,16 +27,20 @@ function pct(part: number, whole: number): string {
 }
 
 export default function Program() {
-  const [data, setData] = useState<LessonsResponse | null>(null)
+  const [lessons, setLessons] = useState<LessonSummary[] | null>(null)
 
   useEffect(() => {
-    api.getLessons().then(setData).catch(() => setData({ lessons: [] }))
+    Promise.all([loadLessons(), api.getProgress()])
+      .then(([content, progress]) =>
+        setLessons(lessonSummaries(content.lessons, indexProgress(progress.problems))),
+      )
+      .catch(() => setLessons([]))
   }, [])
 
-  if (!data) return <div className="loading">Loading…</div>
+  if (!lessons) return <div className="loading">Loading…</div>
 
-  const done = data.lessons.filter((l) => l.done).length
-  const total = data.lessons.length
+  const done = lessons.filter((l) => l.done).length
+  const total = lessons.length
 
   return (
     <div className="page program-page">
@@ -50,11 +57,11 @@ export default function Program() {
         </span>
       </div>
 
-      {groupByTopic(data.lessons).map(([topic, lessons]) => (
+      {groupByTopic(lessons).map(([topic, group]) => (
         <section key={topic} className="topic-group">
           <h3>{topic}</h3>
           <ul className="lesson-cards">
-            {lessons.map((l) => (
+            {group.map((l) => (
               <li key={l.id}>
                 <Link to={`/lesson/${l.id}`} className={`lesson-card ${l.done ? 'done' : ''}`}>
                   <span className="lesson-check">{l.done && <MdCheckCircle />}</span>
