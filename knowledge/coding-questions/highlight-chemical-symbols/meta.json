@@ -2,7 +2,9 @@
   "difficulty": "easy",
   "tags": [
     "string",
-    "sorting",
+    "sorting"
+  ],
+  "companies": [
     "uber"
   ],
   "hint": "for each name, scan every symbol, keep the one with the greatest length (earliest occurrence on ties), then splice square brackets around its first occurrence."

@@ -9,7 +9,7 @@ module never imports db.
 Each coding-question folder (under knowledge/coding-questions/) has four files:
 
     impl.py      # description comment + input classes + the STUBBED primary
-    meta.json    # { difficulty, tags, sources, hint }
+    meta.json    # { difficulty, tags, companies, sources, hint }
     solution.py  # input classes + the full solution
     tests.py     # import unittest + test helpers + the unittest.TestCase
 

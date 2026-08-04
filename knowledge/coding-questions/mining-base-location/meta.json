@@ -3,7 +3,9 @@
   "tags": [
     "bfs",
     "matrix",
-    "graph",
+    "graph"
+  ],
+  "companies": [
     "google"
   ],
   "hint": "BFS from each mining site to accumulate, per cell, the total distance and how many sites reached it; the answer is the reachable-by-all cell with the smallest total (first in row-major order on ties)."

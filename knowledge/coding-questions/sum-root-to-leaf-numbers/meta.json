@@ -3,7 +3,9 @@
   "tags": [
     "tree",
     "dfs",
-    "recursion",
+    "recursion"
+  ],
+  "companies": [
     "google"
   ],
   "hint": "DFS carrying the number built so far (current * 10 + node value); at each leaf add the accumulated number to the running total."

@@ -2,7 +2,9 @@
   "difficulty": "easy",
   "tags": [
     "string",
-    "greedy",
+    "greedy"
+  ],
+  "companies": [
     "uber"
   ],
   "sources": [

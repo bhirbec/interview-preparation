@@ -2,7 +2,9 @@
   "difficulty": "hard",
   "tags": [
     "math",
-    "backtracking",
+    "backtracking"
+  ],
+  "companies": [
     "facebook"
   ],
   "sources": [

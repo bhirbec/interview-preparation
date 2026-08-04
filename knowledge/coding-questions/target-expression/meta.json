@@ -3,7 +3,9 @@
   "tags": [
     "backtracking",
     "recursion",
-    "string",
+    "string"
+  ],
+  "companies": [
     "vmware"
   ],
   "hint": "backtracking over where each number ends; extend the running total with the next number added or subtracted until all digits are consumed."

@@ -3,7 +3,9 @@
   "tags": [
     "string",
     "hashtable",
-    "sorting",
+    "sorting"
+  ],
+  "companies": [
     "twitter"
   ],
   "sources": [

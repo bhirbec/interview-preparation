@@ -3,7 +3,9 @@
   "tags": [
     "recursion",
     "dfs",
-    "hashtable",
+    "hashtable"
+  ],
+  "companies": [
     "google"
   ],
   "hint": "recursive DFS; at each segment expand the set of next keys/indices to visit (\"*\" expands to all children), recurse, and collect leaves at the last segment."

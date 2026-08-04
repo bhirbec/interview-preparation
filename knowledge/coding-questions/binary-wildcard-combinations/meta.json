@@ -3,8 +3,10 @@
   "tags": [
     "recursion",
     "backtracking",
-    "string",
-    "google-interview"
+    "string"
+  ],
+  "companies": [
+    "google"
   ],
   "sources": [
     "https://www.careercup.com/question?id=20308668"

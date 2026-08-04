@@ -3,7 +3,9 @@
   "tags": [
     "tree",
     "bfs",
-    "hashtable",
+    "hashtable"
+  ],
+  "companies": [
     "facebook"
   ],
   "sources": [

@@ -2,7 +2,9 @@
   "difficulty": "medium",
   "tags": [
     "matrix",
-    "array",
+    "array"
+  ],
+  "companies": [
     "facebook"
   ],
   "sources": [

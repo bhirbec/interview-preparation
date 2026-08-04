@@ -1,7 +1,9 @@
 {
   "difficulty": "easy",
   "tags": [
-    "string",
+    "string"
+  ],
+  "companies": [
     "uber"
   ],
   "sources": [
