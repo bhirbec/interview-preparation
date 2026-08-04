@@ -20,16 +20,18 @@ function assert(cond, msg) {
   console.log('  ok -', msg)
 }
 
-// What the page must show follows from the catalog alone: one difficulty bar
-// per distinct difficulty, and topic coverage capped at the top 12 tags.
+// What the page must show follows from the catalog plus the seeded solve: one
+// difficulty bar per distinct difficulty, and one topic bar per tag the user
+// has actually solved (capped at 12) — never one per catalog tag.
 const catalog = JSON.parse(readFileSync(`${CONTENT}/catalog.json`, 'utf8'))
 const difficulties = new Set(catalog.problems.map((p) => p.difficulty).filter(Boolean))
 const tags = new Set(catalog.problems.flatMap((p) => p.tags))
 const titles = new Set(catalog.problems.map((p) => p.title))
-const expectedBars = difficulties.size + Math.min(12, tags.size)
 
 // Guarantee at least one solve so the page isn't empty.
-markSolved('three-sum')
+const SEEDED = 'three-sum'
+markSolved(SEEDED)
+const seededTags = catalog.problems.find((p) => p.id === SEEDED)?.tags ?? []
 
 const browser = await chromium.launch()
 const page = await browser.newPage()
@@ -47,26 +49,66 @@ try {
   await page.locator('.stat-cards').waitFor()
 
   const cards = await page.locator('.stat-cards').textContent()
-  assert(cards.includes(`/ ${catalog.count}`), `solved card counts out of ${catalog.count} problems`)
-  const solved = Number(/(\d+)\s*\/\s*\d+/.exec(cards)?.[1])
-  assert(solved >= 1, `solved count reflects the seeded solve (${solved})`)
+  const solved = Number(
+    await page.locator('.stat-card', { hasText: 'Solved' }).locator('.stat-value').textContent(),
+  )
+  assert(solved >= 1, `solved card shows a bare count of the user's solves (${solved})`)
+  assert(
+    !cards.includes(`${catalog.count}`),
+    `no card measures progress against the ${catalog.count}-problem catalog`,
+  )
   assert(/\d+🔥/.test(cards) && /best \d+/.test(cards), 'streak card renders current + best')
 
-  const bars = await page.locator('.bar-row').count()
-  assert(bars === expectedBars, `${difficulties.size} difficulty + 12 topic bars render (${bars})`)
-
-  // Topic coverage is ranked by total, so the counts must be non-increasing.
-  const topicRows = page.locator('.stat-section', { hasText: 'Topic coverage' }).locator('.bar-row')
-  const topicCounts = await topicRows.locator('.bar-count').allTextContents()
-  const totals = topicCounts.map((t) => Number(t.split('/')[1]))
+  const diffRows = page.locator('.stat-section', { hasText: 'Solved by difficulty' }).locator('.bar-row')
   assert(
-    totals.every((n, i) => i === 0 || totals[i - 1] >= n),
-    `topic bars are ordered by descending total (${totals.join(' ≥ ')})`,
+    (await diffRows.count()) === difficulties.size,
+    `one bar per catalog difficulty (${difficulties.size})`,
   )
-  const topicLabels = await topicRows.locator('.bar-label').allTextContents()
+
+  // Every bar count is now a bare number — no "solved/total" fraction anywhere.
+  const allCounts = await page.locator('.bar-count').allTextContents()
   assert(
-    topicLabels.every((l) => tags.has(l.replace(/^#/, ''))),
+    allCounts.every((c) => /^\d+$/.test(c.trim())),
+    `bar counts are plain solve counts (${allCounts.join(', ')})`,
+  )
+
+  // Topics are ranked by the user's own solves, so counts are non-increasing
+  // and only solved tags get a bar.
+  const topicRows = page.locator('.stat-section', { hasText: 'Solved by topic' }).locator('.bar-row')
+  const topicCounts = (await topicRows.locator('.bar-count').allTextContents()).map(Number)
+  assert(
+    topicCounts.length >= 1 && topicCounts.length <= 12,
+    `topic bars are capped at 12 and cover only solved tags (${topicCounts.length})`,
+  )
+  assert(
+    topicCounts.every((n, i) => n >= 1 && (i === 0 || topicCounts[i - 1] >= n)),
+    `topic bars are ordered by descending solves (${topicCounts.join(' ≥ ')})`,
+  )
+  const topicLabels = (await topicRows.locator('.bar-label').allTextContents()).map((l) =>
+    l.replace(/^#/, ''),
+  )
+  assert(
+    topicLabels.every((l) => tags.has(l)),
     'every topic bar names a tag from the catalog',
+  )
+  assert(
+    topicCounts.length < 12 ? seededTags.every((t) => topicLabels.includes(t)) : true,
+    `the seeded solve's tags are among the solved topics (${seededTags.join(', ')})`,
+  )
+
+  // Gap discovery: untouched tags are named, without a completion denominator.
+  const gapTags = await page
+    .locator('.stat-section', { hasText: 'Not solved yet' })
+    .locator('.tag')
+    .allTextContents()
+  const gaps = gapTags.map((t) => t.replace(/^#/, ''))
+  assert(
+    gaps.every((t) => tags.has(t) && !topicLabels.includes(t)),
+    `unsolved topics name catalog tags with no solve (${gaps.length} listed)`,
+  )
+  assert(
+    seededTags.every((t) => !gaps.includes(t)),
+    'a solved tag never shows up as unsolved',
   )
 
   assert((await page.locator('.heat-cell').count()) === 126, 'activity heatmap has 18×7 cells')

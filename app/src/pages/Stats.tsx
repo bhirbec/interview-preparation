@@ -6,6 +6,8 @@ import { computeStats, sync } from '../db'
 import { formatDuration } from '../time'
 
 const HEATMAP_WEEKS = 18
+// How many topic bars to draw before collapsing the rest into a count.
+const TOPIC_BARS = 12
 
 function dur(ms: number | null): string {
   return ms == null ? '—' : formatDuration(ms)
@@ -39,15 +41,25 @@ function heatStyle(count: number): CSSProperties {
   return { background: 'var(--pass)', opacity: 0.35 + 0.65 * Math.min(1, count / 4) }
 }
 
-function BarRow({ label, solved, total }: { label: string; solved: number; total: number }) {
+// `max` is the largest count in the same section — the bars compare the rows to
+// each other, never to a catalog total.
+function BarRow({
+  label,
+  count,
+  max,
+  raw = false,
+}: {
+  label: string
+  count: number
+  max: number
+  raw?: boolean
+}) {
   return (
     <div className="bar-row">
-      <span className="bar-label">{label}</span>
-      <span className="bar-count">
-        {solved}/{total}
-      </span>
+      <span className={`bar-label${raw ? ' bar-label-raw' : ''}`}>{label}</span>
+      <span className="bar-count">{count}</span>
       <span className="progress-bar">
-        <span className="progress-fill" style={{ width: pct(solved, total) }} />
+        <span className="progress-fill" style={{ width: pct(count, max) }} />
       </span>
     </div>
   )
@@ -73,6 +85,10 @@ export default function Stats() {
   if (!data) return <div className="loading">Loading…</div>
 
   const cells = heatmapCells(data.daily)
+  const diffMax = Math.max(0, ...data.byDifficulty.map((r) => r.solved))
+  const topics = data.byTag.slice(0, TOPIC_BARS)
+  const hiddenTopics = data.byTag.length - topics.length
+  const topicMax = Math.max(0, ...topics.map((t) => t.solved))
 
   return (
     <div className="page stats-page">
@@ -83,9 +99,7 @@ export default function Stats() {
 
       <div className="stat-cards">
         <div className="stat-card">
-          <span className="stat-value">
-            {data.solvedCount} <span className="stat-of">/ {data.totalProblems}</span>
-          </span>
+          <span className="stat-value">{data.solvedCount}</span>
           <span className="stat-label">Solved</span>
         </div>
         <div className="stat-card">
@@ -103,9 +117,9 @@ export default function Stats() {
       </div>
 
       <section className="stat-section">
-        <h3>By difficulty</h3>
+        <h3>Solved by difficulty</h3>
         {data.byDifficulty.map((r) => (
-          <BarRow key={r.difficulty} label={r.difficulty} solved={r.solved} total={r.total} />
+          <BarRow key={r.difficulty} label={r.difficulty} count={r.solved} max={diffMax} />
         ))}
       </section>
 
@@ -153,10 +167,39 @@ export default function Stats() {
       </section>
 
       <section className="stat-section">
-        <h3>Topic coverage</h3>
-        {data.byTag.map((t) => (
-          <BarRow key={t.tag} label={`#${t.tag}`} solved={t.solved} total={t.total} />
-        ))}
+        <h3>Solved by topic</h3>
+        {topics.length === 0 ? (
+          <p className="stat-empty">No solves yet.</p>
+        ) : (
+          <>
+            {topics.map((t) => (
+              <BarRow key={t.tag} label={`#${t.tag}`} count={t.solved} max={topicMax} raw />
+            ))}
+            {hiddenTopics > 0 && (
+              <p className="stat-note">
+                + {hiddenTopics} more topic{hiddenTopics === 1 ? '' : 's'} solved
+              </p>
+            )}
+          </>
+        )}
+      </section>
+
+      <section className="stat-section">
+        <h3>Not solved yet</h3>
+        {data.unsolvedTags.length === 0 ? (
+          <p className="stat-empty">Every topic in the catalog has a solve.</p>
+        ) : (
+          <>
+            <p className="stat-note">Topics you have not solved a problem from yet.</p>
+            <div className="tags">
+              {data.unsolvedTags.map((t) => (
+                <span key={t} className="tag">
+                  #{t}
+                </span>
+              ))}
+            </div>
+          </>
+        )}
       </section>
 
       <div className="stat-cols">

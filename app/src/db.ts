@@ -557,8 +557,6 @@ function timeStat(row: Row | null): TimeStat {
 
 /** The whole stats page, aggregated in SQL. */
 export function computeStats(): StatsResponse {
-  const totalProblems = num(one('SELECT COUNT(*) AS n FROM problem')?.n)
-
   // The ONLY stat that does not join `problem`: it sums the whole progress
   // table, ids no longer in the catalog included, so it matches
   // SELECT COUNT(*) FROM run on the server. Every other stat joins and
@@ -570,8 +568,11 @@ export function computeStats(): StatsResponse {
     SELECT COUNT(*) AS solved, COALESCE(SUM(best_ms), 0) AS total_ms FROM best
   `)
 
+  // Driven off `problem` so every difficulty the catalog uses gets a row, even
+  // one the user has never solved — the difficulties are a closed set, so a row
+  // reading 0 is a real gap, not a shrinking fraction.
   const byDifficulty = all(`
-    SELECT p.difficulty AS difficulty, COUNT(*) AS total,
+    SELECT p.difficulty AS difficulty,
            SUM(CASE WHEN EXISTS (SELECT 1 FROM solve s WHERE s.problem_id = p.id)
                     THEN 1 ELSE 0 END) AS solved
     FROM problem p
@@ -579,16 +580,18 @@ export function computeStats(): StatsResponse {
     ORDER BY ${DIFF_ORDER}
   `)
 
-  // Ranked by TOTAL, not by solved, and cut to 12 after ordering.
-  const byTag = all(`
-    SELECT t.tag AS tag, COUNT(*) AS total,
+  // Every tag with its solve count, ranked by the user's solves — NOT by how
+  // many problems the catalog happens to carry. Unranked and uncut here: the
+  // page splits the zero-solve tail off as the "not solved yet" list, and the
+  // secondary `t.tag` ordering leaves that tail alphabetical.
+  const tagSolves = all(`
+    SELECT t.tag AS tag,
            SUM(CASE WHEN EXISTS (SELECT 1 FROM solve s WHERE s.problem_id = t.problem_id)
                     THEN 1 ELSE 0 END) AS solved
     FROM problem_tag t
     JOIN problem p ON p.id = t.problem_id
     GROUP BY t.tag
-    ORDER BY total DESC, t.tag
-    LIMIT 12
+    ORDER BY solved DESC, t.tag
   `)
 
   const overall = one(`
@@ -674,20 +677,17 @@ export function computeStats(): StatsResponse {
 
   return {
     solvedCount: num(totals?.solved),
-    totalProblems,
     totalRuns,
     totalTimeMs: num(totals?.total_ms),
     streak: { current: num(streak?.current), longest: num(streak?.longest) },
     byDifficulty: byDifficulty.map((r) => ({
       difficulty: str(r.difficulty),
       solved: num(r.solved),
-      total: num(r.total),
     })),
-    byTag: byTag.map((r) => ({
-      tag: str(r.tag),
-      solved: num(r.solved),
-      total: num(r.total),
-    })),
+    byTag: tagSolves
+      .filter((r) => num(r.solved) > 0)
+      .map((r) => ({ tag: str(r.tag), solved: num(r.solved) })),
+    unsolvedTags: tagSolves.filter((r) => num(r.solved) === 0).map((r) => str(r.tag)),
     solveTime: {
       overall: timeStat(overall),
       byDifficulty: timeByDifficulty.map(
