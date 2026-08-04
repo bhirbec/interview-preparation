@@ -2,7 +2,9 @@
   "difficulty": "hard",
   "tags": [
     "array",
-    "two-pointers",
+    "two-pointers"
+  ],
+  "companies": [
     "twitter"
   ],
   "hint": "walk inward from both ends; the shorter side bounds the water there, so advance whichever side is lower, banking (running max - height) as you go."

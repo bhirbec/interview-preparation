@@ -2,7 +2,9 @@
   "difficulty": "hard",
   "tags": [
     "matrix",
-    "graph",
+    "graph"
+  ],
+  "companies": [
     "google"
   ],
   "hint": "Dijkstra / best-first search with a min-heap keyed by the maximum elevation seen so far on the path; pop cells in increasing order of that key and return it upon reaching the target."

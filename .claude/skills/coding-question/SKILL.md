@@ -1,6 +1,6 @@
 ---
 name: coding-question
-description: Turn a YouTube coding-challenge video OR an existing local implementation into a coding question under ./knowledge/coding-questions, authored as four files (impl.py skeleton, meta.json difficulty/tags/sources/hint, solution.py full solution, tests.py). Use when the user gives a YouTube URL (e.g. a CodeSignal/LeetCode explainer) or a local path to an existing solution file. Invoke with the video URL or local path as the argument.
+description: Turn a YouTube coding-challenge video OR an existing local implementation into a coding question under ./knowledge/coding-questions, authored as four files (impl.py skeleton, meta.json difficulty/tags/companies/sources/hint, solution.py full solution, tests.py). Use when the user gives a YouTube URL (e.g. a CodeSignal/LeetCode explainer) or a local path to an existing solution file. Invoke with the video URL or local path as the argument.
 argument-hint: <youtube-url-or-local-path>
 ---
 
@@ -15,9 +15,11 @@ to an existing implementation already in this repo, create a new folder under
   Source/Difficulty/Tags/Approach), any input data-structure classes
   (e.g. `Node`), and the primary function **stubbed** with `raise NotImplementedError`.
 - **`meta.json`** — `{ "difficulty": "<easy|medium|hard>", "tags": ["tag1", ...],
-  "sources": ["<url>", ...], "hint": "<one-line approach>" }`. Difficulty, tags,
-  source URLs, and the solution hint live here (not in the impl.py comment);
-  `hint` is `""` when there's no useful nudge.
+  "companies": ["<company>", ...], "sources": ["<url>", ...],
+  "hint": "<one-line approach>" }`. Difficulty, topic tags, company
+  attributions, source URLs, and the solution hint live here (not in the
+  impl.py comment); `hint` is `""` when there's no useful nudge, and
+  `companies` is omitted entirely when the problem has no attribution.
 - **`solution.py`** — the full working solution: the same input classes + the
   implemented primary function (+ any private helpers or alternate variants).
 - **`tests.py`** — `import unittest`, any test-only helper functions (e.g.
@@ -78,7 +80,7 @@ move-and-cleanup step for local sources (step 7).
 
    - **`meta.json`** in the same folder:
      `{ "difficulty": "<easy|medium|hard>", "tags": ["tag1", ...],
-     "sources": ["<url>", ...], "hint": "..." }`
+     "companies": ["<company>", ...], "sources": ["<url>", ...], "hint": "..." }`
      - `sources`: reference URLs — **only if the input carries a reference
        link**; omit the key otherwise. Preserve every genuine reference URL (the
        YouTube URL in video mode; any Coursera/YouTube/GeeksforGeeks/LeetCode
@@ -94,7 +96,15 @@ move-and-cleanup step for local sources (step 7).
        `dynamic-programming`); name the technique/structure/topic; every tag must
        carry real signal (avoid vague catch-alls like `implementation`,
        `simulation`, `logic`). Do NOT tag the language. Store tags **without** the
-       leading `#`.
+       leading `#`. **Never put a company name in `tags`** — company
+       attributions go in `companies`.
+     - `companies`: companies the problem is attributed to (e.g. it was asked in
+       their interview) — **only if the input names one**; omit the key
+       otherwise. Same normalization as tags (lowercase, kebab-case) and reuse
+       the existing names rather than inventing variants:
+       ```
+       python3 -c "import json,glob,collections as c; print(c.Counter(n for f in glob.glob('knowledge/coding-questions/**/meta.json',recursive=True) for n in json.load(open(f)).get('companies',[])).most_common())"
+       ```
 
    - **Input classes.** If the inputs are a data structure (linked list, tree,
      grid wrapper, …), define the class(es) the tests need to construct inputs

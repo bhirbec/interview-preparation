@@ -3,7 +3,9 @@
   "tags": [
     "tree",
     "dfs",
-    "recursion",
+    "recursion"
+  ],
+  "companies": [
     "box"
   ],
   "hint": "post-order DFS returning whether each subtree is unival; a node is unival iff every child subtree is unival and shares the node's value."

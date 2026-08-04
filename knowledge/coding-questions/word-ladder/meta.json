@@ -3,7 +3,9 @@
   "tags": [
     "bfs",
     "graph",
-    "string",
+    "string"
+  ],
+  "companies": [
     "google"
   ],
   "sources": [

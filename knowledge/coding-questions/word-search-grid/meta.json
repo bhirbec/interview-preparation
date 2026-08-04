@@ -3,7 +3,9 @@
   "tags": [
     "matrix",
     "dfs",
-    "backtracking",
+    "backtracking"
+  ],
+  "companies": [
     "uber"
   ],
   "hint": "from every cell that matches the first letter, run a depth-first search that marks the cell visited, recurses into the four neighbors for the next letter, then unmarks it on backtrack."

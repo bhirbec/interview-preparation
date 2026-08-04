@@ -2,7 +2,9 @@
   "difficulty": "easy",
   "tags": [
     "two-pointers",
-    "array",
+    "array"
+  ],
+  "companies": [
     "facebook"
   ],
   "sources": [
