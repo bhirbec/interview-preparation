@@ -125,16 +125,17 @@ export interface LessonDetail {
 
 // --- stats ---
 
+// Counts of the user's own solves only. The catalog is a growing library, not a
+// syllabus, so nothing here is expressed against a catalog total: importing new
+// problems must never move a number on the stats page.
 export interface DifficultyStat {
   difficulty: string
   solved: number
-  total: number
 }
 
 export interface TagStat {
   tag: string
   solved: number
-  total: number
 }
 
 export interface TimeStat {
@@ -170,12 +171,15 @@ export interface ProblemRef {
 
 export interface StatsResponse {
   solvedCount: number
-  totalProblems: number
   totalRuns: number
   totalTimeMs: number
   streak: { current: number; longest: number }
   byDifficulty: DifficultyStat[]
+  // Tags with at least one solve, most solved first; the page caps how many it
+  // draws. `unsolvedTags` is the complement — every remaining tag, alphabetical
+  // — so the two together name every tag in the catalog exactly once.
   byTag: TagStat[]
+  unsolvedTags: string[]
   solveTime: { overall: TimeStat; byDifficulty: DifficultyTimeStat[] }
   fastest: FastestSolve[]
   daily: { date: string; count: number }[]

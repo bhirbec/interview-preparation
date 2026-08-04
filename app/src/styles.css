@@ -1140,12 +1140,6 @@ button.tag:hover {
   font-variant-numeric: tabular-nums;
 }
 
-.stat-of {
-  font-size: 1rem;
-  font-weight: 400;
-  color: var(--muted);
-}
-
 .stat-label {
   font-size: 0.8rem;
   color: var(--muted);
@@ -1181,6 +1175,12 @@ button.tag:hover {
   text-transform: capitalize;
 }
 
+/* Tags are printed as written, so a topic bar and the chip for the same tag
+   never disagree on case. */
+.bar-label-raw {
+  text-transform: none;
+}
+
 .bar-count {
   flex: 0 0 3rem;
   text-align: right;
@@ -1192,6 +1192,19 @@ button.tag:hover {
 .bar-row .progress-bar {
   flex: 1;
   width: auto;
+}
+
+/* Caption under a stats section: the "+ N more" line, the untouched-topics
+   hint. Muted, and not a list item. */
+.stat-note {
+  margin: 0.5rem 0 0;
+  color: var(--muted);
+  font-size: 0.85rem;
+}
+
+/* The stats page reuses the catalog's tag chips, but they filter nothing there. */
+.stat-section span.tag {
+  cursor: default;
 }
 
 /* activity heatmap */
