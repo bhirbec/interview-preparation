@@ -10,10 +10,46 @@ one.
 
 ## Stacks
 
-Three DynamoDB tables holding the user state that `backend/db.py` reads and
-writes: `submissions-table`, `attempts-table` and `runs-table`. All on-demand,
-all keyed by `user_id` + `sk`, all `RETAIN` — they hold the only copy of a
-user's progress.
+`submissions-table`, `attempts-table`, `runs-table` — the user state that
+`backend/db.py` reads and writes. All on-demand, all keyed by `user_id` + `sk`,
+all `RETAIN`: they hold the only copy of a user's progress.
+
+`trainer-website` — the site itself, live on
+**https://d2xq9qs5gi6j3t.cloudfront.net**. An S3 bucket behind CloudFront, plus
+the FastAPI app of `backend/` as a Lambda on the *same* distribution under
+`/api/*`. One distribution means the browser is same-origin, so there is no CORS
+setup anywhere and `app/src/api.ts` uses the same relative `/api/...` paths in
+production as it does behind the Vite dev proxy.
+
+The stack deploys the API; the site's files are published separately by
+`app/scripts/deploy`, which reads the bucket name and distribution id back from
+this stack's outputs.
+
+### The Lambda bundle
+
+`lib/backend-code.ts` builds it from `backend/uv.lock` with `uv`, asking for
+Linux/ARM wheels from whatever machine is deploying — so the Lambda runs the
+same versions `docker compose up` runs, without a Docker bundling step. `uv`
+must be installed. The entrypoint is `backend/lambda_handler.py` (Mangum over
+the unchanged `server.py`).
+
+### Two things about the function URL
+
+CloudFront reaches the Lambda through a function URL locked to `AWS_IAM`, signed
+by an origin access control. That arrangement has two sharp edges, both of which
+show up as a 403 that the distribution's error response rewrites into the SPA's
+`index.html` — an API that answers HTML:
+
+1. AWS requires **two** resource-based permissions, `lambda:InvokeFunctionUrl`
+   *and* `lambda:InvokeFunction`. `StaticWebsiteStack` grants the first;
+   `bin/aws.ts` adds the second.
+2. Lambda rejects unsigned payloads, and CloudFront does not read request
+   bodies, so any request **with a body** must carry its own
+   `x-amz-content-sha256`. `app/src/api.ts` computes it — that is why the
+   frontend hashes what it POSTs and PUTs.
+
+Both are documented under [Restrict access to an AWS Lambda function URL
+origin](https://docs.aws.amazon.com/AmazonCloudFront/latest/DeveloperGuide/private-content-restricting-access-to-lambda.html).
 
 ## Deploy
 
@@ -37,8 +73,8 @@ Then:
 npx cdk deploy <stack> --profile interview-prep
 ```
 
-The account has not been bootstrapped yet; the first deploy needs
-`npx cdk bootstrap --profile interview-prep`.
+The account is bootstrapped (`CDKToolkit`, `us-east-1`); a new region or account
+would need `npx cdk bootstrap --profile interview-prep` first.
 
 ## Useful Commands
 

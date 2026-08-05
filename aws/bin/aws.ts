@@ -1,7 +1,9 @@
 #!/usr/bin/env node
 import 'source-map-support/register';
 import * as cdk from 'aws-cdk-lib';
-import { DynamoStack } from '@devkit/cdk';
+import * as lambda from 'aws-cdk-lib/aws-lambda';
+import { DynamoStack, StaticWebsiteStack } from '@devkit/cdk';
+import { backendLambdaCode } from '../lib/backend-code';
 
 const app = new cdk.App();
 const account = process.env.CDK_DEFAULT_ACCOUNT || "0";
@@ -62,3 +64,72 @@ const stateTable = (name: string) => ({
 new DynamoStack(app, 'submissions-table', stateTable(tableNames.submissions));
 new DynamoStack(app, 'attempts-table', stateTable(tableNames.attempts));
 new DynamoStack(app, 'runs-table', stateTable(tableNames.runs));
+
+// Built from account + region rather than by importing the table constructs:
+// the names are fixed above, so this needs no cross-stack export and the
+// website stack can be deployed, rolled back or replaced on its own.
+const tableArn = (name: string) => `arn:aws:dynamodb:${region}:${account}:table/${name}`;
+
+// The site itself: S3 behind CloudFront, with the FastAPI app of backend/ as a
+// Lambda on the *same* distribution under /api/*.
+//
+// No `domainName` — the account has no hosted zone on purpose, so the site is
+// served on CloudFront's own d<...>.cloudfront.net name and the stack creates
+// no Route 53 record and no ACM certificate.
+//
+// Same distribution means same origin, which is the whole point: the browser
+// sends the user_id cookie by itself, app/src/api.ts keeps calling relative
+// /api/... paths, and there is no CORS hop — identical to what the Vite dev
+// proxy does locally.
+const site = new StaticWebsiteStack(app, 'trainer-website', {
+  env,
+  bucketName: 'interview-prep-trainer-website',
+  // The default is /404.html, which this app does not build: every unknown path
+  // is a client-side route, and index.html is what boots the router.
+  notFoundPage: '/index.html',
+  api: {
+    functionProps: {
+      functionName: 'trainer-api',
+      runtime: lambda.Runtime.PYTHON_3_13,
+      // Graviton, matching the wheels lib/backend-code.ts asks uv for.
+      architecture: lambda.Architecture.ARM_64,
+      handler: 'lambda_handler.handler',
+      code: backendLambdaCode(),
+      // Pyodide runs the tests in the browser; every endpoint here is a handful
+      // of DynamoDB calls, so the ceiling only has to cover a cold start.
+      timeout: cdk.Duration.seconds(15),
+      memorySize: 512,
+      logRetention: cdk.aws_logs.RetentionDays.ONE_MONTH,
+    },
+    // backend/db.py defaults to these same names; passing them keeps the
+    // deployed API pointing at the tables this app owns rather than at a
+    // default that happens to agree.
+    environmentVariables: {
+      SUBMISSIONS_TABLE: tableNames.submissions,
+      ATTEMPTS_TABLE: tableNames.attempts,
+      RUNS_TABLE: tableNames.runs,
+    },
+    // Read and write: every endpoint but /api/health touches user state.
+    permissionArns: {
+      dynamodb: { write: Object.values(tableNames).map(tableArn) },
+    },
+  },
+});
+
+// StaticWebsiteStack grants CloudFront lambda:InvokeFunctionUrl, which is not
+// enough on its own: AWS documents *two* statements for an OAC-signed function
+// URL origin, and without this second one every /api/* request is rejected at
+// the function URL — before the Lambda is even invoked, so nothing shows up in
+// its logs. It surfaces as a 403 that the distribution's error response turns
+// into the SPA's index.html, i.e. a site whose API silently answers HTML.
+// https://docs.aws.amazon.com/AmazonCloudFront/latest/DeveloperGuide/private-content-restricting-access-to-lambda.html
+site.apiFunction?.addPermission('cloudfront-invoke-function', {
+  principal: new cdk.aws_iam.ServicePrincipal('cloudfront.amazonaws.com'),
+  action: 'lambda:InvokeFunction',
+  sourceArn: `arn:aws:cloudfront::${account}:distribution/${site.distribution.distributionId}`,
+});
+
+// app/scripts/deploy reads both back at runtime instead of hardcoding ids that
+// change whenever the stack is replaced. The distribution id and domain name
+// are already emitted by StaticWebsiteStack.
+new cdk.CfnOutput(site, 'website-bucket-name', { value: site.bucket.bucketName });

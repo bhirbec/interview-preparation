@@ -6,6 +6,9 @@ requires-python = ">=3.13"
 dependencies = [
     "boto3>=1.35",
     "fastapi>=0.115",
+    # The ASGI adapter used by lambda_handler.py in AWS. uvicorn stays the local
+    # server; the two never run in the same process.
+    "mangum>=0.19",
     "uvicorn[standard]>=0.34",
 ]
 
