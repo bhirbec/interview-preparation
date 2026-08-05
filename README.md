@@ -92,6 +92,22 @@ the API never creates anything. Inspect the local tables with:
 docker compose exec api python -c "import db; print(db._db().meta.client.list_tables())"
 ```
 
+Before this the state lived in SQLite, in a Docker volume that is no longer
+mounted. `backend/migrate_sqlite_to_dynamo.py` imports a backup of that database
+into the three tables — a one-off, kept because SQLite state predates `user_id`
+and so has to be re-imported once per target table, each time naming the browser
+identity it belongs to:
+
+```
+python backend/migrate_sqlite_to_dynamo.py --sqlite path/to/trainer.db \
+    --user-id <uuid> --endpoint-url http://dynamodb:8000 --dry-run
+```
+
+`--user-id` is required (rows are invisible to the app under the wrong one),
+`--dry-run` reports the per-table counts without writing, and re-running is safe:
+sort keys are ULIDs derived from each source row, so the second run overwrites
+the same items instead of adding new ones.
+
 The browser builds its own in-memory SQLite (sql.js) over the generated JSON and
 answers search, filtering, pagination, the curriculum roll-ups and the stats
 page from it — no request per keystroke. The WASM build is vendored at
