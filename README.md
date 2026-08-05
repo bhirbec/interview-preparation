@@ -26,6 +26,23 @@ It only needs the standard library, so it also runs on the host:
 CONTENT_OUT=app/public/data python3 backend/build_content.py
 ```
 
+<h3>Browser identity</h3>
+
+Each browser gets a `user_id` on first load: the app generates a UUID with
+`crypto.randomUUID()` and stores it in a `user_id` cookie (`path=/`,
+`SameSite=Lax`, one-year max-age, `Secure` only over HTTPS, and readable from
+JavaScript — the frontend writes it). Because the API is same-origin, the
+browser sends it with every request on its own; no API call site passes it. The
+server resolves it in exactly one place, `current_user()` in `backend/user.py`,
+which validates the UUID shape and answers **400** if the cookie is missing or
+malformed.
+
+**This is not authentication and there is no recovery path.** The id is minted
+by the client and never verified, so anyone can set the cookie to another value
+and read that state. Clear your cookies, switch browser, or open a private
+window, and you get a brand-new identity — the old state still exists on the
+server, and nothing can prove it was yours or hand it back.
+
 The SQLite database on the server holds only user state (saved code, test runs,
 timed attempts); the content is never stored in it. The browser builds its own
 in-memory SQLite (sql.js) over the generated JSON and answers search, filtering,
