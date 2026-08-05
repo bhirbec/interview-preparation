@@ -15,14 +15,38 @@ function get<T>(url: string): Promise<T> {
   return fetch(url).then((r) => asJson<T>(r))
 }
 
+// The SHA-256 of a request body, hex, or null where the browser has no
+// SubtleCrypto — see send() for why either answer is fine.
+async function sha256Hex(body: string): Promise<string | null> {
+  // Only defined in a secure context: https, or localhost in development.
+  if (!globalThis.crypto?.subtle) return null
+  const digest = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(body))
+  return [...new Uint8Array(digest)].map((b) => b.toString(16).padStart(2, '0')).join('')
+}
+
 // POST/PUT with an optional JSON body (omit the body for query-param endpoints).
-function send<T>(method: string, url: string, body?: unknown): Promise<T> {
+//
+// x-amz-content-sha256 is what makes the body-carrying calls work in AWS. The
+// deployed API is a Lambda function URL behind this distribution, and CloudFront
+// SigV4-signs every /api/* request to it — but it does not read the body, and
+// Lambda refuses unsigned payloads. So the *caller* has to hand it the body's
+// hash to sign; without it PUT and POST come back 403 while every GET works,
+// which is as confusing to debug as it sounds.
+// https://docs.aws.amazon.com/AmazonCloudFront/latest/DeveloperGuide/private-content-restricting-access-to-lambda.html
+//
+// Sent unconditionally: locally the Vite proxy forwards the header to uvicorn,
+// which ignores it, so dev and prod stay on one code path. Where SubtleCrypto
+// is missing there is no CloudFront in front either (it needs a secure context,
+// and so does the deployed site), so omitting it is correct and not a fallback.
+async function send<T>(method: string, url: string, body?: unknown): Promise<T> {
   const init: RequestInit = { method }
   if (body !== undefined) {
-    init.headers = jsonHeaders
-    init.body = JSON.stringify(body)
+    const json = JSON.stringify(body)
+    const hash = await sha256Hex(json)
+    init.headers = hash ? { ...jsonHeaders, 'x-amz-content-sha256': hash } : jsonHeaders
+    init.body = json
   }
-  return fetch(url, init).then((r) => asJson<T>(r))
+  return asJson<T>(await fetch(url, init))
 }
 
 export type AttemptAction = 'start' | 'pause' | 'resume'

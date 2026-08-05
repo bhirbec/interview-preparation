@@ -1,0 +1,133 @@
+#!/bin/bash
+#
+# Publish the trainer to S3 + CloudFront (the `trainer-website` stack in aws/).
+#
+# Everything the script needs to address is read back from the stack's outputs,
+# so nothing here goes stale when the distribution or the bucket is replaced —
+# and there is no domain to look the distribution up by: the site is served on
+# CloudFront's own d<...>.cloudfront.net name.
+#
+# The API is NOT deployed from here. It is a Lambda inside the same stack, on
+# the same distribution under /api/*, and ships with `cdk deploy trainer-website`.
+set -euo pipefail
+
+ACCOUNT_ID=332778514565
+REGION=us-east-1
+STACK=trainer-website
+
+# The *default* profile is the org payer. Same reasoning as aws/bin/aws.ts:
+# a forgotten profile must not be able to aim this at another account.
+export AWS_PROFILE="${AWS_PROFILE:-interview-prep}"
+
+ROOT=$(cd "$(dirname "$0")/../.." && pwd)
+DIST_DIR="$ROOT/app/dist"
+
+fail() { echo "✘ $1" >&2; exit 1; }
+
+command -v aws >/dev/null || fail "the AWS CLI is not installed"
+
+# --- who are we deploying as -----------------------------------------------
+
+ACTUAL_ACCOUNT=$(aws sts get-caller-identity --query Account --output text 2>/dev/null) \
+  || fail "could not reach AWS with profile '$AWS_PROFILE'"
+
+if [ "$ACTUAL_ACCOUNT" != "$ACCOUNT_ID" ]; then
+  fail "profile '$AWS_PROFILE' is account $ACTUAL_ACCOUNT, not $ACCOUNT_ID.
+     Run with AWS_PROFILE=interview-prep."
+fi
+
+# --- where to deploy, straight from the stack -------------------------------
+
+output() {
+  aws cloudformation describe-stacks \
+    --region "$REGION" --stack-name "$STACK" \
+    --query "Stacks[0].Outputs[?OutputKey=='$1'].OutputValue | [0]" \
+    --output text 2>/dev/null
+}
+
+BUCKET=$(output websitebucketname)
+DISTRIBUTION_ID=$(output distributionid)
+SITE_DOMAIN=$(output distributiondomainname)
+
+for v in BUCKET DISTRIBUTION_ID SITE_DOMAIN; do
+  case "${!v}" in
+    ""|None) fail "no '$v' output on stack '$STACK' — deploy it first: (cd aws && npx cdk deploy $STACK --profile $AWS_PROFILE)" ;;
+  esac
+done
+
+echo "This will deploy the coding trainer to production:"
+echo "  account      $ACCOUNT_ID ($AWS_PROFILE)"
+echo "  bucket       s3://$BUCKET"
+echo "  distribution $DISTRIBUTION_ID"
+echo "  url          https://$SITE_DOMAIN"
+echo ""
+read -p "Continue? (y/n) " -n 1 -r
+echo ""
+[[ $REPLY =~ ^[Yy]$ ]] || fail "aborted."
+
+# --- build ------------------------------------------------------------------
+
+# The knowledge content is generated and gitignored, exactly as the api
+# container generates it on boot — a deploy from a fresh clone must not ship a
+# site with an empty catalog. It lands in app/public, which Vite copies into
+# dist, so it has to run BEFORE the build.
+echo "Building content from knowledge/ ..."
+CONTENT_OUT="$ROOT/app/public/data" python3 "$ROOT/backend/build_content.py"
+
+echo "Building the app ..."
+(cd "$ROOT/app" && npm run build)
+
+[ -f "$DIST_DIR/index.html" ] || fail "no index.html in $DIST_DIR"
+# Belt and braces: Vite copies public/ into dist/, so data/ arrives with the
+# rest. If that ever stops being true the site would deploy with no content at
+# all and still answer 200, which is the failure mode this catches.
+[ -f "$DIST_DIR/data/catalog.json" ] || fail "no data/catalog.json in $DIST_DIR — Vite did not copy public/data"
+
+# --- upload -----------------------------------------------------------------
+#
+# Two passes, because the right cache header differs by how a file is addressed:
+#
+#   assets/*  Vite content-hashes the filename, so the bytes behind a name never
+#             change -> cache for a year, immutable.
+#   the rest  index.html, data/*.json, the Pyodide worker and sql-wasm.wasm are
+#             fetched by a FIXED path. Cached, a returning browser keeps booting
+#             the previous bundle (old asset hashes) until the cache expires ->
+#             no-cache, i.e. revalidate every time (a 304 when unchanged).
+#
+# No --delete: the bucket has no other writer, and the only things it would
+# remove are the previous build's hashed assets — which every tab still running
+# the old index.html is loading from. Orphans are unreachable (nothing links
+# them) and cost cents.
+
+echo "Uploading to s3://$BUCKET ..."
+
+aws s3 sync "$DIST_DIR" "s3://$BUCKET" \
+  --cache-control "public, max-age=31536000, immutable" \
+  --exclude "*" --include "assets/*"
+
+aws s3 sync "$DIST_DIR" "s3://$BUCKET" \
+  --cache-control "no-cache" \
+  --exclude "assets/*" `# content-hashed: uploaded immutable above, don't overwrite that header`
+
+# sync skips files whose bytes are unchanged, which would leave the *previous*
+# cache-control on them. index.html is the one file where that is fatal — it is
+# what points at the new asset hashes — so it is always re-uploaded.
+aws s3 cp "$DIST_DIR/index.html" "s3://$BUCKET/index.html" --cache-control "no-cache"
+
+echo "✔ uploaded"
+
+# --- invalidate -------------------------------------------------------------
+#
+# no-cache is a *browser* header; CloudFront still holds its own copy at the
+# edge. Invalidate everything: the immutable assets are new paths anyway, so
+# this only really drops index.html, data/ and the wasm.
+
+echo "Invalidating CloudFront ..."
+INVALIDATION=$(aws cloudfront create-invalidation \
+  --distribution-id "$DISTRIBUTION_ID" \
+  --paths "/*" \
+  --query 'Invalidation.Id' --output text)
+
+echo "✔ invalidation $INVALIDATION created"
+echo ""
+echo "Live at https://$SITE_DOMAIN"

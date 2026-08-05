@@ -3,6 +3,30 @@
 This repository contains resources to prepare for technical interviews. You will find common algorithms,
 well known data structures, and some coding questions found through websites like careerup.
 
+<h2>Deployed site</h2>
+
+**https://d2xq9qs5gi6j3t.cloudfront.net**
+
+S3 + CloudFront in AWS account 332778514565 (`interview-prep`), on CloudFront's
+own `*.cloudfront.net` name — the account has no domain on purpose. The API is
+not a second host: the FastAPI app of `backend/` runs as a Lambda on the *same*
+distribution under `/api/*`, so the browser is same-origin exactly as it is
+behind the Vite dev proxy locally — no CORS, and `app/src/api.ts` calls the same
+relative paths in both. Infrastructure lives in [`aws/`](aws/).
+
+Publish a new version of the site (builds the content and the app, uploads with
+the right cache headers, invalidates CloudFront):
+
+```
+./app/scripts/deploy
+```
+
+The API ships separately, with the stack that owns it:
+
+```
+cd aws && npx cdk deploy trainer-website --profile interview-prep
+```
+
 <h2>Running the trainer app</h2>
 
 ```
