@@ -10,7 +10,7 @@ import { chromium } from 'playwright'
 import { readFileSync } from 'node:fs'
 import { fileURLToPath } from 'node:url'
 import { dirname, resolve } from 'node:path'
-import { markSolved } from './fixtures.mjs'
+import { newPage, markSolved } from './fixtures.mjs'
 
 const BASE = process.env.BASE_URL || 'http://localhost:3100'
 const CONTENT = resolve(dirname(fileURLToPath(import.meta.url)), '../public/data')
@@ -34,7 +34,7 @@ markSolved(SEEDED)
 const seededTags = catalog.problems.find((p) => p.id === SEEDED)?.tags ?? []
 
 const browser = await chromium.launch()
-const page = await browser.newPage()
+const page = await newPage(browser)
 page.on('pageerror', (e) => console.log('  [pageerror]', e.message))
 
 try {

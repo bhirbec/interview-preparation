@@ -1,7 +1,7 @@
 # Docker service logs
 logs/*.log
 
-# Backend SQLite database + Python caches
+# Python caches (and any stray SQLite file — the server used to keep one here)
 *.db
 __pycache__/
 *.pyc

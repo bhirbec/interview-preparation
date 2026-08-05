@@ -33,17 +33,44 @@ services:
       # Mount app/public (tracked, already exists) rather than app/public/data —
       # Docker creates a missing bind-mount path root-owned.
       - ./app/public:/public-out
-      - api_data:/data
       - ./logs:/logs
     environment:
-      DB_PATH: /data/trainer.db
       QUESTIONS_DIR: /coding-questions
       LESSONS_DIR: /lessons
       CONTENT_OUT: /public-out/data
+      # Setting DDB_ENDPOINT is also what tells the server it is running locally,
+      # so it creates the table on boot; in AWS the table is CDK-managed.
+      DDB_ENDPOINT: http://dynamodb:8000
+      DDB_TABLE: trainer
+      # DynamoDB Local ignores credentials, but boto3 refuses to sign without
+      # them, so give it something.
+      AWS_REGION: us-east-1
+      AWS_ACCESS_KEY_ID: local
+      AWS_SECRET_ACCESS_KEY: local
+    depends_on:
+      - dynamodb
     # The generated content is gitignored, so build it on boot: a fresh clone
     # must not come up blank.
     command: /bin/sh -c "mkdir -p /logs && python build_content.py && uvicorn server:app --host 0.0.0.0 --port 8000 --reload 2>&1 | tee /logs/api.log"
 
+  # User state lives here: one table, keyed by the id in the browser's cookie.
+  dynamodb:
+    restart: unless-stopped
+    image: amazon/dynamodb-local:2.5.2
+    # Published so host-side scripts (aws dynamodb --endpoint-url) can reach it;
+    # the api container talks to it over the compose network instead.
+    ports:
+      - "${DDB_PORT:-8002}:8000"
+    working_dir: /home/dynamodblocal
+    # -sharedDb: one database file for every credential set, so it does not
+    # matter which fake access key a client signs with.
+    command: ["-jar", "DynamoDBLocal.jar", "-sharedDb", "-dbPath", "./data"]
+    volumes:
+      - dynamodb_data:/home/dynamodblocal/data
+    # The named volume mounts in root-owned; the image's own user cannot write
+    # to it, and there is nothing to protect in a local dev database.
+    user: root
+
 volumes:
   frontend_node_modules:
-  api_data:
+  dynamodb_data:

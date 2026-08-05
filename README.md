@@ -9,8 +9,9 @@ well known data structures, and some coding questions found through websites lik
 docker compose up
 ```
 
-The frontend is on http://localhost:3000 and the API on http://localhost:8000
-(override with `APP_PORT` / `API_PORT`).
+The frontend is on http://localhost:3000, the API on http://localhost:8000 and
+DynamoDB Local on http://localhost:8002 (override with `APP_PORT` / `API_PORT` /
+`DDB_PORT`).
 
 The knowledge content (coding questions + lessons) is served as static JSON from
 `app/public/data/`, generated from `knowledge/` by `backend/build_content.py`.
@@ -26,8 +27,36 @@ It only needs the standard library, so it also runs on the host:
 CONTENT_OUT=app/public/data python3 backend/build_content.py
 ```
 
-The SQLite database on the server holds only user state (saved code, test runs,
-timed attempts); the content is never stored in it. The browser builds its own
+The server stores only user state (saved code, test runs, timed attempts) and it
+stores it in DynamoDB — locally the `dynamodb` container, which is
+[DynamoDB Local](https://hub.docker.com/r/amazon/dynamodb-local). One table,
+`trainer`, keyed by `pk` (`U#<user_id>`) and `sk` (`P#`, `RUN#` or `SLV#` plus
+the problem id), so everything one user owns sits in one partition and every
+read is a `GetItem` or a single-partition `Query`. The api container creates the
+table on boot when `DDB_ENDPOINT` is set; the data survives `docker compose
+down` in the `dynamodb_data` volume and is thrown away by `docker compose down
+-v`. To poke at it directly:
+
+```
+aws dynamodb scan --table-name trainer --endpoint-url http://localhost:8002
+```
+
+**The `user_id` is a cookie, not a login.** On load the app looks for a
+`trainer_uid` cookie and, if there is none, generates one with
+`crypto.randomUUID()` and stores it for a year (`app/src/user.ts`). A cookie
+rather than `localStorage` because same-origin `fetch` sends it automatically,
+so no API call site has to know it exists. The server reads it in one place
+(`current_user()` in `backend/server.py`), validates it is a UUID before it
+reaches a key, and rejects a request without one with a 400.
+
+This is **not authentication**: the id is generated in the browser and the
+server takes it at face value, so anyone can set the cookie to someone else's id
+and read their data. It is a partition key for a single-user prototype. The
+practical consequence is that identity lives entirely in that cookie — clearing
+cookies, or opening the app in a different browser or a private window, mints a
+new id and shows an empty history, and there is no way to get the old one back.
+
+The browser builds its own
 in-memory SQLite (sql.js) over the generated JSON and answers search, filtering,
 pagination, the curriculum roll-ups and the stats page from it — no request per
 keystroke. The WASM build is vendored at `app/public/sql-wasm.wasm`; refresh it

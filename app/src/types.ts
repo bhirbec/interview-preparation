@@ -7,7 +7,7 @@ export interface TestResult {
 }
 
 export interface RunRecord {
-  id: number
+  id: string // a ULID: the server has no autoincrement any more
   problemId: string
   passed: number
   failed: number

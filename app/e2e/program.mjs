@@ -2,7 +2,7 @@
 // opening a lesson renders the markdown body + exercises with status; an
 // exercise links to its problem; solving an exercise marks the lesson done.
 import { chromium } from 'playwright'
-import { markSolved } from './fixtures.mjs'
+import { newPage, markSolved } from './fixtures.mjs'
 
 const BASE = process.env.BASE_URL || 'http://localhost:3100'
 
@@ -15,7 +15,7 @@ function assert(cond, msg) {
 markSolved('three-sum')
 
 const browser = await chromium.launch()
-const page = await browser.newPage()
+const page = await newPage(browser)
 page.on('pageerror', (e) => console.log('  [pageerror]', e.message))
 
 try {

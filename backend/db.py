@@ -1,250 +1,356 @@
-"""SQLite storage for the coding-trainer API — user state only.
+"""DynamoDB storage for the coding-trainer API — user state only.
 
-Three tables, keyed by the problem slug (a stable id, so a content rebuild never
-invalidates them):
-  - submission: the latest autosaved implementation per problem.
-  - run:        one row per test run (result + the code that produced it).
-  - attempt:    a log of timed attempts; the latest one drives a problem's status.
+One table, composite key (pk, sk). Everything a user owns lives in that user's
+single partition, so every read below is a GetItem or a Query on one partition —
+there is no Scan anywhere, and none should be added.
 
-The knowledge content used to live here too, in `problem` and `lesson`. It is
-now static JSON under app/public/data, indexed by SQLite in the browser, so
-those tables are dropped on startup rather than maintained.
+  pk             sk                        item
+  ------------   -----------------------   ----------------------------------
+  U#<user_id>    P#<problem_id>            per-problem state: the saved code,
+                                           the latest attempt's timer fields,
+                                           and the two run counters
+  U#<user_id>    RUN#<problem_id>#<ulid>   one test run (result + the code)
+  U#<user_id>    SLV#<problem_id>#<ulid>   one solved attempt (the solve log)
+
+Problem ids are the stable path-based slugs, so a content rebuild never
+invalidates a key.
+
+Three things that do not carry over from the SQLite schema this replaces:
+
+  - There is no autoincrement, so the RUN#/SLV# sort keys end in a ULID. ULIDs
+    are lexicographically time-ordered, which is what keeps "newest run first" a
+    native descending Query instead of a client-side sort.
+  - There is no COUNT(*) … GROUP BY, so `run_count` (every run of a problem) and
+    `attempt_run_count` (runs in the latest attempt) are counter attributes on
+    the P# item, maintained with atomic ADD.
+  - The latest attempt is folded into the P# item and Retake overwrites it, so
+    solved attempts are ALSO written as their own SLV# items. The stats page
+    needs every solve ever, not the latest one — see _progress_entry in
+    server.py.
 """
 
 import os
-import sqlite3
-from contextlib import contextmanager
+import secrets
+import threading
+import time
+from decimal import Decimal
 
-DB_PATH = os.environ.get(
-    "DB_PATH", os.path.join(os.path.dirname(os.path.abspath(__file__)), "trainer.db")
-)
+import boto3
+from boto3.dynamodb.conditions import Key
+from botocore.exceptions import ClientError
 
-SCHEMA = """
-CREATE TABLE IF NOT EXISTS submission (
-  problem_id TEXT PRIMARY KEY,
-  code       TEXT NOT NULL,
-  updated_at TEXT NOT NULL
-);
+TABLE_NAME = os.environ.get("DDB_TABLE", "trainer")
+# Set only for local development (DynamoDB Local). Empty in AWS, where boto3
+# resolves the real endpoint and the credentials come from the task role.
+ENDPOINT = os.environ.get("DDB_ENDPOINT") or None
+REGION = os.environ.get("AWS_REGION", "us-east-1")
 
-CREATE TABLE IF NOT EXISTS run (
-  id          INTEGER PRIMARY KEY AUTOINCREMENT,
-  problem_id  TEXT NOT NULL,
-  code        TEXT NOT NULL,
-  passed      INTEGER NOT NULL,
-  failed      INTEGER NOT NULL,
-  total       INTEGER NOT NULL,
-  duration_ms REAL NOT NULL,
-  all_passed  INTEGER NOT NULL,
-  created_at  TEXT NOT NULL,
-  attempt_id  INTEGER              -- FK to attempt.id; _add_run_attempt_id backfills older DBs
-);
-
-CREATE INDEX IF NOT EXISTS idx_run_problem ON run (problem_id, created_at DESC);
-CREATE INDEX IF NOT EXISTS idx_run_attempt ON run (attempt_id);
-
--- A log of timed attempts (one row per Start/Retake). Status is derived from
--- the latest attempt per problem; the log also feeds daily stats later.
-CREATE TABLE IF NOT EXISTS attempt (
-  id             INTEGER PRIMARY KEY AUTOINCREMENT,
-  problem_id     TEXT NOT NULL,
-  started_at     TEXT NOT NULL,
-  accumulated_ms INTEGER NOT NULL DEFAULT 0,   -- active time from finished (paused) segments
-  running_since  TEXT,                          -- ISO while running; NULL while paused or solved
-  solved_at      TEXT,
-  elapsed_ms     INTEGER
-);
-
-CREATE INDEX IF NOT EXISTS idx_attempt_problem ON attempt (problem_id, id DESC);
-"""
+_table = None
 
 
-@contextmanager
-def connect():
-  conn = sqlite3.connect(DB_PATH)
-  conn.row_factory = sqlite3.Row
-  try:
-    yield conn
-    conn.commit()
-  finally:
-    conn.close()
+def _resource():
+  return boto3.resource("dynamodb", region_name=REGION, endpoint_url=ENDPOINT)
 
 
-def _add_run_attempt_id(conn):
-  """Link runs to attempts (SQLite has no ADD COLUMN IF NOT EXISTS)."""
-  cols = [r["name"] for r in conn.execute("PRAGMA table_info(run)").fetchall()]
-  if "attempt_id" not in cols:
-    conn.execute("ALTER TABLE run ADD COLUMN attempt_id INTEGER")
-
-
-def _backfill_solved_attempts(conn):
-  """One-time: seed a solved attempt for problems already solved (no duration)."""
-  if conn.execute("SELECT COUNT(*) AS n FROM attempt").fetchone()["n"]:
-    return
-  rows = conn.execute(
-      """
-      SELECT problem_id, MAX(created_at) AS solved_at
-      FROM run WHERE all_passed = 1
-      GROUP BY problem_id
-      """
-  ).fetchall()
-  for r in rows:
-    conn.execute(
-        "INSERT INTO attempt (problem_id, started_at, solved_at, elapsed_ms) "
-        "VALUES (?, ?, ?, NULL)",
-        (r["problem_id"], r["solved_at"], r["solved_at"]),
-    )
+def table():
+  """The Table resource, created once per process (boto3 clients are cheap to
+  reuse and expensive to rebuild per request)."""
+  global _table
+  if _table is None:
+    _table = _resource().Table(TABLE_NAME)
+  return _table
 
 
 def init_db():
-  with connect() as conn:
-    conn.executescript(SCHEMA)
-    _add_run_attempt_id(conn)
-    _backfill_solved_attempts(conn)
-    # Content tables that moved out of the database. Dropping them here is what
-    # actually clears them from every existing dev volume.
-    conn.execute("DROP TABLE IF EXISTS chapter")  # renamed to lesson
-    conn.execute("DROP TABLE IF EXISTS problem")  # now app/public/data/problems
-    conn.execute("DROP TABLE IF EXISTS lesson")   # now app/public/data/lessons.json
+  """Create the table, for local development only.
 
-
-# --- data access -----------------------------------------------------------
-# Each function takes an open connection so the caller controls the transaction
-# boundary (commit happens when its `with connect()` block exits). Rows are
-# returned raw; server.py owns the snake_case→camelCase serialization.
-
-def get_submission_code(conn, pid):
-  r = conn.execute(
-      "SELECT code FROM submission WHERE problem_id = ?", (pid,)
-  ).fetchone()
-  return r["code"] if r else None
-
-
-def upsert_submission(conn, pid, code, ts):
-  conn.execute(
-      """
-      INSERT INTO submission (problem_id, code, updated_at)
-      VALUES (?, ?, ?)
-      ON CONFLICT(problem_id)
-      DO UPDATE SET code = excluded.code, updated_at = excluded.updated_at
-      """,
-      (pid, code, ts),
-  )
-
-
-def latest_attempt(conn, pid):
-  return conn.execute(
-      "SELECT * FROM attempt WHERE problem_id = ? ORDER BY id DESC LIMIT 1", (pid,)
-  ).fetchone()
-
-
-def latest_attempts(conn):
-  """The latest attempt of every problem, plus that attempt's run count.
-
-  One query for the whole progress bundle (no N+1); ordered by problem_id so the
-  bundle is deterministic."""
-  return conn.execute(
-      """
-      SELECT a.*, (SELECT COUNT(*) FROM run WHERE attempt_id = a.id) AS run_count
-      FROM attempt a
-      WHERE a.id = (SELECT MAX(id) FROM attempt WHERE problem_id = a.problem_id)
-      ORDER BY a.problem_id
-      """
-  ).fetchall()
-
-
-def run_counts(conn, pid=None):
-  """(problem_id, n) for every problem with runs — all attempts, not just the
-  latest. Problems with no runs are absent."""
-  if pid is None:
-    return conn.execute(
-        "SELECT problem_id, COUNT(*) AS n FROM run GROUP BY problem_id "
-        "ORDER BY problem_id"
-    ).fetchall()
-  return conn.execute(
-      "SELECT problem_id, COUNT(*) AS n FROM run WHERE problem_id = ? "
-      "GROUP BY problem_id",
-      (pid,),
-  ).fetchall()
-
-
-def latest_attempt_with_run_count(conn, pid):
-  return conn.execute(
-      """
-      SELECT *, (SELECT COUNT(*) FROM run WHERE attempt_id = attempt.id) AS run_count
-      FROM attempt WHERE problem_id = ? ORDER BY id DESC LIMIT 1
-      """,
-      (pid,),
-  ).fetchone()
-
-
-def insert_attempt(conn, pid, ts):
-  conn.execute(
-      "INSERT INTO attempt (problem_id, started_at, accumulated_ms, running_since) "
-      "VALUES (?, ?, 0, ?)",
-      (pid, ts, ts),
-  )
-
-
-def pause_attempt(conn, attempt_id, add_ms):
-  conn.execute(
-      "UPDATE attempt SET accumulated_ms = accumulated_ms + ?, running_since = NULL "
-      "WHERE id = ?",
-      (add_ms, attempt_id),
-  )
-
-
-def resume_attempt(conn, attempt_id, ts):
-  conn.execute("UPDATE attempt SET running_since = ? WHERE id = ?", (ts, attempt_id))
-
-
-def finalize_solve(conn, attempt_id, ts, elapsed_ms):
-  conn.execute(
-      "UPDATE attempt SET solved_at = ?, elapsed_ms = ?, running_since = NULL "
-      "WHERE id = ?",
-      (ts, elapsed_ms, attempt_id),
-  )
-
-
-def insert_run(conn, pid, code, passed, failed, total, duration_ms, all_passed,
-               ts, attempt_id):
-  cur = conn.execute(
-      """
-      INSERT INTO run
-        (problem_id, code, passed, failed, total, duration_ms, all_passed,
-         created_at, attempt_id)
-      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
-      """,
-      (pid, code, passed, failed, total, duration_ms, all_passed, ts, attempt_id),
-  )
-  return cur.lastrowid
-
-
-def get_run(conn, run_id):
-  return conn.execute("SELECT * FROM run WHERE id = ?", (run_id,)).fetchone()
-
-
-def list_run_rows(conn, pid, limit):
-  return conn.execute(
-      "SELECT * FROM run WHERE problem_id = ? ORDER BY created_at DESC, id DESC LIMIT ?",
-      (pid, limit),
-  ).fetchall()
-
-
-# --- stats ---
-
-
-def solved_attempts(conn, pid=None):
-  """Every solved attempt: problem_id, solved_at, elapsed_ms (may be NULL for
-  backfilled solves). Ascending by attempt id — the folds over these rows have
-  order-dependent tie-breaks, so the ordering is explicit rather than incidental.
+  In AWS the table is infrastructure: it is created by the CDK stack and the
+  app's role has no CreateTable permission. DDB_ENDPOINT is set only when
+  pointing at DynamoDB Local, so it is what gates this.
   """
-  if pid is None:
-    return conn.execute(
-        "SELECT problem_id, solved_at, elapsed_ms FROM attempt "
-        "WHERE solved_at IS NOT NULL ORDER BY id"
-    ).fetchall()
-  return conn.execute(
-      "SELECT problem_id, solved_at, elapsed_ms FROM attempt "
-      "WHERE solved_at IS NOT NULL AND problem_id = ? ORDER BY id",
-      (pid,),
-  ).fetchall()
+  if not ENDPOINT:
+    return
+  ddb = _resource()
+  # `docker compose up` starts uvicorn and dynamodb-local together; the Java
+  # process needs a moment before it answers, so retry rather than crash-loop.
+  for attempt in range(30):
+    try:
+      ddb.create_table(
+          TableName=TABLE_NAME,
+          KeySchema=[
+              {"AttributeName": "pk", "KeyType": "HASH"},
+              {"AttributeName": "sk", "KeyType": "RANGE"},
+          ],
+          AttributeDefinitions=[
+              {"AttributeName": "pk", "AttributeType": "S"},
+              {"AttributeName": "sk", "AttributeType": "S"},
+          ],
+          BillingMode="PAY_PER_REQUEST",
+      )
+      return
+    except ClientError as e:
+      if e.response["Error"]["Code"] == "ResourceInUseException":
+        return  # already created by an earlier boot
+      raise
+    except Exception:
+      if attempt == 29:
+        raise
+      time.sleep(1)
+
+
+# --- ULID ------------------------------------------------------------------
+# 48 bits of millisecond timestamp + 80 bits of randomness, Crockford base32.
+# The only property the storage layer relies on is that the string ordering
+# matches the creation ordering.
+
+_B32 = "0123456789ABCDEFGHJKMNPQRSTVWXYZ"
+_ulid_lock = threading.Lock()
+_ulid_last = (0, 0)
+
+
+def new_ulid() -> str:
+  """A 26-character, lexicographically time-ordered id.
+
+  Monotonic within the process: two ids minted in the same millisecond increment
+  the random component instead of drawing again, so the run written second also
+  sorts second. Without that, "newest first" would be a coin flip for runs a few
+  hundred microseconds apart.
+  """
+  global _ulid_last
+  with _ulid_lock:
+    ms = int(time.time() * 1000)
+    last_ms, last_rand = _ulid_last
+    if ms > last_ms:
+      rand = secrets.randbits(80)
+    else:
+      ms, rand = last_ms, last_rand + 1
+    _ulid_last = (ms, rand)
+  n = (ms << 80) | rand
+  return "".join(_B32[(n >> shift) & 31] for shift in range(125, -1, -5))
+
+
+# --- keys ------------------------------------------------------------------
+
+
+def user_pk(user_id: str) -> str:
+  return f"U#{user_id}"
+
+
+def problem_sk(pid: str) -> str:
+  return f"P#{pid}"
+
+
+def run_prefix(pid: str) -> str:
+  return f"RUN#{pid}#"
+
+
+def solve_prefix(pid: str) -> str:
+  return f"SLV#{pid}#"
+
+
+# --- row shaping -----------------------------------------------------------
+# Items come back with DynamoDB's Decimal numbers and with absent attributes
+# simply missing. Everything below normalizes both away, so server.py sees the
+# same flat dicts (plain ints/floats, every key present) the SQLite rows gave it
+# and still owns the snake_case→camelCase serialization.
+
+
+def _int(v, default=None):
+  return default if v is None else int(v)
+
+
+def _problem_row(item, pid=None) -> dict:
+  return {
+      "problem_id": pid if pid is not None else item["sk"][2:],
+      "code": item.get("code"),
+      "started_at": item.get("started_at"),
+      "accumulated_ms": _int(item.get("accumulated_ms"), 0),
+      "running_since": item.get("running_since"),
+      "solved_at": item.get("solved_at"),
+      "elapsed_ms": _int(item.get("elapsed_ms")),
+      "run_count": _int(item.get("run_count"), 0),
+      "attempt_run_count": _int(item.get("attempt_run_count"), 0),
+  }
+
+
+def _run_row(item) -> dict:
+  return {
+      # The sort key's ULID suffix is the run id. It replaces the SQLite
+      # autoincrement, so run ids are strings now rather than integers; the
+      # client only ever uses the value as a React key.
+      "id": item["sk"].rsplit("#", 1)[1],
+      "problem_id": item["problem_id"],
+      "code": item["code"],
+      "passed": _int(item["passed"]),
+      "failed": _int(item["failed"]),
+      "total": _int(item["total"]),
+      "duration_ms": float(item["duration_ms"]),
+      "all_passed": _int(item["all_passed"]),
+      "created_at": item["created_at"],
+  }
+
+
+def _solve_row(item) -> dict:
+  return {
+      "problem_id": item["problem_id"],
+      "solved_at": item["solved_at"],
+      "elapsed_ms": _int(item.get("elapsed_ms")),
+  }
+
+
+def _query_all(**kwargs) -> list:
+  """Every page of a Query. A single response is capped at 1 MB, which a user
+  with a lot of saved code can exceed, so the pages are followed rather than
+  assumed to be one."""
+  items = []
+  while True:
+    resp = table().query(**kwargs)
+    items.extend(resp["Items"])
+    key = resp.get("LastEvaluatedKey")
+    if not key:
+      return items
+    kwargs["ExclusiveStartKey"] = key
+
+
+# --- reads -----------------------------------------------------------------
+
+
+def get_problem(user_id, pid) -> dict | None:
+  resp = table().get_item(Key={"pk": user_pk(user_id), "sk": problem_sk(pid)})
+  item = resp.get("Item")
+  return _problem_row(item, pid) if item else None
+
+
+def list_problems(user_id) -> list[dict]:
+  """Every problem this user has state for, ascending by problem id — the whole
+  progress bundle in one Query."""
+  items = _query_all(
+      KeyConditionExpression=Key("pk").eq(user_pk(user_id))
+      & Key("sk").begins_with("P#"),
+  )
+  return [_problem_row(i) for i in items]
+
+
+def list_solves(user_id, pid=None):
+  """Every solved attempt, ascending. The ULID suffix makes that chronological
+  within a problem, which the stats folds depend on (their tie-breaks are
+  order-dependent, so the ordering is explicit rather than incidental)."""
+  prefix = "SLV#" if pid is None else solve_prefix(pid)
+  items = _query_all(
+      KeyConditionExpression=Key("pk").eq(user_pk(user_id))
+      & Key("sk").begins_with(prefix),
+  )
+  return [_solve_row(i) for i in items]
+
+
+def list_runs(user_id, pid, limit):
+  """A problem's runs, newest first. Descending on the sort key IS newest-first
+  because the suffix is a ULID."""
+  resp = table().query(
+      KeyConditionExpression=Key("pk").eq(user_pk(user_id))
+      & Key("sk").begins_with(run_prefix(pid)),
+      ScanIndexForward=False,
+      Limit=limit,
+  )
+  return [_run_row(i) for i in resp["Items"]]
+
+
+# --- writes ----------------------------------------------------------------
+# Every write is an UpdateItem on the P# item (upserting it if this is the
+# problem's first) or a PutItem of a new RUN#/SLV# item. Nothing read-modify-
+# writes a counter: run_count and attempt_run_count use ADD.
+
+
+def _update_problem(user_id, pid, **kwargs):
+  table().update_item(
+      Key={"pk": user_pk(user_id), "sk": problem_sk(pid)}, **kwargs
+  )
+
+
+def save_code(user_id, pid, code, ts):
+  _update_problem(
+      user_id, pid,
+      UpdateExpression="SET code = :c, updated_at = :t",
+      ExpressionAttributeValues={":c": code, ":t": ts},
+  )
+
+
+def start_attempt(user_id, pid, ts):
+  """Start or Retake: the latest attempt is overwritten in place.
+
+  attempt_run_count resets, run_count does not (it counts every run ever), and
+  the previous attempt's solve survives as its SLV# item — which is what keeps a
+  retaken problem "ever solved" for the lessons and stats.
+  """
+  _update_problem(
+      user_id, pid,
+      UpdateExpression=(
+          "SET started_at = :t, accumulated_ms = :zero, running_since = :t,"
+          " attempt_run_count = :zero REMOVE solved_at, elapsed_ms"
+      ),
+      ExpressionAttributeValues={":t": ts, ":zero": 0},
+  )
+
+
+def pause_attempt(user_id, pid, add_ms):
+  _update_problem(
+      user_id, pid,
+      UpdateExpression="ADD accumulated_ms :ms REMOVE running_since",
+      ExpressionAttributeValues={":ms": int(add_ms)},
+  )
+
+
+def resume_attempt(user_id, pid, ts):
+  _update_problem(
+      user_id, pid,
+      UpdateExpression="SET running_since = :t",
+      ExpressionAttributeValues={":t": ts},
+  )
+
+
+def finalize_solve(user_id, pid, ts, elapsed_ms):
+  """Stop the timer on the latest attempt and append the solve to the log."""
+  _update_problem(
+      user_id, pid,
+      UpdateExpression="SET solved_at = :t, elapsed_ms = :ms REMOVE running_since",
+      ExpressionAttributeValues={":t": ts, ":ms": int(elapsed_ms)},
+  )
+  table().put_item(Item={
+      "pk": user_pk(user_id),
+      "sk": solve_prefix(pid) + new_ulid(),
+      "problem_id": pid,
+      "solved_at": ts,
+      "elapsed_ms": int(elapsed_ms),
+  })
+
+
+def create_run(user_id, pid, code, passed, failed, total, duration_ms,
+               all_passed, ts, in_attempt):
+  """Record a test run and bump the counters it belongs to.
+
+  `in_attempt` says whether a timed attempt is open. Runs outside one still
+  count towards run_count but not towards attempt_run_count, mirroring the
+  nullable attempt_id of the schema this replaces.
+  """
+  item = {
+      "pk": user_pk(user_id),
+      "sk": run_prefix(pid) + new_ulid(),
+      "problem_id": pid,
+      "code": code,
+      "passed": int(passed),
+      "failed": int(failed),
+      "total": int(total),
+      # DynamoDB has no float type; Decimal(str(...)) keeps the decimal digits
+      # the client sent rather than the binary float's expansion.
+      "duration_ms": Decimal(str(duration_ms)),
+      "all_passed": int(all_passed),
+      "created_at": ts,
+  }
+  table().put_item(Item=item)
+  counters = "run_count :one, attempt_run_count :one" if in_attempt else "run_count :one"
+  _update_problem(
+      user_id, pid,
+      UpdateExpression=f"ADD {counters}",
+      ExpressionAttributeValues={":one": 1},
+  )
+  return _run_row(item)
