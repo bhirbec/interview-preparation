@@ -1,7 +1,7 @@
 // Solve-timer flow: Run Tests gated behind Start; ticking timer; pause/resume;
 // solve records the elapsed time; the list row shows it.
 import { chromium } from 'playwright'
-import { problemContent, resetProblem } from './fixtures.mjs'
+import { problemContent, resetProblem, newPage } from './fixtures.mjs'
 
 const BASE = process.env.BASE_URL || 'http://localhost:3100'
 const PID = 'make-array-consecutive'
@@ -21,7 +21,7 @@ resetProblem(PID, { seedSolution: true })
 const problem = problemContent(PID)
 
 const browser = await chromium.launch()
-const page = await browser.newPage()
+const page = await newPage(browser)
 page.on('pageerror', (e) => console.log('  [pageerror]', e.message))
 
 try {

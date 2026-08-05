@@ -1,0 +1,45 @@
+{
+  "compilerOptions": {
+    "target": "ES2022",
+    "module": "NodeNext",
+    "moduleResolution": "NodeNext",
+    "lib": [
+      "es2022"
+    ],
+    "baseUrl": ".",
+    "paths": {
+      "constructs": [
+        "node_modules/constructs"
+      ],
+      "aws-cdk-lib": [
+        "node_modules/aws-cdk-lib"
+      ],
+      "aws-cdk-lib/*": [
+        "node_modules/aws-cdk-lib/*"
+      ]
+    },
+    "declaration": true,
+    "strict": true,
+    "noImplicitAny": true,
+    "strictNullChecks": true,
+    "noImplicitThis": true,
+    "alwaysStrict": true,
+    "noUnusedLocals": false,
+    "noUnusedParameters": false,
+    "noImplicitReturns": true,
+    "noFallthroughCasesInSwitch": false,
+    "inlineSourceMap": true,
+    "inlineSources": true,
+    "experimentalDecorators": true,
+    "strictPropertyInitialization": false,
+    "emitDeclarationOnly": true,
+    "allowImportingTsExtensions": true,
+    "typeRoots": [
+      "./node_modules/@types"
+    ]
+  },
+  "exclude": [
+    "node_modules",
+    "cdk.out"
+  ]
+}

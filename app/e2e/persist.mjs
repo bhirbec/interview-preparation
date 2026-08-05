@@ -1,7 +1,7 @@
 // End-to-end test of persistence against the state API: autosave, run
 // recording, history, last-all-passed status, and reload restoring code.
 import { chromium } from 'playwright'
-import { problemContent, resetProblem } from './fixtures.mjs'
+import { problemContent, resetProblem, newPage } from './fixtures.mjs'
 
 const BASE = process.env.BASE_URL || 'http://localhost:3100'
 const ID = 'maximum-subarray'
@@ -15,7 +15,7 @@ resetProblem(ID) // repeatable: back to not-started, whatever ran before
 const solution = problemContent(ID).solution
 
 const browser = await chromium.launch()
-const page = await browser.newPage()
+const page = await newPage(browser)
 page.on('pageerror', (e) => console.log('  [pageerror]', e.message))
 
 try {

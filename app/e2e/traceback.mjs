@@ -1,7 +1,7 @@
 // A failing in-browser run must report tracebacks against the editor files
 // (impl.py / tests.py) with real line numbers and source, not an opaque <exec>.
 import { chromium } from 'playwright'
-import { resetProblem } from './fixtures.mjs'
+import { resetProblem, newPage } from './fixtures.mjs'
 
 const BASE = process.env.BASE_URL || 'http://localhost:3100'
 const PID = 'merge-m-sorted-arrays'
@@ -33,7 +33,7 @@ function assert(cond, msg) {
 
 resetProblem(PID) // repeatable: back to not-started
 const browser = await chromium.launch()
-const page = await browser.newPage()
+const page = await newPage(browser)
 page.on('pageerror', (e) => console.log('  [pageerror]', e.message))
 
 try {

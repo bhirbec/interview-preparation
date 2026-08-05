@@ -43,12 +43,35 @@ and read that state. Clear your cookies, switch browser, or open a private
 window, and you get a brand-new identity — the old state still exists on the
 server, and nothing can prove it was yours or hand it back.
 
-The SQLite database on the server holds only user state (saved code, test runs,
-timed attempts); the content is never stored in it. The browser builds its own
-in-memory SQLite (sql.js) over the generated JSON and answers search, filtering,
-pagination, the curriculum roll-ups and the stats page from it — no request per
-keystroke. The WASM build is vendored at `app/public/sql-wasm.wasm`; refresh it
-after upgrading the dependency:
+<h3>Server storage</h3>
+
+The server stores only user state (saved code, test runs, timed attempts) —
+never content — in three DynamoDB tables, all partitioned by that `user_id`:
+
+| table | `user_id` (pk) | `sk` | holds |
+|---|---|---|---|
+| `submissions` | user id | `<problem_id>` | the latest autosaved code, plus a lifetime run counter |
+| `attempts` | user id | `<problem_id>#<ulid>` | one timed attempt; a solve is an attempt with `solved_at` set |
+| `runs` | user id | `<problem_id>#<ulid>` | one test run: its result and the code that produced it |
+
+Because `user_id` is the partition key, every read is a `GetItem` or a query of
+one user's partition — no scans and no secondary indexes — and two browsers can
+never see each other's rows. The `<ulid>` half of the sort key replaces SQLite's
+autoincrement ids: it sorts by creation time, so "newest first" is a plain
+descending query.
+
+`docker compose up` runs DynamoDB Local in a container and the API creates the
+tables on boot. In AWS the tables belong to the CDK app in [`aws/`](aws/) and
+the API never creates anything. Inspect the local tables with:
+
+```
+docker compose exec api python -c "import db; print(db._db().meta.client.list_tables())"
+```
+
+The browser builds its own in-memory SQLite (sql.js) over the generated JSON and
+answers search, filtering, pagination, the curriculum roll-ups and the stats
+page from it — no request per keystroke. The WASM build is vendored at
+`app/public/sql-wasm.wasm`; refresh it after upgrading the dependency:
 
 ```
 cp app/node_modules/sql.js/dist/sql-wasm.wasm app/public/sql-wasm.wasm

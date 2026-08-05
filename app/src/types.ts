@@ -7,7 +7,9 @@ export interface TestResult {
 }
 
 export interface RunRecord {
-  id: number
+  // A ULID, not a counter: DynamoDB has no autoincrement. Opaque here — the app
+  // only ever uses it as a React key, and the runs arrive newest-first already.
+  id: string
   problemId: string
   passed: number
   failed: number
