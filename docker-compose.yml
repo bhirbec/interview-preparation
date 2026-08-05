@@ -33,17 +33,42 @@ services:
       # Mount app/public (tracked, already exists) rather than app/public/data —
       # Docker creates a missing bind-mount path root-owned.
       - ./app/public:/public-out
-      - api_data:/data
       - ./logs:/logs
     environment:
-      DB_PATH: /data/trainer.db
+      # DynamoDB Local, in place of the AWS endpoint the deployed API talks to.
+      # Setting this is also what makes the API create the tables on boot; in
+      # AWS they belong to the CDK app in aws/.
+      DYNAMODB_ENDPOINT: http://dynamodb:8000
+      AWS_REGION: us-east-1
+      # DynamoDB Local ignores the values but botocore refuses to sign without
+      # them. They are not credentials and unlock nothing.
+      AWS_ACCESS_KEY_ID: local
+      AWS_SECRET_ACCESS_KEY: local
       QUESTIONS_DIR: /coding-questions
       LESSONS_DIR: /lessons
       CONTENT_OUT: /public-out/data
+    depends_on:
+      - dynamodb
     # The generated content is gitignored, so build it on boot: a fresh clone
     # must not come up blank.
     command: /bin/sh -c "mkdir -p /logs && python build_content.py && uvicorn server:app --host 0.0.0.0 --port 8000 --reload 2>&1 | tee /logs/api.log"
 
+  # The same DynamoDB the deployed API uses, running locally. Not published on a
+  # host port: only the api service talks to it, over the compose network.
+  dynamodb:
+    restart: unless-stopped
+    image: amazon/dynamodb-local:2.5.2
+    working_dir: /home/dynamodblocal
+    # -sharedDb keeps one database file whatever credentials a client signs
+    # with, so state survives a restart and stays reachable from any client.
+    command: -jar DynamoDBLocal.jar -sharedDb -dbPath /home/dynamodblocal/data
+    # As root because a named volume mounted at a path the image does not ship
+    # is created root-owned, and the image's own dynamodblocal user could not
+    # write to it.
+    user: root
+    volumes:
+      - dynamodb_data:/home/dynamodblocal/data
+
 volumes:
   frontend_node_modules:
-  api_data:
+  dynamodb_data:

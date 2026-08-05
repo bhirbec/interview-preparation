@@ -32,10 +32,10 @@ def current_user(user_id: str | None = Cookie(default=None, alias=COOKIE_NAME)) 
   """The calling browser's id, or 400.
 
   A missing cookie is rejected rather than falling back to a shared default:
-  the fallback would quietly merge every cookie-less caller into one bucket,
-  which becomes one partition key once storage moves to DynamoDB. The frontend
-  writes the cookie before it issues its first request, so in the app a missing
-  cookie means something is actually wrong.
+  the fallback would quietly merge every cookie-less caller into one bucket —
+  and this value is the DynamoDB partition key of every row they read or write.
+  The frontend writes the cookie before it issues its first request, so in the
+  app a missing cookie means something is actually wrong.
 
   Returned lowercased so ids that differ only in hex case are one identity and
   not two adjacent storage keys.

@@ -1,7 +1,7 @@
 // Smoke test of the full flow against the static catalog: paginated list,
 // in-browser search, opening a problem, and running tests in-browser (Pyodide).
 import { chromium } from 'playwright'
-import { problemContent, resetProblem } from './fixtures.mjs'
+import { problemContent, resetProblem, newPage } from './fixtures.mjs'
 
 const BASE = process.env.BASE_URL || 'http://localhost:3100'
 
@@ -14,7 +14,7 @@ resetProblem('maximum-subarray') // repeatable: back to not-started
 const solution = problemContent('maximum-subarray').solution
 
 const browser = await chromium.launch()
-const page = await browser.newPage()
+const page = await newPage(browser)
 page.on('pageerror', (e) => console.log('  [pageerror]', e.message))
 
 try {

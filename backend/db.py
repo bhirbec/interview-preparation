@@ -1,250 +1,403 @@
-"""SQLite storage for the coding-trainer API — user state only.
+"""DynamoDB storage for the coding-trainer API — user state only.
 
-Three tables, keyed by the problem slug (a stable id, so a content rebuild never
-invalidates them):
-  - submission: the latest autosaved implementation per problem.
-  - run:        one row per test run (result + the code that produced it).
-  - attempt:    a log of timed attempts; the latest one drives a problem's status.
+Three tables, one per entity, mirroring the SQLite schema this replaced:
+  - submissions: the latest autosaved implementation per problem, plus that
+                 problem's lifetime run counter.
+  - attempts:    a log of timed attempts; the latest one drives a problem's
+                 status, and a solved attempt is one with `solved_at` set (there
+                 is no separate "solves" table).
+  - runs:        one row per test run (result + the code that produced it).
 
-The knowledge content used to live here too, in `problem` and `lesson`. It is
-now static JSON under app/public/data, indexed by SQLite in the browser, so
-those tables are dropped on startup rather than maintained.
+Every table is partitioned by `user_id`, so a request can only ever read the
+calling browser's own state and every read below is a GetItem or a
+single-partition Query — no scans, no GSIs.
+
+  | table       | user_id (pk) | sk                   | attributes                    |
+  |-------------|--------------|----------------------|-------------------------------|
+  | submissions | user id      | problem_id           | code, updated_at, run_count   |
+  | attempts    | user id      | problem_id#<ulid>    | started_at, accumulated_ms,   |
+  |             |              |                      | running_since, solved_at,     |
+  |             |              |                      | elapsed_ms, attempt_run_count |
+  | runs        | user id      | problem_id#<ulid>    | code, passed, failed, total,  |
+  |             |              |                      | duration_ms, all_passed,      |
+  |             |              |                      | created_at                    |
+
+Problem ids are paths and can contain "/" ("CTCI/1.1-is-unique"). ULIDs are
+base32 and cannot contain "#", so "<problem_id>#<ulid>" always splits back apart
+on its LAST "#" whatever the id holds, and `begins_with(sk, "<problem_id>#")`
+selects exactly one problem's rows.
+
+The counters exist because DynamoDB has no `COUNT(*) … GROUP BY`: counting runs
+would mean querying the runs table, which drags every stored code blob back over
+the wire. `run_count` (lifetime, per problem) and `attempt_run_count` (per
+attempt) are maintained instead, with atomic `ADD`.
+
+Rows come back as plain dicts under the old SQLite column names, with numbers
+already narrowed out of `Decimal` — server.py owns the snake_case→camelCase
+serialization and is unaware of any of the above.
 """
 
 import os
-import sqlite3
-from contextlib import contextmanager
+import time
+from decimal import Decimal
 
-DB_PATH = os.environ.get(
-    "DB_PATH", os.path.join(os.path.dirname(os.path.abspath(__file__)), "trainer.db")
-)
+import boto3
+import ulid
+from boto3.dynamodb.conditions import Key
+from botocore.exceptions import EndpointConnectionError
 
-SCHEMA = """
-CREATE TABLE IF NOT EXISTS submission (
-  problem_id TEXT PRIMARY KEY,
-  code       TEXT NOT NULL,
-  updated_at TEXT NOT NULL
-);
+# Set to DynamoDB Local's address in development (docker-compose does this);
+# unset in AWS, where the region and the instance role do the addressing.
+ENDPOINT_URL = os.environ.get("DYNAMODB_ENDPOINT") or None
+REGION = os.environ.get("AWS_REGION", "us-east-1")
 
-CREATE TABLE IF NOT EXISTS run (
-  id          INTEGER PRIMARY KEY AUTOINCREMENT,
-  problem_id  TEXT NOT NULL,
-  code        TEXT NOT NULL,
-  passed      INTEGER NOT NULL,
-  failed      INTEGER NOT NULL,
-  total       INTEGER NOT NULL,
-  duration_ms REAL NOT NULL,
-  all_passed  INTEGER NOT NULL,
-  created_at  TEXT NOT NULL,
-  attempt_id  INTEGER              -- FK to attempt.id; _add_run_attempt_id backfills older DBs
-);
+SUBMISSIONS_TABLE = os.environ.get("SUBMISSIONS_TABLE", "submissions")
+ATTEMPTS_TABLE = os.environ.get("ATTEMPTS_TABLE", "attempts")
+RUNS_TABLE = os.environ.get("RUNS_TABLE", "runs")
 
-CREATE INDEX IF NOT EXISTS idx_run_problem ON run (problem_id, created_at DESC);
-CREATE INDEX IF NOT EXISTS idx_run_attempt ON run (attempt_id);
+PK = "user_id"
+SK = "sk"
 
--- A log of timed attempts (one row per Start/Retake). Status is derived from
--- the latest attempt per problem; the log also feeds daily stats later.
-CREATE TABLE IF NOT EXISTS attempt (
-  id             INTEGER PRIMARY KEY AUTOINCREMENT,
-  problem_id     TEXT NOT NULL,
-  started_at     TEXT NOT NULL,
-  accumulated_ms INTEGER NOT NULL DEFAULT 0,   -- active time from finished (paused) segments
-  running_since  TEXT,                          -- ISO while running; NULL while paused or solved
-  solved_at      TEXT,
-  elapsed_ms     INTEGER
-);
-
-CREATE INDEX IF NOT EXISTS idx_attempt_problem ON attempt (problem_id, id DESC);
-"""
+_resource = None
 
 
-@contextmanager
-def connect():
-  conn = sqlite3.connect(DB_PATH)
-  conn.row_factory = sqlite3.Row
-  try:
-    yield conn
-    conn.commit()
-  finally:
-    conn.close()
-
-
-def _add_run_attempt_id(conn):
-  """Link runs to attempts (SQLite has no ADD COLUMN IF NOT EXISTS)."""
-  cols = [r["name"] for r in conn.execute("PRAGMA table_info(run)").fetchall()]
-  if "attempt_id" not in cols:
-    conn.execute("ALTER TABLE run ADD COLUMN attempt_id INTEGER")
-
-
-def _backfill_solved_attempts(conn):
-  """One-time: seed a solved attempt for problems already solved (no duration)."""
-  if conn.execute("SELECT COUNT(*) AS n FROM attempt").fetchone()["n"]:
-    return
-  rows = conn.execute(
-      """
-      SELECT problem_id, MAX(created_at) AS solved_at
-      FROM run WHERE all_passed = 1
-      GROUP BY problem_id
-      """
-  ).fetchall()
-  for r in rows:
-    conn.execute(
-        "INSERT INTO attempt (problem_id, started_at, solved_at, elapsed_ms) "
-        "VALUES (?, ?, ?, NULL)",
-        (r["problem_id"], r["solved_at"], r["solved_at"]),
+def _db():
+  """The shared boto3 resource (one connection pool for the process)."""
+  global _resource
+  if _resource is None:
+    _resource = boto3.resource(
+        "dynamodb", region_name=REGION, endpoint_url=ENDPOINT_URL
     )
+  return _resource
+
+
+def _submissions():
+  return _db().Table(SUBMISSIONS_TABLE)
+
+
+def _attempts():
+  return _db().Table(ATTEMPTS_TABLE)
+
+
+def _runs():
+  return _db().Table(RUNS_TABLE)
+
+
+# --- setup -----------------------------------------------------------------
 
 
 def init_db():
-  with connect() as conn:
-    conn.executescript(SCHEMA)
-    _add_run_attempt_id(conn)
-    _backfill_solved_attempts(conn)
-    # Content tables that moved out of the database. Dropping them here is what
-    # actually clears them from every existing dev volume.
-    conn.execute("DROP TABLE IF EXISTS chapter")  # renamed to lesson
-    conn.execute("DROP TABLE IF EXISTS problem")  # now app/public/data/problems
-    conn.execute("DROP TABLE IF EXISTS lesson")   # now app/public/data/lessons.json
+  """Create the tables — development only.
 
-
-# --- data access -----------------------------------------------------------
-# Each function takes an open connection so the caller controls the transaction
-# boundary (commit happens when its `with connect()` block exits). Rows are
-# returned raw; server.py owns the snake_case→camelCase serialization.
-
-def get_submission_code(conn, pid):
-  r = conn.execute(
-      "SELECT code FROM submission WHERE problem_id = ?", (pid,)
-  ).fetchone()
-  return r["code"] if r else None
-
-
-def upsert_submission(conn, pid, code, ts):
-  conn.execute(
-      """
-      INSERT INTO submission (problem_id, code, updated_at)
-      VALUES (?, ?, ?)
-      ON CONFLICT(problem_id)
-      DO UPDATE SET code = excluded.code, updated_at = excluded.updated_at
-      """,
-      (pid, code, ts),
-  )
-
-
-def latest_attempt(conn, pid):
-  return conn.execute(
-      "SELECT * FROM attempt WHERE problem_id = ? ORDER BY id DESC LIMIT 1", (pid,)
-  ).fetchone()
-
-
-def latest_attempts(conn):
-  """The latest attempt of every problem, plus that attempt's run count.
-
-  One query for the whole progress bundle (no N+1); ordered by problem_id so the
-  bundle is deterministic."""
-  return conn.execute(
-      """
-      SELECT a.*, (SELECT COUNT(*) FROM run WHERE attempt_id = a.id) AS run_count
-      FROM attempt a
-      WHERE a.id = (SELECT MAX(id) FROM attempt WHERE problem_id = a.problem_id)
-      ORDER BY a.problem_id
-      """
-  ).fetchall()
-
-
-def run_counts(conn, pid=None):
-  """(problem_id, n) for every problem with runs — all attempts, not just the
-  latest. Problems with no runs are absent."""
-  if pid is None:
-    return conn.execute(
-        "SELECT problem_id, COUNT(*) AS n FROM run GROUP BY problem_id "
-        "ORDER BY problem_id"
-    ).fetchall()
-  return conn.execute(
-      "SELECT problem_id, COUNT(*) AS n FROM run WHERE problem_id = ? "
-      "GROUP BY problem_id",
-      (pid,),
-  ).fetchall()
-
-
-def latest_attempt_with_run_count(conn, pid):
-  return conn.execute(
-      """
-      SELECT *, (SELECT COUNT(*) FROM run WHERE attempt_id = attempt.id) AS run_count
-      FROM attempt WHERE problem_id = ? ORDER BY id DESC LIMIT 1
-      """,
-      (pid,),
-  ).fetchone()
-
-
-def insert_attempt(conn, pid, ts):
-  conn.execute(
-      "INSERT INTO attempt (problem_id, started_at, accumulated_ms, running_since) "
-      "VALUES (?, ?, 0, ?)",
-      (pid, ts, ts),
-  )
-
-
-def pause_attempt(conn, attempt_id, add_ms):
-  conn.execute(
-      "UPDATE attempt SET accumulated_ms = accumulated_ms + ?, running_since = NULL "
-      "WHERE id = ?",
-      (add_ms, attempt_id),
-  )
-
-
-def resume_attempt(conn, attempt_id, ts):
-  conn.execute("UPDATE attempt SET running_since = ? WHERE id = ?", (ts, attempt_id))
-
-
-def finalize_solve(conn, attempt_id, ts, elapsed_ms):
-  conn.execute(
-      "UPDATE attempt SET solved_at = ?, elapsed_ms = ?, running_since = NULL "
-      "WHERE id = ?",
-      (ts, elapsed_ms, attempt_id),
-  )
-
-
-def insert_run(conn, pid, code, passed, failed, total, duration_ms, all_passed,
-               ts, attempt_id):
-  cur = conn.execute(
-      """
-      INSERT INTO run
-        (problem_id, code, passed, failed, total, duration_ms, all_passed,
-         created_at, attempt_id)
-      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
-      """,
-      (pid, code, passed, failed, total, duration_ms, all_passed, ts, attempt_id),
-  )
-  return cur.lastrowid
-
-
-def get_run(conn, run_id):
-  return conn.execute("SELECT * FROM run WHERE id = ?", (run_id,)).fetchone()
-
-
-def list_run_rows(conn, pid, limit):
-  return conn.execute(
-      "SELECT * FROM run WHERE problem_id = ? ORDER BY created_at DESC, id DESC LIMIT ?",
-      (pid, limit),
-  ).fetchall()
-
-
-# --- stats ---
-
-
-def solved_attempts(conn, pid=None):
-  """Every solved attempt: problem_id, solved_at, elapsed_ms (may be NULL for
-  backfilled solves). Ascending by attempt id — the folds over these rows have
-  order-dependent tie-breaks, so the ordering is explicit rather than incidental.
+  In AWS the tables are owned by the CDK app in aws/ (RETAIN, on-demand); an API
+  process must never create them there, or a typo'd table name would silently
+  provision a second, empty table instead of failing loudly. So this is a no-op
+  unless DYNAMODB_ENDPOINT points at a local DynamoDB.
   """
-  if pid is None:
-    return conn.execute(
-        "SELECT problem_id, solved_at, elapsed_ms FROM attempt "
-        "WHERE solved_at IS NOT NULL ORDER BY id"
-    ).fetchall()
-  return conn.execute(
-      "SELECT problem_id, solved_at, elapsed_ms FROM attempt "
-      "WHERE solved_at IS NOT NULL AND problem_id = ? ORDER BY id",
-      (pid,),
-  ).fetchall()
+  if not ENDPOINT_URL:
+    return
+  client = _db().meta.client
+  for name in (SUBMISSIONS_TABLE, ATTEMPTS_TABLE, RUNS_TABLE):
+    try:
+      _create_table(client, name)
+    except client.exceptions.ResourceInUseException:
+      pass  # already created by a previous boot
+
+
+def _create_table(client, name, attempts=30):
+  """Create `name`, waiting for the container to accept connections.
+
+  docker-compose starts the API alongside DynamoDB Local, so the first calls of
+  a cold `docker compose up` land before the Java process is listening.
+  """
+  for i in range(attempts):
+    try:
+      client.create_table(
+          TableName=name,
+          KeySchema=[
+              {"AttributeName": PK, "KeyType": "HASH"},
+              {"AttributeName": SK, "KeyType": "RANGE"},
+          ],
+          AttributeDefinitions=[
+              {"AttributeName": PK, "AttributeType": "S"},
+              {"AttributeName": SK, "AttributeType": "S"},
+          ],
+          BillingMode="PAY_PER_REQUEST",
+      )
+      return
+    except EndpointConnectionError:
+      if i == attempts - 1:
+        raise
+      time.sleep(1)
+
+
+# --- keys and row shapes ---------------------------------------------------
+
+
+def _key(user, sk):
+  return {PK: user, SK: sk}
+
+
+def _sk(pid, uid):
+  return f"{pid}#{uid}"
+
+
+def _pid_of(sk):
+  return sk.rsplit("#", 1)[0]
+
+
+def _uid_of(sk):
+  return sk.rsplit("#", 1)[1]
+
+
+def _opt_int(v):
+  return None if v is None else int(v)
+
+
+def _attempt_row(item):
+  """An attempt as the old `attempt` table row, plus `sk` (its identity)."""
+  return {
+      "sk": item[SK],
+      "problem_id": _pid_of(item[SK]),
+      "started_at": item.get("started_at"),
+      "accumulated_ms": int(item.get("accumulated_ms", 0)),
+      "running_since": item.get("running_since"),
+      "solved_at": item.get("solved_at"),
+      "elapsed_ms": _opt_int(item.get("elapsed_ms")),
+      # Absent on rows written before their first run — ADD creates the counter.
+      "attempt_run_count": int(item.get("attempt_run_count", 0)),
+  }
+
+
+def _run_row(item):
+  """A run as the old `run` table row. `id` is the ULID half of the sort key:
+  a string where SQLite had an integer, still unique and still the newest-first
+  ordering the client renders with."""
+  return {
+      "id": _uid_of(item[SK]),
+      "problem_id": _pid_of(item[SK]),
+      "code": item["code"],
+      "passed": int(item["passed"]),
+      "failed": int(item["failed"]),
+      # REAL in SQLite; DynamoDB hands back Decimal, which would serialize as a
+      # JSON string unless narrowed here.
+      "duration_ms": float(item["duration_ms"]),
+      "total": int(item["total"]),
+      "all_passed": int(item["all_passed"]),
+      "created_at": item["created_at"],
+  }
+
+
+def _query_all(table, **kwargs):
+  """Every page of a Query — DynamoDB caps a page at 1 MB regardless of Limit."""
+  items = []
+  while True:
+    resp = table.query(**kwargs)
+    items += resp["Items"]
+    last = resp.get("LastEvaluatedKey")
+    if not last:
+      return items
+    kwargs["ExclusiveStartKey"] = last
+
+
+# --- submissions -----------------------------------------------------------
+
+
+def get_submission(user, pid):
+  """(code, run_count) for one problem — one GetItem, both callers' worth.
+
+  A run on a problem that was never autosaved creates the row for its counter
+  alone, so an existing row does not imply code.
+  """
+  item = _submissions().get_item(Key=_key(user, pid)).get("Item") or {}
+  return item.get("code"), int(item.get("run_count", 0))
+
+
+def run_counts(user):
+  """(problem_id, n) for every problem the user has ever run, ascending by id.
+
+  Projected down to the counter: the submissions rows carry code blobs, and this
+  feeds /api/progress, which wants none of them.
+  """
+  items = _query_all(
+      _submissions(),
+      KeyConditionExpression=Key(PK).eq(user),
+      ProjectionExpression="#sk, run_count",
+      ExpressionAttributeNames={"#sk": SK},
+  )
+  return [(i[SK], int(i["run_count"])) for i in items if int(i.get("run_count", 0))]
+
+
+def upsert_submission(user, pid, code, ts):
+  _submissions().update_item(
+      Key=_key(user, pid),
+      UpdateExpression="SET #code = :code, updated_at = :ts",
+      ExpressionAttributeNames={"#code": "code"},
+      ExpressionAttributeValues={":code": code, ":ts": ts},
+  )
+
+
+# --- attempts --------------------------------------------------------------
+
+
+def latest_attempt(user, pid):
+  """The newest attempt on one problem, or None.
+
+  ULID sort keys are time-ordered, so this is the first row of a descending
+  query — no sorting, and one row over the wire.
+  """
+  resp = _attempts().query(
+      KeyConditionExpression=Key(PK).eq(user) & Key(SK).begins_with(f"{pid}#"),
+      ScanIndexForward=False,
+      Limit=1,
+  )
+  items = resp["Items"]
+  return _attempt_row(items[0]) if items else None
+
+
+def problem_attempts(user, pid):
+  """Every attempt on one problem, ascending (so the last one is the latest).
+
+  /api/problem/state needs the latest attempt *and* the problem's solve log, and
+  a problem has a handful of attempts at most — one query answers both.
+  """
+  return [
+      _attempt_row(i)
+      for i in _query_all(
+          _attempts(),
+          KeyConditionExpression=Key(PK).eq(user) & Key(SK).begins_with(f"{pid}#"),
+      )
+  ]
+
+
+def all_attempts(user):
+  """Every attempt row for the user, ascending by (problem_id, ULID).
+
+  /api/progress needs the latest attempt per problem and every solved attempt,
+  and DynamoDB has no top-N-per-group — so it reads the whole (small) partition
+  and folds in Python. Attempt rows are a handful of scalars each; the runs
+  table, which carries the code blobs, is deliberately not read in that path.
+  """
+  return [
+      _attempt_row(i)
+      for i in _query_all(_attempts(), KeyConditionExpression=Key(PK).eq(user))
+  ]
+
+
+def insert_attempt(user, pid, ts):
+  _attempts().put_item(
+      Item={
+          **_key(user, _sk(pid, ulid.new())),
+          "started_at": ts,
+          "accumulated_ms": 0,
+          "running_since": ts,
+          "attempt_run_count": 0,
+      }
+  )
+
+
+def pause_attempt(user, sk, add_ms):
+  _attempts().update_item(
+      Key=_key(user, sk),
+      UpdateExpression="ADD accumulated_ms :ms REMOVE running_since",
+      ExpressionAttributeValues={":ms": add_ms},
+  )
+
+
+def resume_attempt(user, sk, ts):
+  _attempts().update_item(
+      Key=_key(user, sk),
+      UpdateExpression="SET running_since = :ts",
+      ExpressionAttributeValues={":ts": ts},
+  )
+
+
+def finalize_solve(user, sk, ts, elapsed_ms):
+  _attempts().update_item(
+      Key=_key(user, sk),
+      UpdateExpression=(
+          "SET solved_at = :ts, elapsed_ms = :ms REMOVE running_since"
+      ),
+      ExpressionAttributeValues={":ts": ts, ":ms": elapsed_ms},
+  )
+
+
+# --- runs ------------------------------------------------------------------
+
+
+def insert_run(user, pid, code, passed, failed, total, duration_ms, all_passed,
+               ts, attempt_sk):
+  """Record a run and bump the two counters that summarize it.
+
+  NOT ATOMIC — three separate writes, four when the run solves the problem:
+    1. PutItem on `runs`,
+    2. ADD run_count on the problem's `submissions` row,
+    3. ADD attempt_run_count on the current `attempts` row (skipped when the
+       problem has no attempt yet),
+    4. finalize_solve() on that same attempt row, issued by server.py right
+       after this returns when every test passed.
+
+  If the process dies between them, the run exists but a counter is one low (or,
+  on a retried request, one high). What the user sees is a wrong "3 runs" label
+  or a wrong run total on the stats page — the run itself, its code and its
+  result are intact, and nothing is lost.
+
+  Both counters are derivable from the runs table (count the rows whose sk
+  begins with "<problem_id>#" for run_count; group by attempt for
+  attempt_run_count), so drift is repairable by a backfill, not by asking the
+  user to redo anything.
+
+  TransactWriteItems across the three tables is the fix if this ever matters —
+  DynamoDB supports it cross-table and it would make all four writes atomic, at
+  double the write cost of every single test run. Not worth paying to protect a
+  counter that is both cosmetic and rebuildable, but the trade is here so that
+  whoever finds a count off by one can tell at a glance that it is an expected
+  partial write and not a new bug.
+  """
+  item = {
+      **_key(user, _sk(pid, ulid.new())),
+      "code": code,
+      "passed": passed,
+      "failed": failed,
+      "total": total,
+      # DynamoDB has no float type; Decimal(str(x)) keeps the value as printed,
+      # unlike Decimal(x), which carries the full binary expansion.
+      "duration_ms": Decimal(str(duration_ms)),
+      "all_passed": all_passed,
+      "created_at": ts,
+  }
+  _runs().put_item(Item=item)
+
+  _submissions().update_item(
+      Key=_key(user, pid),
+      UpdateExpression="ADD run_count :one",
+      ExpressionAttributeValues={":one": 1},
+  )
+  if attempt_sk:
+    _attempts().update_item(
+        Key=_key(user, attempt_sk),
+        UpdateExpression="ADD attempt_run_count :one",
+        ExpressionAttributeValues={":one": 1},
+    )
+  return _run_row(item)
+
+
+def list_run_rows(user, pid, limit):
+  """The newest `limit` runs for one problem, newest first."""
+  rows = []
+  kwargs = {
+      "KeyConditionExpression": Key(PK).eq(user) & Key(SK).begins_with(f"{pid}#"),
+      "ScanIndexForward": False,
+      "Limit": limit,
+  }
+  while len(rows) < limit:
+    resp = _runs().query(**kwargs)
+    rows += [_run_row(i) for i in resp["Items"]]
+    last = resp.get("LastEvaluatedKey")
+    # Runs carry code, so `limit` rows can exceed a 1 MB page; keep paging until
+    # the page budget is filled or the problem runs out of runs.
+    if not last:
+      break
+    kwargs["ExclusiveStartKey"] = last
+    kwargs["Limit"] = limit - len(rows)
+  return rows[:limit]

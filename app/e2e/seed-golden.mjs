@@ -14,7 +14,11 @@
 //   - runs on a problem with NO attempt rows at all
 //   - runs and a solved attempt for an id that is no longer in the catalog
 //
-// Runs against the same sqlite DB the app uses, via the api container.
+// Its only consumer is capture-golden.mjs, which — like this file — runs
+// against a checkout from before #52, so both still speak to that server's
+// SQLite database via the api container. The live app's user state moved to
+// DynamoDB in #77; nothing here was ported, because there is nothing left to
+// capture.
 import { execFileSync } from 'node:child_process'
 import { fileURLToPath } from 'node:url'
 import { dirname, resolve } from 'node:path'
