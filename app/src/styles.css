@@ -245,16 +245,20 @@ body {
 
 @media (max-width: 760px) {
   /* minmax(0, …) rather than 1fr: a bare 1fr floors the column at the list's
-     min-content width, which pushes the page into horizontal overflow. */
+     min-content width, which pushes the page into horizontal overflow. The
+     single column is still needed with .filters hidden — otherwise the list
+     would land in the 220px sidebar track. */
   .list-layout {
     grid-template-columns: minmax(0, 1fr);
   }
 
   /* This is the one page with no .app-header to reserve room for the fixed
      3-dot button, so once the layout stacks the button lands on the search
-     input. Give it its own band above the content. */
+     input. Give it its own band above the content. The bottom band keeps the
+     pager clear of the fixed Filters button. */
   .list-page {
     padding-top: 3.6rem;
+    padding-bottom: 5rem;
   }
 }
 
@@ -264,6 +268,136 @@ body {
   display: flex;
   flex-direction: column;
   gap: 1.1rem;
+}
+
+/* ---- mobile filters: bottom sheet (hidden at >760px) ---- */
+
+/* Bottom-right rather than a bar above the list: it stays thumb-reachable at
+   any scroll position and is diagonally opposite the fixed .menu-btn. */
+.filters-fab {
+  display: none;
+  position: fixed;
+  right: 1rem;
+  bottom: calc(1rem + env(safe-area-inset-bottom, 0px));
+  z-index: 30;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.6rem 0.95rem;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  background: var(--panel);
+  color: var(--text);
+  font-size: 0.9rem;
+  cursor: pointer;
+  box-shadow: 0 3px 14px rgba(0, 0, 0, 0.28);
+}
+
+.filters-fab > svg {
+  font-size: 1.15rem;
+}
+
+/* Same trick as .menu-btn: the sheet replaces the trigger, so drop it instead
+   of leaving it focusable underneath. */
+.filters-fab[aria-expanded='true'] {
+  display: none;
+}
+
+.filters-count {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 1.25rem;
+  height: 1.25rem;
+  padding: 0 0.3rem;
+  border-radius: 999px;
+  background: var(--accent);
+  color: #fff;
+  font-size: 0.72rem;
+  font-weight: 600;
+}
+
+.sheet-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.4);
+  z-index: 40;
+}
+
+.filter-sheet {
+  display: none;
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 50;
+  flex-direction: column;
+  max-height: 80vh;
+  background: var(--panel);
+  border-top: 1px solid var(--border);
+  border-radius: 14px 14px 0 0;
+  box-shadow: 0 -2px 16px rgba(0, 0, 0, 0.25);
+  padding: 0.75rem 1rem calc(1rem + env(safe-area-inset-bottom, 0px));
+  transform: translateY(100%);
+  /* visibility rather than only transform, so the closed sheet is out of the
+     tab order; the 0s delay defers the flip until the slide-out has finished. */
+  visibility: hidden;
+  transition: transform 0.22s ease, visibility 0s linear 0.22s;
+}
+
+.filter-sheet.open {
+  transform: translateY(0);
+  visibility: visible;
+  transition: transform 0.22s ease, visibility 0s linear 0s;
+}
+
+.sheet-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex: 0 0 auto;
+  margin-bottom: 0.6rem;
+}
+
+.sheet-title {
+  font-weight: 600;
+  font-size: 1.05rem;
+}
+
+/* The sheet is capped at 80vh, so the controls — not the page — scroll. */
+.sheet-body {
+  display: flex;
+  flex-direction: column;
+  gap: 1.1rem;
+  overflow-y: auto;
+}
+
+.sheet-body .search {
+  margin-bottom: 0;
+}
+
+/* Kept after the rules above rather than folded into the earlier 760px block:
+   these are all plain `display` overrides at equal specificity, so they only
+   win by coming later in the sheet. */
+@media (max-width: 760px) {
+  /* The sidebar moves into the bottom sheet below this width. Hiding it is
+     also what retires its `position: sticky`, which used to pin the filters
+     over the stacked list on scroll. */
+  .filters {
+    display: none;
+  }
+
+  .filters-fab {
+    display: inline-flex;
+  }
+
+  .filter-sheet {
+    display: flex;
+  }
+
+  /* Re-assert: the base .filters-fab rule above also matches at this width. */
+  .filters-fab[aria-expanded='true'] {
+    display: none;
+  }
 }
 
 .filters .search {
