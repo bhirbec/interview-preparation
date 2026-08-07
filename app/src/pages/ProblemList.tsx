@@ -182,7 +182,21 @@ export default function ProblemList() {
 
   return (
     <div className="page list-page">
-      <AppMenu />
+      <header className="list-header">
+        <AppMenu />
+
+        <button
+          type="button"
+          className="filters-fab"
+          onClick={() => setSheetOpen(true)}
+          aria-label="Open filters"
+          aria-expanded={sheetOpen}
+        >
+          <MdTune />
+          <span>Filters</span>
+          {activeCount > 0 && <span className="filters-count">{activeCount}</span>}
+        </button>
+      </header>
 
       <div className="list-layout">
         <aside className="filters">
@@ -237,18 +251,6 @@ export default function ProblemList() {
           )}
         </main>
       </div>
-
-      <button
-        type="button"
-        className="filters-fab"
-        onClick={() => setSheetOpen(true)}
-        aria-label="Open filters"
-        aria-expanded={sheetOpen}
-      >
-        <MdTune />
-        <span>Filters</span>
-        {activeCount > 0 && <span className="filters-count">{activeCount}</span>}
-      </button>
 
       {sheetOpen && <div className="sheet-overlay" onClick={() => setSheetOpen(false)} />}
 

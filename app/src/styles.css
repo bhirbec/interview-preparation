@@ -91,9 +91,6 @@ body {
   align-items: center;
   gap: 0.75rem;
   margin-bottom: 1rem;
-  /* Reserve horizontal room for the fixed top-left 3-dot menu button so it never
-     overlaps header content on the detail page. */
-  padding-left: 2rem;
 }
 
 .app-header h1 {
@@ -112,33 +109,39 @@ body {
   text-align: left;
 }
 
-/* ---- left drawer menu (3-dot) ---- */
+/* ---- left drawer menu (hamburger) ---- */
+/* Just the glyph: no border, background or padding. It sits in flow as the first
+   item of the page header row, so it lines up with the page content edge rather
+   than floating in the viewport corner. */
 .menu-btn {
-  position: fixed;
-  top: 0.9rem;
-  left: 0.9rem;
-  z-index: 30;
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  background: var(--panel);
-  border: 1px solid var(--border);
-  border-radius: 8px;
-  padding: 0.35rem;
-  font-size: 1.35rem;
+  background: transparent;
+  border: none;
+  border-radius: 6px;
+  padding: 0;
+  font-size: 1.5rem;
   line-height: 1;
   cursor: pointer;
   color: var(--text);
 }
 
+/* Border-free affordance: the icon itself takes the accent colour on hover. */
 .menu-btn:hover {
-  border-color: var(--accent);
+  color: var(--accent);
 }
 
-/* Once the drawer is open it replaces the button: drop it rather than leave it
-   sitting under the panel, still focusable and overlapping the drawer items. */
+.menu-btn:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 3px;
+}
+
+/* Once the drawer is open it replaces the button: hide it rather than leave it
+   focusable under the panel. `visibility` rather than `display` so the header
+   row keeps its size and the page does not shift while the drawer is open. */
 .menu-btn[aria-expanded='true'] {
-  display: none;
+  visibility: hidden;
 }
 
 .drawer-overlay {
@@ -236,6 +239,17 @@ body {
   max-width: 1200px;
 }
 
+/* The list page has no <h1>, so this is its header row: the menu icon on the
+   left, aligned with the list content edge, and (on mobile only) the Filters
+   button on the right of the same row. */
+.list-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  margin-bottom: 1rem;
+}
+
 .list-layout {
   display: grid;
   grid-template-columns: 220px minmax(0, 1fr);
@@ -251,15 +265,6 @@ body {
   .list-layout {
     grid-template-columns: minmax(0, 1fr);
   }
-
-  /* This is the one page with no .app-header to reserve room for the fixed
-     3-dot button, so once the layout stacks the button lands on the search
-     input. Give it its own band above the content. The bottom band keeps the
-     pager clear of the fixed Filters button. */
-  .list-page {
-    padding-top: 3.6rem;
-    padding-bottom: 5rem;
-  }
 }
 
 .filters {
@@ -272,34 +277,32 @@ body {
 
 /* ---- mobile filters: bottom sheet (hidden at >760px) ---- */
 
-/* Bottom-right rather than a bar above the list: it stays thumb-reachable at
-   any scroll position and is diagonally opposite the fixed .menu-btn. */
+/* In flow at the right end of .list-header, so it shares the menu icon's row
+   and top offset instead of floating over the list. Mobile-only: the base rule
+   hides it and the 760px block below turns it back on. */
 .filters-fab {
   display: none;
-  position: fixed;
-  right: 1rem;
-  bottom: calc(1rem + env(safe-area-inset-bottom, 0px));
-  z-index: 30;
+  flex: 0 0 auto;
   align-items: center;
   gap: 0.4rem;
-  padding: 0.6rem 0.95rem;
+  padding: 0.4rem 0.85rem;
   border: 1px solid var(--border);
   border-radius: 999px;
   background: var(--panel);
   color: var(--text);
   font-size: 0.9rem;
   cursor: pointer;
-  box-shadow: 0 3px 14px rgba(0, 0, 0, 0.28);
 }
 
 .filters-fab > svg {
   font-size: 1.15rem;
 }
 
-/* Same trick as .menu-btn: the sheet replaces the trigger, so drop it instead
-   of leaving it focusable underneath. */
+/* Same trick as .menu-btn: the sheet replaces the trigger, so hide it instead
+   of leaving it focusable underneath — and, like the menu button, by
+   visibility, so the header row does not collapse while the sheet is open. */
 .filters-fab[aria-expanded='true'] {
-  display: none;
+  visibility: hidden;
 }
 
 .filters-count {
@@ -392,11 +395,6 @@ body {
 
   .filter-sheet {
     display: flex;
-  }
-
-  /* Re-assert: the base .filters-fab rule above also matches at this width. */
-  .filters-fab[aria-expanded='true'] {
-    display: none;
   }
 }
 
