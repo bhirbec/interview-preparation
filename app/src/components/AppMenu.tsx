@@ -1,10 +1,11 @@
 import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
-import { MdMoreVert, MdClose, MdListAlt, MdSchool, MdQueryStats } from 'react-icons/md'
+import { MdMenu, MdClose, MdListAlt, MdSchool, MdQueryStats } from 'react-icons/md'
 import ThemeToggle from './ThemeToggle'
 
-// Top-left 3-dot button that opens a left-hand drawer. Holds app-wide nav and
-// controls (Questions, theme). Closes on overlay click, Escape, or navigation.
+// Borderless hamburger button that opens a left-hand drawer. Holds app-wide nav
+// and controls (Questions, theme). Closes on overlay click, Escape, or
+// navigation. It renders in flow, so each page places it in its header row.
 export default function AppMenu() {
   const [open, setOpen] = useState(false)
 
@@ -26,7 +27,7 @@ export default function AppMenu() {
         aria-label="Open menu"
         aria-expanded={open}
       >
-        <MdMoreVert />
+        <MdMenu />
       </button>
 
       {open && <div className="drawer-overlay" onClick={() => setOpen(false)} />}
