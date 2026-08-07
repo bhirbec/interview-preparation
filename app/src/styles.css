@@ -135,6 +135,12 @@ body {
   border-color: var(--accent);
 }
 
+/* Once the drawer is open it replaces the button: drop it rather than leave it
+   sitting under the panel, still focusable and overlapping the drawer items. */
+.menu-btn[aria-expanded='true'] {
+  display: none;
+}
+
 .drawer-overlay {
   position: fixed;
   inset: 0;
@@ -238,8 +244,17 @@ body {
 }
 
 @media (max-width: 760px) {
+  /* minmax(0, …) rather than 1fr: a bare 1fr floors the column at the list's
+     min-content width, which pushes the page into horizontal overflow. */
   .list-layout {
-    grid-template-columns: 1fr;
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  /* This is the one page with no .app-header to reserve room for the fixed
+     3-dot button, so once the layout stacks the button lands on the search
+     input. Give it its own band above the content. */
+  .list-page {
+    padding-top: 3.6rem;
   }
 }
 
@@ -414,6 +429,29 @@ body {
   color: var(--muted);
   font-size: 0.85rem;
   margin: 0.75rem 0 0;
+}
+
+@media (max-width: 760px) {
+  /* Four columns do not fit a phone width: the row cannot shrink past its
+     min-content size, so it spills over the viewport and the cells collide.
+     Keep title, difficulty and status on one line and wrap the tags below. */
+  .problem-row {
+    flex-wrap: wrap;
+    row-gap: 0.4rem;
+  }
+
+  .problem-title {
+    min-width: 0;
+  }
+
+  .problem-row .tags {
+    order: 1;
+    flex: 1 0 100%;
+  }
+
+  .problem-row .status-badge {
+    min-width: 0;
+  }
 }
 
 /* Per-row status icon in the list (✓ solved, ◐ started, ○ not started). */
